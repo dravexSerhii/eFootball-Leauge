@@ -52,6 +52,7 @@
                                 <tr>
                                     <th scope="col">#</th>
                                     <th scope="col">Team</th>
+                                    <th scope="col" title="Results from the last five matches">Form</th>
                                     <th scope="col" title="Played">Pld</th>
                                     <th scope="col" title="Wins">W</th>
                                     <th scope="col" title="Draws">D</th>
@@ -63,7 +64,7 @@
                             <tbody id="standingsBody"></tbody>
                         </table>
                     </div>
-                    <div class="table-footer">Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
+                    <div class="table-footer">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
                     </div>
                 </section>
 
@@ -80,6 +81,21 @@
                             league and keep them in sync.</span></div>
                 </aside>
             </div>
+
+            <section class="news-section panel" aria-labelledby="newsTitle">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="newsTitle">League news</h2>
+                        <p class="news-subtitle">Stories, photos and updates from the league</p>
+                    </div>
+                    <button class="button button-primary" id="addNewsButton" type="button" disabled>
+                        <span aria-hidden="true">＋</span> Add news
+                    </button>
+                </div>
+                <div class="news-grid" id="newsList" aria-live="polite">
+                    <p class="news-empty">Loading news…</p>
+                </div>
+            </section>
         </main>
         <footer><span>eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP</span><span>Every match counts.</span></footer>
     </div>
@@ -155,6 +171,35 @@
             <div class="dialog-actions"><button class="button button-quiet" type="button"
                     data-close="teamsDialog">Cancel</button><button class="button button-primary"
                     type="submit">Save teams</button></div>
+        </form>
+    </dialog>
+    <dialog id="newsDialog" aria-labelledby="newsDialogTitle">
+        <form class="dialog-inner" id="newsForm">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="newsDialogTitle">Publish league news</h2>
+                    <p>Add a photo and a story for everyone to see</p>
+                </div>
+                <button class="close-button" type="button" data-close="newsDialog" aria-label="Close">×</button>
+            </div>
+            <div class="field">
+                <label for="newsTitleInput">Headline</label>
+                <input id="newsTitleInput" type="text" maxlength="120" required>
+            </div>
+            <div class="field">
+                <label for="newsDescriptionInput">Description</label>
+                <textarea id="newsDescriptionInput" maxlength="3000" rows="5" required></textarea>
+            </div>
+            <div class="field">
+                <label for="newsImageInput">Photo (JPEG, PNG or WebP, up to 5 MB)</label>
+                <input id="newsImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
+            </div>
+            <img class="news-image-preview" id="newsImagePreview" alt="Selected news photo preview" hidden>
+            <p class="form-error" id="newsError" role="alert"></p>
+            <div class="dialog-actions">
+                <button class="button button-quiet" type="button" data-close="newsDialog">Cancel</button>
+                <button class="button button-primary" id="publishNewsButton" type="submit">Publish news</button>
+            </div>
         </form>
     </dialog>
     <dialog id="authDialog" aria-labelledby="authDialogTitle">

@@ -93,12 +93,19 @@
     .live-label { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px rgba(211,255,87,.7); }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; min-width: 620px; border-collapse: collapse; text-align: center; }
+    table { width: 100%; min-width: 700px; border-collapse: collapse; text-align: center; }
     th { height: 46px; color: #8e8a9a; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     td { height: 76px; border-top: 1px solid var(--line); font-size: 13px; }
     th:first-child, td:first-child { width: 58px; }
     th:nth-child(2), td:nth-child(2) { text-align: left; }
+    th:nth-child(3), td:nth-child(3) { min-width: 142px; }
     .team-cell { display: flex; align-items: center; gap: 12px; font-weight: 760; }
+    .team-form { display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .form-marker { width: 18px; height: 18px; display: inline-grid; place-items: center; border: 1px solid transparent; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 900; line-height: 1; }
+    .form-win { background: #27a653; }
+    .form-draw { background: #9898a2; }
+    .form-loss { background: #f0443a; }
+    .form-marker.latest { outline: 1px solid currentColor; outline-offset: 2px; }
     .position { color: #888494; font-size: 12px; font-weight: 700; }
     .team-badge { position: relative; width: clamp(42px, 5vw, 52px); height: clamp(42px, 5vw, 52px); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 14px; font-size: 11px; font-weight: 900; }
     .team-badge.one { background: rgba(156,120,255,.18); color: #c7b5ff; }
@@ -109,6 +116,18 @@
     .negative { color: var(--red); }
     .empty-note { padding: 22px; color: var(--muted); font-size: 12px; line-height: 1.6; }
     .table-footer { padding: 14px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+
+    .news-section { margin-top: 22px; }
+    .news-section .panel-heading { min-height: 82px; }
+    .news-subtitle { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 16px; padding: 18px; }
+    .news-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,7,13,.28); }
+    .news-card-image { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--surface-raised); }
+    .news-card-content { padding: 15px; }
+    .news-card-date { margin: 0 0 7px; color: var(--lime); font-size: 10px; font-weight: 750; }
+    .news-card-title { margin: 0; font-size: 15px; line-height: 1.4; }
+    .news-card-description { margin: 9px 0 0; color: #cbc9d1; font-size: 12px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .news-empty { grid-column: 1 / -1; margin: 0; padding: 18px 4px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 
     .side-panel { padding-bottom: 4px; }
     .side-panel .panel-heading { margin-bottom: 2px; }
@@ -144,7 +163,12 @@
     .field { display: grid; gap: 8px; margin-bottom: 16px; }
     .field label { color: #c9c6d0; font-size: 11px; font-weight: 750; }
     .field input, .field select { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; outline: 0; background: #17151e; color: var(--ink); }
+    .field textarea { width: 100%; min-height: 120px; padding: 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; outline: 0; background: #17151e; color: var(--ink); resize: vertical; }
+    .field input[type="file"] { height: auto; padding: 10px; }
     .field input:focus, .field select:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(156,120,255,.13); }
+    .field textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(156,120,255,.13); }
+    .news-image-preview { display: block; width: 100%; max-height: 240px; margin: 0 0 16px; border-radius: 11px; object-fit: cover; }
+    .news-image-preview[hidden] { display: none; }
     .score-fields { display: grid; grid-template-columns: 1fr 58px 1fr; align-items: end; gap: 12px; }
     .score-fields .field { min-width: 0; }
     .score-divider { padding-bottom: 28px; color: var(--muted); text-align: center; font-size: 18px; font-weight: 800; }

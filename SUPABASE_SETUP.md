@@ -11,6 +11,12 @@ Match results are stored in Supabase, separately from the website files, so rede
 
 After signing in, both users will see the same matches and team names. Updates sync through Supabase Realtime. If Realtime is unavailable, the website refreshes the data approximately every 15 seconds.
 
+## League news
+
+For an existing project, run `supabase-migration-league-news.sql` once in the Supabase SQL Editor before publishing the updated app. It creates the news table and public image bucket. Visitors can read news and photos without signing in; only signed-in league members can publish. Photos must be JPEG, PNG or WebP and no larger than 5 MB.
+
+New projects get the news table, bucket and access policies from `supabase.sql`.
+
 ## Match statistics
 
 For an existing project, run `supabase-migration-match-stats.sql` once in the Supabase SQL Editor before publishing the updated app. It adds a JSONB column for optional shots, shots on target, possession, and passes; existing match results are preserved. New projects get this column from `supabase.sql`.

@@ -20,8 +20,11 @@ let session = null;
 let dataReady = false;
 let sessionGeneration = 0;
 let realtimeChannel = null;
+let newsRealtimeChannel = null;
 let pollTimer = null;
 let toastTimer;
+let newsPreviewUrl = null;
+let newsItems = [];
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -32,10 +35,84 @@ const authButton = document.getElementById("authButton");
 const authStatus = document.getElementById("authStatus");
 const matchButton = document.getElementById("addMatchButton");
 const editTeamsButton = document.getElementById("editTeamsButton");
+const addNewsButton = document.getElementById("addNewsButton");
+const newsDialog = document.getElementById("newsDialog");
+const newsList = document.getElementById("newsList");
 
 function render() {
   renderStandings();
   renderMatches();
+  renderNews();
+}
+
+function renderNews() {
+  newsList.replaceChildren();
+  if (newsItems.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "news-empty";
+    empty.textContent = "No news yet. Check back soon for league updates.";
+    newsList.append(empty);
+    return;
+  }
+  newsItems.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "news-card";
+    const image = document.createElement("img");
+    image.className = "news-card-image";
+    image.src = supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
+    image.alt = item.title;
+    image.loading = "lazy";
+    image.addEventListener("error", () => {
+      image.alt = `Photo unavailable: ${item.title}`;
+      image.classList.add("news-image-unavailable");
+    }, { once: true });
+    const content = document.createElement("div");
+    content.className = "news-card-content";
+    const date = document.createElement("p");
+    date.className = "news-card-date";
+    const parsedDate = new Date(item.created_at);
+    date.textContent = Number.isNaN(parsedDate.getTime()) ? "" :
+      parsedDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const title = document.createElement("h3");
+    title.className = "news-card-title";
+    title.textContent = item.title;
+    const description = document.createElement("p");
+    description.className = "news-card-description";
+    description.textContent = item.description;
+    content.append(date, title, description);
+    card.append(image, content);
+    newsList.append(card);
+  });
+}
+
+async function refreshNews() {
+  try {
+    const { data, error } = await supabase.from("league_news")
+      .select("id, title, description, image_path, created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    newsItems = data;
+    renderNews();
+  } catch (error) {
+    console.error("Failed to load league news:", error);
+    const message = document.createElement("p");
+    message.className = "news-empty";
+    message.textContent = `Could not load league news: ${error.message}`;
+    newsList.replaceChildren(message);
+  }
+}
+
+function subscribeToNews() {
+  if (newsRealtimeChannel) void supabase.removeChannel(newsRealtimeChannel);
+  newsRealtimeChannel = supabase.channel("public-league-news")
+    .on("postgres_changes", { event: "*", schema: "public", table: "league_news" }, () => {
+      void refreshNews();
+    })
+    .subscribe(status => {
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        console.error(`League news Realtime is unavailable: ${status}`);
+      }
+    });
 }
 
 function getStandings() {
@@ -73,6 +150,7 @@ function renderStandings() {
     const values = [
       { text: String(position + 1), className: "position" },
       { team: true },
+      { form: team.index },
       { text: String(team.played) }, { text: String(team.wins) },
       { text: String(team.draws) }, { text: String(team.losses) },
       {
@@ -104,6 +182,23 @@ function renderStandings() {
         name.textContent = team.name;
         teamCell.append(badge, name);
         cell.append(teamCell);
+      } else if (value.form !== undefined) {
+        cell.className = "form-cell";
+        const form = getTeamForm(value.form);
+        const formList = document.createElement("div");
+        formList.className = "team-form";
+        formList.setAttribute("aria-label", form.length
+          ? `Last ${form.length} matches: ${form.map(result => result.label).join(", ")}`
+          : "No match results yet");
+        form.forEach((result, index) => {
+          const marker = document.createElement("span");
+          marker.className = `form-marker form-${result.outcome}${index === form.length - 1 ? " latest" : ""}`;
+          marker.textContent = result.symbol;
+          marker.title = result.label;
+          marker.setAttribute("aria-hidden", "true");
+          formList.append(marker);
+        });
+        cell.append(formList);
       } else {
         cell.textContent = value.text;
         if (value.className) cell.className = value.className;
@@ -113,6 +208,20 @@ function renderStandings() {
     });
     standingsBody.append(row);
   });
+}
+
+function getTeamForm(teamIndex) {
+  return state.matches
+    .filter(match => match.home === teamIndex || match.away === teamIndex)
+    .slice(-5)
+    .map(match => {
+      const teamGoals = match.home === teamIndex ? match.homeGoals : match.awayGoals;
+      const opponentGoals = match.home === teamIndex ? match.awayGoals : match.homeGoals;
+      if (teamGoals === opponentGoals) return { outcome: "draw", symbol: "–", label: "Draw" };
+      return teamGoals > opponentGoals
+        ? { outcome: "win", symbol: "✓", label: "Win" }
+        : { outcome: "loss", symbol: "×", label: "Loss" };
+    });
 }
 
 function renderMatches() {
@@ -218,6 +327,7 @@ function updateAuthUi() {
   const enabled = configReady && Boolean(session) && dataReady;
   matchButton.disabled = !enabled;
   editTeamsButton.disabled = !enabled;
+  addNewsButton.disabled = !configReady || !session;
   if (!configReady) {
     authStatus.textContent = "Supabase setup required";
     authButton.textContent = "Setup";
@@ -435,6 +545,103 @@ matchButton.addEventListener("click", () => {
   matchDialog.showModal();
 });
 
+addNewsButton.addEventListener("click", () => {
+  if (!session) return;
+  document.getElementById("newsError").textContent = "";
+  document.getElementById("newsForm").reset();
+  clearNewsPreview();
+  newsDialog.showModal();
+});
+
+function clearNewsPreview() {
+  if (newsPreviewUrl) URL.revokeObjectURL(newsPreviewUrl);
+  newsPreviewUrl = null;
+  const preview = document.getElementById("newsImagePreview");
+  preview.removeAttribute("src");
+  preview.hidden = true;
+}
+
+document.getElementById("newsImageInput").addEventListener("change", event => {
+  const file = event.target.files[0];
+  const errorElement = document.getElementById("newsError");
+  errorElement.textContent = "";
+  clearNewsPreview();
+  if (!file) return;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    errorElement.textContent = "Choose a JPEG, PNG or WebP image.";
+    event.target.value = "";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    errorElement.textContent = "The image must be 5 MB or smaller.";
+    event.target.value = "";
+    return;
+  }
+  newsPreviewUrl = URL.createObjectURL(file);
+  const preview = document.getElementById("newsImagePreview");
+  preview.src = newsPreviewUrl;
+  preview.hidden = false;
+});
+
+document.getElementById("newsForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const errorElement = document.getElementById("newsError");
+  const publishButton = document.getElementById("publishNewsButton");
+  const title = document.getElementById("newsTitleInput").value.trim();
+  const description = document.getElementById("newsDescriptionInput").value.trim();
+  const file = document.getElementById("newsImageInput").files[0];
+  if (!session) {
+    errorElement.textContent = "Sign in before publishing league news.";
+    return;
+  }
+  if (!title || !description || !file) {
+    errorElement.textContent = "Enter a headline and description, and choose a photo.";
+    return;
+  }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+    file.size > 5 * 1024 * 1024) {
+    errorElement.textContent = "Choose a JPEG, PNG or WebP image up to 5 MB.";
+    return;
+  }
+
+  publishButton.disabled = true;
+  const extension = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[file.type];
+  const imagePath = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  let photoUploaded = false;
+  try {
+    const { error: uploadError } = await supabase.storage.from("news-images")
+      .upload(imagePath, file, { contentType: file.type, cacheControl: "3600", upsert: false });
+    if (uploadError) throw new Error(`Could not upload the photo: ${uploadError.message}`);
+    photoUploaded = true;
+    const { error: insertError } = await supabase.from("league_news").insert({
+      title,
+      description,
+      image_path: imagePath
+    });
+    if (insertError) throw new Error(`Could not publish news: ${insertError.message}`);
+  } catch (error) {
+    console.error("Failed to publish league news:", error);
+    if (photoUploaded) {
+      try {
+        const { error: cleanupError } = await supabase.storage.from("news-images").remove([imagePath]);
+        if (cleanupError) console.error("Could not remove the unused news photo:", cleanupError);
+      } catch (cleanupError) {
+        console.error("Could not remove the unused news photo:", cleanupError);
+      }
+    }
+    errorElement.textContent = error.message;
+    publishButton.disabled = false;
+    return;
+  }
+
+  publishButton.disabled = false;
+  clearNewsPreview();
+  document.getElementById("newsForm").reset();
+  newsDialog.close();
+  await refreshNews();
+  showToast("League news published");
+});
+
 ["homeTeam", "awayTeam"].forEach(id => {
   document.getElementById(id).addEventListener("change", updateStatsTeamLabels);
 });
@@ -550,16 +757,21 @@ document.querySelectorAll("[data-close]").forEach(button => {
   button.addEventListener("click", () => document.getElementById(button.dataset.close).close());
 });
 
-[matchDialog, teamsDialog, authDialog].forEach(dialog => {
+[matchDialog, teamsDialog, authDialog, newsDialog].forEach(dialog => {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
 });
 
+newsDialog.addEventListener("close", clearNewsPreview);
+
 render();
 updateAuthUi();
 
 if (configReady) {
+  void refreshNews();
+  subscribeToNews();
+  window.setInterval(() => void refreshNews(), 30000);
   const { data, error } = await supabase.auth.getSession();
   if (error) {
     console.error("Failed to check the Supabase session:", error);
