@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111019">
+    <title>eFootball League</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
+            <div class="topbar-right">
+                <span id="authStatus" role="status">Connecting to database…</span>
+                <button class="button button-quiet" id="authButton" type="button" disabled>Sign in</button>
+                <span class="season-tag">2026 / 27</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="intro">
+                <div>
+                    <p class="eyebrow">eFootball League</p>
+                </div>
+                <div class="actions">
+                    <button class="button" id="editTeamsButton" type="button"><span aria-hidden="true">✎</span>
+                        Teams</button>
+                    <button class="button button-primary" id="addMatchButton" type="button"><span
+                            aria-hidden="true">＋</span> Add match</button>
+                </div>
+            </section>
+
+            <section class="hero-card" aria-label="League information">
+                <div class="hero-content">
+                    <h2 class="hero-title">eFootball League</h2>
+                </div>
+
+            </section>
+
+            <div class="content-grid">
+                <section class="panel" aria-labelledby="tableTitle">
+                    <div class="panel-heading">
+                        <h2 id="tableTitle">Table</h2>
+                        <span class="live-label"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Team</th>
+                                    <th scope="col" title="Played">Pld</th>
+                                    <th scope="col" title="Wins">W</th>
+                                    <th scope="col" title="Draws">D</th>
+                                    <th scope="col" title="Losses">L</th>
+                                    <th scope="col" title="Goal difference">GD</th>
+                                    <th scope="col" title="Points">Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody id="standingsBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
+                    </div>
+                </section>
+
+                <aside>
+                    <section class="panel side-panel" aria-labelledby="matchesTitle">
+                        <div class="panel-heading">
+                            <h2 id="matchesTitle">Latest matches</h2><span class="live-label" id="matchesCount">0
+                                matches</span>
+                        </div>
+                        <div class="match-list" id="matchList"></div>
+                    </section>
+                    <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span>A win earns <strong>3
+                                points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared
+                            league and keep them in sync.</span></div>
+                </aside>
+            </div>
+        </main>
+        <footer><span>eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP</span><span>Every match counts.</span></footer>
+    </div>
+
+    <dialog id="matchDialog" aria-labelledby="matchDialogTitle">
+        <form class="dialog-inner" id="matchForm">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="matchDialogTitle">Add match result</h2>
+                    <p>Enter the score for a match you played</p>
+                </div>
+                <button class="close-button" type="button" data-close="matchDialog" aria-label="Close">×</button>
+            </div>
+            <div class="field"><label for="homeTeam">Home team</label><select id="homeTeam" required></select>
+            </div>
+            <div class="score-fields">
+                <div class="field"><label for="homeGoals">Goals</label><input id="homeGoals" type="number" min="0"
+                        max="99" inputmode="numeric" required></div>
+                <div class="score-divider" aria-hidden="true">:</div>
+                <div class="field"><label for="awayGoals">Goals</label><input id="awayGoals" type="number" min="0"
+                        max="99" inputmode="numeric" required></div>
+            </div>
+            <div class="field"><label for="awayTeam">Away team</label><select id="awayTeam" required></select>
+            </div>
+            <p class="form-error" id="matchError" role="alert"></p>
+            <div class="dialog-actions"><button class="button button-quiet" type="button"
+                    data-close="matchDialog">Cancel</button><button class="button button-primary"
+                    type="submit">Save result</button></div>
+        </form>
+    </dialog>
+
+    <dialog id="teamsDialog" aria-labelledby="teamsDialogTitle">
+        <form class="dialog-inner" id="teamsForm">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="teamsDialogTitle">Your teams</h2>
+                    <p>Choose names for your league</p>
+                </div>
+                <button class="close-button" type="button" data-close="teamsDialog" aria-label="Close">×</button>
+            </div>
+            <div class="team-edit-row"><span class="team-badge one" aria-hidden="true">01</span><input id="teamNameOne"
+                    maxlength="24" aria-label="First team name" required></div>
+            <div class="team-edit-row"><span class="team-badge two" aria-hidden="true">02</span><input id="teamNameTwo"
+                    maxlength="24" aria-label="Second team name" required></div>
+            <p class="form-error" id="teamsError" role="alert"></p>
+            <div class="dialog-actions"><button class="button button-quiet" type="button"
+                    data-close="teamsDialog">Cancel</button><button class="button button-primary"
+                    type="submit">Save teams</button></div>
+        </form>
+    </dialog>
+    <dialog id="authDialog" aria-labelledby="authDialogTitle">
+        <form class="dialog-inner" id="authForm">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="authDialogTitle">Sign in to your league</h2>
+                    <p>Use an account created in Supabase</p>
+                </div>
+                <button class="close-button" type="button" data-close="authDialog" aria-label="Close">×</button>
+            </div>
+            <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email"
+                    autocomplete="username" required></div>
+            <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password"
+                    autocomplete="current-password" required></div>
+            <p class="form-error" id="authError" role="alert"></p>
+            <div class="dialog-actions"><button class="button button-primary" type="submit">Sign in</button></div>
+        </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
