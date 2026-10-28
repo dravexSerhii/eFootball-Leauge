@@ -90,6 +90,21 @@ $$;
 do $$
 begin
   if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'league_matches'
+      and policyname = 'Users can delete their own matches'
+  ) then
+    create policy "Users can delete their own matches"
+      on public.league_matches for delete to authenticated
+      using (auth.uid() = created_by);
+  end if;
+end
+$$;
+
+do $$
+begin
+  if not exists (
     select 1
     from pg_publication_tables
     where pubname = 'supabase_realtime'
