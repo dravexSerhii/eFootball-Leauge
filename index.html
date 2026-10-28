@@ -202,6 +202,20 @@
             </div>
         </form>
     </dialog>
+    <dialog id="newsViewDialog" aria-labelledby="newsViewDialogTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="newsViewDialogTitle">League news</h2>
+                    <p class="news-view-date"></p>
+                </div>
+                <button class="close-button" type="button" data-close="newsViewDialog" aria-label="Close">×</button>
+            </div>
+            <img id="newsViewImage" class="news-view-image" alt="News photo">
+            <h3 id="newsViewTitle"></h3>
+            <p id="newsViewDescription" class="news-view-description"></p>
+        </div>
+    </dialog>
     <dialog id="authDialog" aria-labelledby="authDialogTitle">
         <form class="dialog-inner" id="authForm">
             <div class="dialog-header">

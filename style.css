@@ -528,6 +528,30 @@
       line-height: 1.6;
     }
 
+    .news-view-image {
+      display: block;
+      width: 100%;
+      max-height: 45vh;
+      object-fit: cover;
+      border-radius: 12px;
+      background: var(--surface-raised);
+      margin: 0 0 16px;
+    }
+    .news-view-description {
+      margin: 0 0 0;
+      color: #cbc9d1;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .news-view-date {
+      margin: 0 0 0;
+      color: var(--lime);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
     .side-panel {
       padding-bottom: 4px;
     }

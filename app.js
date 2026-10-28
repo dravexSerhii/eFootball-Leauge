@@ -37,6 +37,7 @@ const matchButton = document.getElementById("addMatchButton");
 const editTeamsButton = document.getElementById("editTeamsButton");
 const addNewsButton = document.getElementById("addNewsButton");
 const newsDialog = document.getElementById("newsDialog");
+const newsViewDialog = document.getElementById("newsViewDialog");
 const newsList = document.getElementById("newsList");
 
 function render() {
@@ -90,6 +91,10 @@ function renderNews() {
       }
     });
     card.append(deleteButton);
+    card.addEventListener("click", event => {
+      if (event.target.closest(".news-delete")) return;
+      void openNewsView(item);
+    });
     newsList.append(card);
   });
 }
@@ -125,6 +130,21 @@ async function deleteNews(id, imagePath) {
     console.error("Failed to delete league news:", error);
     showToast(`Не удалось удалить новость: ${error.message}`);
   }
+}
+
+function openNewsView(item) {
+  const titleEl = document.getElementById("newsViewTitle");
+  const descEl = document.getElementById("newsViewDescription");
+  const dateEl = document.getElementById("newsViewDialog").querySelector(".news-view-date");
+  const imgEl = document.getElementById("newsViewImage");
+  titleEl.textContent = item.title;
+  descEl.textContent = item.description;
+  const parsedDate = new Date(item.created_at);
+  dateEl.textContent = Number.isNaN(parsedDate.getTime()) ? "" :
+    parsedDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  imgEl.src = supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
+  imgEl.alt = item.title;
+  newsViewDialog.showModal();
 }
 
 async function deleteMatch(id) {
@@ -806,7 +826,7 @@ document.querySelectorAll("[data-close]").forEach(button => {
   button.addEventListener("click", () => document.getElementById(button.dataset.close).close());
 });
 
-[matchDialog, teamsDialog, authDialog, newsDialog].forEach(dialog => {
+[matchDialog, teamsDialog, authDialog, newsDialog, newsViewDialog].forEach(dialog => {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
