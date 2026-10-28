@@ -6,8 +6,8 @@ const initialState = {
   matches: []
 };
 const TEAM_PHOTOS = [
-  "", // Add a relative image path here, for example "images/fc-promashkov.png".
-  ""  // Add a relative image path here, for example "images/fc-lionslav.png".
+  "img/logo-promashkov.webp",
+  "img/logo-lionslav.webp"
 ];
 const configReady = SUPABASE_URL.startsWith("https://") &&
   SUPABASE_ANON_KEY.length > 20 &&
@@ -127,8 +127,10 @@ function renderMatches() {
     return;
   }
   state.matches.slice().reverse().slice(0, 6).forEach(match => {
-    const item = document.createElement("div");
-    item.className = "match-item";
+    const hasStats = match.stats && Object.values(match.stats.home ?? {})
+      .concat(Object.values(match.stats.away ?? {})).some(value => value !== null);
+    const item = document.createElement(hasStats ? "details" : "div");
+    item.className = hasStats ? "match-item match-item-details" : "match-item";
     const teams = document.createElement("div");
     teams.className = "match-teams";
     const first = document.createElement("span");
@@ -145,9 +147,59 @@ function renderMatches() {
     score.className = "match-score";
     score.textContent = `${match.homeGoals} : ${match.awayGoals}`;
     score.setAttribute("aria-label", `Score ${match.homeGoals} to ${match.awayGoals}`);
-    item.append(teams, score);
+    if (hasStats) {
+      const summary = document.createElement("summary");
+      summary.className = "match-summary";
+      summary.append(teams, score);
+      item.append(summary, renderMatchStats(match));
+    } else {
+      item.append(teams, score);
+    }
     matchList.append(item);
   });
+}
+
+function renderMatchStats(match) {
+  const section = document.createElement("div");
+  section.className = "match-stats";
+  const title = document.createElement("h3");
+  title.className = "match-stats-title";
+  title.textContent = "Match statistics";
+  const table = document.createElement("table");
+  const head = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["", state.teams[match.home].name, state.teams[match.away].name].forEach(label => {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headerRow.append(cell);
+  });
+  head.append(headerRow);
+  const body = document.createElement("tbody");
+  const rows = [
+    ["Shots", "shots", ""],
+    ["Shots on target", "shotsOnTarget", ""],
+    ["Possession", "possession", "%"],
+    ["Passes", "passes", ""]
+  ];
+  rows.forEach(([label, key, suffix]) => {
+    const row = document.createElement("tr");
+    const name = document.createElement("th");
+    name.scope = "row";
+    name.textContent = label;
+    row.append(name);
+    [match.stats.home, match.stats.away].forEach(teamStats => {
+      const value = document.createElement("td");
+      value.textContent = teamStats[key] === null || teamStats[key] === undefined
+        ? "—"
+        : `${teamStats[key]}${suffix}`;
+      row.append(value);
+    });
+    body.append(row);
+  });
+  table.append(head, body);
+  section.append(title, table);
+  return section;
 }
 
 function pluralize(count, singular, plural) {
@@ -192,8 +244,31 @@ function mapMatch(row) {
     away: row.away_team,
     homeGoals: row.home_goals,
     awayGoals: row.away_goals,
-    date: row.played_at
+    date: row.played_at,
+    stats: row.stats ?? { home: {}, away: {} }
   };
+}
+
+function isValidMatchStats(stats) {
+  if (stats === null || stats === undefined) return true;
+  if (typeof stats !== "object" || Array.isArray(stats)) return false;
+  const keys = ["shots", "shotsOnTarget", "possession", "passes"];
+  for (const team of ["home", "away"]) {
+    const teamStats = stats[team] ?? {};
+    if (typeof teamStats !== "object" || Array.isArray(teamStats)) return false;
+    for (const key of keys) {
+      const value = teamStats[key];
+      const maximum = key === "possession" ? 100 : key === "passes" ? 9999 : 999;
+      if (value !== undefined && value !== null &&
+        (!Number.isInteger(value) || value < 0 || value > maximum)) return false;
+    }
+    if (teamStats.shotsOnTarget != null && teamStats.shots != null &&
+      teamStats.shotsOnTarget > teamStats.shots) return false;
+  }
+  const homePossession = stats.home?.possession;
+  const awayPossession = stats.away?.possession;
+  return (homePossession == null && awayPossession == null) ||
+    (homePossession != null && awayPossession != null && homePossession + awayPossession === 100);
 }
 
 function validateServerState(settings, matchRows) {
@@ -206,6 +281,7 @@ function validateServerState(settings, matchRows) {
     match.home_team !== match.away_team &&
     Number.isInteger(match.home_goals) && match.home_goals >= 0 &&
     Number.isInteger(match.away_goals) && match.away_goals >= 0 &&
+    isValidMatchStats(match.stats) &&
     typeof match.played_at === "string")) {
     throw new Error("The database contains a match with invalid data.");
   }
@@ -215,7 +291,7 @@ async function fetchServerState() {
   const [settingsResponse, matchesResponse] = await Promise.all([
     supabase.from("league_settings").select("teams").eq("id", true).maybeSingle(),
     supabase.from("league_matches")
-      .select("id, home_team, away_team, home_goals, away_goals, played_at")
+      .select("id, home_team, away_team, home_goals, away_goals, played_at, stats")
       .order("played_at", { ascending: true })
   ]);
   if (settingsResponse.error) throw settingsResponse.error;
@@ -305,6 +381,14 @@ function populateTeamSelects() {
     });
   });
   document.getElementById("awayTeam").value = "1";
+  updateStatsTeamLabels();
+}
+
+function updateStatsTeamLabels() {
+  const home = Number(document.getElementById("homeTeam").value);
+  const away = Number(document.getElementById("awayTeam").value);
+  document.getElementById("homeStatsTeam").textContent = state.teams[home]?.name ?? "Home";
+  document.getElementById("awayStatsTeam").textContent = state.teams[away]?.name ?? "Away";
 }
 
 authButton.addEventListener("click", async () => {
@@ -345,7 +429,14 @@ matchButton.addEventListener("click", () => {
   document.getElementById("matchError").textContent = "";
   document.getElementById("homeGoals").value = "";
   document.getElementById("awayGoals").value = "";
+  ["homeShots", "awayShots", "homeShotsOnTarget", "awayShotsOnTarget",
+    "homePossession", "awayPossession", "homePasses", "awayPasses"]
+    .forEach(id => { document.getElementById(id).value = ""; });
   matchDialog.showModal();
+});
+
+["homeTeam", "awayTeam"].forEach(id => {
+  document.getElementById(id).addEventListener("change", updateStatsTeamLabels);
 });
 
 editTeamsButton.addEventListener("click", () => {
@@ -372,12 +463,50 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
     errorElement.textContent = "Enter a score between 0 and 99 goals.";
     return;
   }
+  const readStat = id => {
+    const value = document.getElementById(id).value;
+    return value === "" ? null : Number(value);
+  };
+  const stats = {
+    home: {
+      shots: readStat("homeShots"),
+      shotsOnTarget: readStat("homeShotsOnTarget"),
+      possession: readStat("homePossession"),
+      passes: readStat("homePasses")
+    },
+    away: {
+      shots: readStat("awayShots"),
+      shotsOnTarget: readStat("awayShotsOnTarget"),
+      possession: readStat("awayPossession"),
+      passes: readStat("awayPasses")
+    }
+  };
+  if ([...Object.values(stats.home), ...Object.values(stats.away)]
+    .some(value => value !== null && !Number.isInteger(value))) {
+    errorElement.textContent = "Enter whole numbers for match statistics.";
+    return;
+  }
+  if (stats.home.shotsOnTarget !== null && stats.home.shots !== null &&
+    stats.home.shotsOnTarget > stats.home.shots ||
+    stats.away.shotsOnTarget !== null && stats.away.shots !== null &&
+    stats.away.shotsOnTarget > stats.away.shots) {
+    errorElement.textContent = "Shots on target cannot exceed total shots.";
+    return;
+  }
+  const hasHomePossession = stats.home.possession !== null;
+  const hasAwayPossession = stats.away.possession !== null;
+  if (hasHomePossession !== hasAwayPossession ||
+    hasHomePossession && stats.home.possession + stats.away.possession !== 100) {
+    errorElement.textContent = "Enter possession for both teams and make the total 100%.";
+    return;
+  }
   const { data, error } = await supabase.from("league_matches").insert({
     home_team: home,
     away_team: away,
     home_goals: homeGoals,
-    away_goals: awayGoals
-  }).select("id, home_team, away_team, home_goals, away_goals, played_at").single();
+    away_goals: awayGoals,
+    stats
+  }).select("id, home_team, away_team, home_goals, away_goals, played_at, stats").single();
   if (error) {
     console.error("Failed to save the result to the server:", error);
     errorElement.textContent = `Could not save the result: ${error.message}`;

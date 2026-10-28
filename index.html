@@ -104,6 +104,33 @@
             </div>
             <div class="field"><label for="awayTeam">Away team</label><select id="awayTeam" required></select>
             </div>
+            <section class="stats-entry" aria-labelledby="statsEntryTitle">
+                <h3 id="statsEntryTitle">Match statistics <span>Optional</span></h3>
+                <p>Leave any statistic blank if you do not have it.</p>
+                <div class="stats-entry-head" aria-hidden="true">
+                    <span>Statistic</span><span id="homeStatsTeam">Home</span><span id="awayStatsTeam">Away</span>
+                </div>
+                <div class="stats-entry-row">
+                    <span>Shots</span>
+                    <input id="homeShots" type="number" min="0" max="999" inputmode="numeric" aria-label="Home team shots">
+                    <input id="awayShots" type="number" min="0" max="999" inputmode="numeric" aria-label="Away team shots">
+                </div>
+                <div class="stats-entry-row">
+                    <span>Shots on target</span>
+                    <input id="homeShotsOnTarget" type="number" min="0" max="999" inputmode="numeric" aria-label="Home team shots on target">
+                    <input id="awayShotsOnTarget" type="number" min="0" max="999" inputmode="numeric" aria-label="Away team shots on target">
+                </div>
+                <div class="stats-entry-row">
+                    <span>Possession (%)</span>
+                    <input id="homePossession" type="number" min="0" max="100" inputmode="numeric" aria-label="Home team possession percentage">
+                    <input id="awayPossession" type="number" min="0" max="100" inputmode="numeric" aria-label="Away team possession percentage">
+                </div>
+                <div class="stats-entry-row">
+                    <span>Passes</span>
+                    <input id="homePasses" type="number" min="0" max="9999" inputmode="numeric" aria-label="Home team passes">
+                    <input id="awayPasses" type="number" min="0" max="9999" inputmode="numeric" aria-label="Away team passes">
+                </div>
+            </section>
             <p class="form-error" id="matchError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-quiet" type="button"
                     data-close="matchDialog">Cancel</button><button class="button button-primary"

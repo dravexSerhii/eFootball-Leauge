@@ -14,6 +14,7 @@ create table public.league_matches (
   away_team smallint not null check (away_team in (0, 1) and away_team <> home_team),
   home_goals smallint not null check (home_goals between 0 and 99),
   away_goals smallint not null check (away_goals between 0 and 99),
+  stats jsonb not null default '{}'::jsonb,
   played_at timestamptz not null default now(),
   created_by uuid references auth.users (id) default auth.uid()
 );
