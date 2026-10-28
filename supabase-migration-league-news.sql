@@ -29,8 +29,18 @@ begin
       and tablename = 'league_news'
       and policyname = 'League members can publish news'
   ) then
-    create policy "League members can publish news"
-      on public.league_news for insert to authenticated with check (auth.uid() = created_by);
+  create policy "League members can publish news"
+    on public.league_news for insert to authenticated with check (auth.uid() = created_by);
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'league_news'
+      and policyname = 'Users can delete their own league news'
+  ) then
+    create policy "Users can delete their own league news"
+      on public.league_news for delete to authenticated
+      using (auth.uid() = created_by);
   end if;
 end
 $$;

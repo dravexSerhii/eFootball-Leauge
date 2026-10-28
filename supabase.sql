@@ -49,11 +49,19 @@ create policy "League members can read matches"
 create policy "League members can add matches"
   on public.league_matches for insert to authenticated with check (true);
 
+create policy "Users can delete their own matches"
+  on public.league_matches for delete to authenticated
+  using (auth.uid() = created_by);
+
 create policy "Anyone can read league news"
   on public.league_news for select to anon, authenticated using (true);
 
 create policy "League members can publish news"
   on public.league_news for insert to authenticated with check (auth.uid() = created_by);
+
+create policy "Users can delete their own league news"
+  on public.league_news for delete to authenticated
+  using (auth.uid() = created_by);
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('news-images', 'news-images', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])

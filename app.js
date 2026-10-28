@@ -81,6 +81,15 @@ function renderNews() {
     description.textContent = item.description;
     content.append(date, title, description);
     card.append(image, content);
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "button button-quiet news-delete";
+    deleteButton.textContent = "Удалить";
+    deleteButton.addEventListener("click", () => {
+      if (confirm(`Удалить новость "${item.title}"?`)) {
+        void deleteNews(item.id, item.image_path);
+      }
+    });
+    card.append(deleteButton);
     newsList.append(card);
   });
 }
@@ -99,6 +108,34 @@ async function refreshNews() {
     message.className = "news-empty";
     message.textContent = `Could not load league news: ${error.message}`;
     newsList.replaceChildren(message);
+  }
+}
+
+async function deleteNews(id, imagePath) {
+  try {
+    const { error } = await supabase.from("league_news").delete().eq("id", id);
+    if (error) throw error;
+    if (imagePath) {
+      const { error: storageError } = await supabase.storage.from("news-images").remove([imagePath]);
+      if (storageError) console.error("Could not remove the news photo:", storageError);
+    }
+    await refreshNews();
+    showToast("Новость удалена");
+  } catch (error) {
+    console.error("Failed to delete league news:", error);
+    showToast(`Не удалось удалить новость: ${error.message}`);
+  }
+}
+
+async function deleteMatch(id) {
+  try {
+    const { error } = await supabase.from("league_matches").delete().eq("id", id);
+    if (error) throw error;
+    await refreshFromServer();
+    showToast("Матч удалён");
+  } catch (error) {
+    console.error("Failed to delete match:", error);
+    showToast(`Не удалось удалить матч: ${error.message}`);
   }
 }
 
@@ -264,6 +301,15 @@ function renderMatches() {
     } else {
       item.append(teams, score);
     }
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "button button-quiet match-delete";
+    deleteButton.textContent = "Удалить";
+    deleteButton.addEventListener("click", () => {
+      if (confirm("Удалить этот матч?")) {
+        void deleteMatch(match.id);
+      }
+    });
+    item.append(deleteButton);
     matchList.append(item);
   });
 }
@@ -423,6 +469,7 @@ async function refreshFromServer() {
   if (!session) return;
   try {
     await fetchServerState();
+    await refreshNews();
   } catch (error) {
     console.error("Failed to refresh the league from the server:", error);
     authStatus.textContent = "Sync error";
@@ -465,6 +512,8 @@ async function handleSession(nextSession) {
   try {
     await fetchServerState();
     if (generation !== sessionGeneration) return;
+    await refreshNews();
+    subscribeToNews();
     subscribeToChanges(generation);
     pollTimer = setInterval(() => {
       if (generation === sessionGeneration) void refreshFromServer();
