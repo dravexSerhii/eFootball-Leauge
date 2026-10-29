@@ -202,6 +202,9 @@ function renderChampionshipRace() {
     if (championshipHistory.length > 50) championshipHistory.shift();
   }
   drawRaceChart();
+  raceChartCanvas.classList.remove("live-pulse");
+  void raceChartCanvas.offsetWidth;
+  raceChartCanvas.classList.add("live-pulse");
   const badgeOne = document.getElementById("raceTeamOneBadge");
   const badgeTwo = document.getElementById("raceTeamTwoBadge");
   document.getElementById("raceTeamOneName").textContent = race.one.name;
@@ -245,51 +248,109 @@ function drawRaceChart() {
   const h = rect.height;
   ctx.clearRect(0, 0, w, h);
   if (championshipHistory.length < 2) return;
-  const pad = 24;
+  const pad = 26;
   const innerW = w - pad * 2;
   const innerH = h - pad * 2;
   const minX = championshipHistory[0].t;
   const maxX = championshipHistory[championshipHistory.length - 1].t;
   const rangeX = maxX - minX || 1;
-  const maxY = 100;
-  const minY = 0;
-  const rangeY = maxY - minY;
-  const lineOne = [];
-  const lineTwo = [];
-  championshipHistory.forEach(p => {
-    lineOne.push({ x: pad + ((p.t - minX) / rangeX) * innerW, y: pad + innerH - ((p.one - minY) / rangeY) * innerH });
-    lineTwo.push({ x: pad + ((p.t - minX) / rangeX) * innerW, y: pad + innerH - ((p.two - minY) / rangeY) * innerH });
-  });
+  const rangeY = 100;
+  const pts = championshipHistory.map(p => ({
+    x: pad + ((p.t - minX) / rangeX) * innerW,
+    yOne: pad + innerH - (p.one / rangeY) * innerH,
+    yTwo: pad + innerH - (p.two / rangeY) * innerH
+  }));
+  const last = pts[pts.length - 1];
+  const gradOne = ctx.createLinearGradient(0, pad, 0, pad + innerH);
+  gradOne.addColorStop(0, "rgba(211,255,87,.35)");
+  gradOne.addColorStop(1, "rgba(211,255,87,.02)");
+  const gradTwo = ctx.createLinearGradient(0, pad, 0, pad + innerH);
+  gradTwo.addColorStop(0, "rgba(156,120,255,.35)");
+  gradTwo.addColorStop(1, "rgba(156,120,255,.02)");
   ctx.beginPath();
-  ctx.moveTo(lineOne[0].x, lineOne[0].y);
-  lineOne.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.moveTo(pts[0].x, pad + innerH);
+  pts.forEach(p => ctx.lineTo(p.x, p.yOne));
+  ctx.lineTo(w - pad, pad + innerH);
+  ctx.closePath();
+  ctx.fillStyle = gradOne;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pad + innerH);
+  pts.forEach(p => ctx.lineTo(p.x, p.yTwo));
+  ctx.lineTo(w - pad, pad + innerH);
+  ctx.closePath();
+  ctx.fillStyle = gradTwo;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].yOne);
+  pts.forEach(p => ctx.lineTo(p.x, p.yOne));
   ctx.strokeStyle = "#d3ff57";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(lineTwo[0].x, lineTwo[0].y);
-  lineTwo.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.moveTo(pts[0].x, pts[0].yTwo);
+  pts.forEach(p => ctx.lineTo(p.x, p.yTwo));
   ctx.strokeStyle = "#9c78ff";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   ctx.stroke();
+  pts.forEach((p, i) => {
+    if (i === 0 || i === pts.length - 1) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.yOne, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#d3ff57";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(p.x, p.yTwo, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = "#9c78ff";
+      ctx.fill();
+    }
+  });
   ctx.beginPath();
   ctx.moveTo(pad, pad + innerH);
   ctx.lineTo(w - pad, pad + innerH);
-  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.strokeStyle = "rgba(255,255,255,.06)";
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(pad, pad);
   ctx.lineTo(pad, pad + innerH);
-  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.strokeStyle = "rgba(255,255,255,.06)";
   ctx.lineWidth = 1;
   ctx.stroke();
+  for (let y = 25; y <= 100; y += 25) {
+    const yy = pad + innerH - (y / 100) * innerH;
+    ctx.beginPath();
+    ctx.moveTo(pad, yy);
+    ctx.lineTo(w - pad, yy);
+    ctx.strokeStyle = "rgba(255,255,255,.03)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255,255,255,.35)";
+    ctx.font = "9px Inter, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(y + "%", pad + 4, yy - 4);
+  }
+  const lastHist = championshipHistory[championshipHistory.length - 1];
   ctx.fillStyle = "#d3ff57";
-  ctx.font = "10px Inter, sans-serif";
+  ctx.font = "bold 12px Inter, sans-serif";
   ctx.textAlign = "right";
-  ctx.fillText(`${championshipHistory[championshipHistory.length - 1].one}%`, w - pad, pad + 10);
+  ctx.fillText(`${lastHist.one}%`, w - pad - 8, last.yOne - 8);
   ctx.fillStyle = "#9c78ff";
-  ctx.fillText(`${championshipHistory[championshipHistory.length - 1].two}%`, w - pad, pad + innerH - 4);
+  ctx.fillText(`${lastHist.two}%`, w - pad - 8, last.yTwo + 14);
+  ctx.beginPath();
+  ctx.arc(last.x, last.yOne, 5, 0, Math.PI * 2);
+  ctx.fillStyle = "#d3ff57";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(last.x, last.yTwo, 5, 0, Math.PI * 2);
+  ctx.fillStyle = "#9c78ff";
+  ctx.fill();
 }
 
 async function deleteMatch(id) {
