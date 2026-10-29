@@ -79,7 +79,7 @@ const TRANSLATIONS = {
     matchDeleted: "Match deleted",
     matchDeleteError: "Could not delete match: {0}",
     deleteNews: "Delete",
-    favoriteLeads: "{0} leads the championship race."
+    favoriteLeads: "{0} leads the championship race.",
     newsPublished: "League news published",
     newsUploadError: "Could not upload the photo: {0}",
     newsInsertError: "Could not publish news: {0}",
