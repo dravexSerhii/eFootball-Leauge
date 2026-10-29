@@ -1117,8 +1117,8 @@
     .race-team { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); position: relative; }
     .race-team:last-child { border-bottom: 0; }
     .race-team::before { content: ""; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(135deg, rgba(211,255,87,.06), rgba(156,120,255,.06)); pointer-events: none; }
-    .race-team-badge { position: relative; width: clamp(48px, 6vw, 60px); height: clamp(48px, 6vw, 60px); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 16px; font-size: 12px; font-weight: 900; background: var(--surface); color: var(--ink); box-shadow: 0 8px 24px rgba(0,0,0,.35); border: 1px solid var(--line); z-index: 2; }
-    .race-team-badge img { width: 100%; height: 100%; object-fit: contain; object-position: center; border-radius: inherit; }
+    .race-team-badge { position: relative; width: clamp(60px, 7vw, 90px); height: clamp(60px, 7vw, 90px); display: grid; place-items: center; flex-shrink: 0; overflow: visible; border-radius: 20px; font-size: 12px; font-weight: 900; background: var(--surface); color: var(--ink); box-shadow: 0 10px 30px rgba(0,0,0,.45); border: 1px solid var(--line); z-index: 2; }
+    .race-team-badge img { width: 100%; height: 100%; object-fit: contain !important; object-position: center; border-radius: inherit; }
     .race-team-info { flex: 1; position: relative; z-index: 2; }
     .race-team-name { margin: 0 0 3px; font-size: 17px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); text-shadow: 0 0 12px rgba(255,255,255,.15); }
     .race-team-points { color: var(--muted); font-size: 12px; font-weight: 700; margin-top: 1px; }
@@ -1138,6 +1138,6 @@
       .race-grid { grid-template-columns: 1fr; gap: 10px; padding: 0 16px 6px; }
       .race-team { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 0; }
       .race-team-odds { text-align: left; margin-top: 4px; }
-      .race-team-badge { width: clamp(44px, 12vw, 52px); height: clamp(44px, 12vw, 52px); }
+      .race-team-badge { width: clamp(52px, 14vw, 72px); height: clamp(52px, 14vw, 72px); }
       #raceChart { margin: 10px 16px 20px; }
     }
