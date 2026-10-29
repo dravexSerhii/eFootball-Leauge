@@ -39,6 +39,9 @@ const addNewsButton = document.getElementById("addNewsButton");
 const newsDialog = document.getElementById("newsDialog");
 const newsViewDialog = document.getElementById("newsViewDialog");
 const newsList = document.getElementById("newsList");
+const raceChartCanvas = document.getElementById("raceChart");
+
+let championshipHistory = [];
 
 function render() {
   renderStandings();
@@ -170,13 +173,13 @@ function calculateChampionshipOdds() {
   let statusText = "";
   if (one.points > two.points) {
     favorite = one;
-    statusText = `Facvorit: ${one.name}`;
+    statusText = `Favorite: ${one.name}`;
   } else if (two.points > one.points) {
     favorite = two;
-    statusText = `Facvorit: ${two.name}`;
+    statusText = `Favorite: ${two.name}`;
   } else {
     favorite = null;
-    statusText = "Ravnovshiya shansы";
+    statusText = "Equal chances";
   }
   return { one, two, oddsOne, oddsTwo, favorite, statusText };
 }
@@ -188,12 +191,19 @@ function renderChampionshipRace() {
   const raceFooter = document.getElementById("raceFooter");
   if (!race) {
     raceGrid.replaceChildren();
-    raceStatus.textContent = "Net dannyh";
+    raceStatus.textContent = "No data";
     raceFooter.textContent = "";
     return;
   }
-  const badgeOne = document.getElementById("raceTeamOneBadge") || document.createElement("div");
-  const badgeTwo = document.getElementById("raceTeamTwoBadge") || document.createElement("div");
+  const now = Date.now();
+  const last = championshipHistory[championshipHistory.length - 1];
+  if (!last || last.one !== race.oddsOne || last.two !== race.oddsTwo) {
+    championshipHistory.push({ t: now, one: race.oddsOne, two: race.oddsTwo });
+    if (championshipHistory.length > 50) championshipHistory.shift();
+  }
+  drawRaceChart();
+  const badgeOne = document.getElementById("raceTeamOneBadge");
+  const badgeTwo = document.getElementById("raceTeamTwoBadge");
   document.getElementById("raceTeamOneName").textContent = race.one.name;
   document.getElementById("raceTeamTwoName").textContent = race.two.name;
   document.getElementById("raceTeamOnePts").textContent = `${race.one.points} pts`;
@@ -203,8 +213,6 @@ function renderChampionshipRace() {
   raceStatus.textContent = race.statusText;
   const photoOne = TEAM_PHOTOS[race.one.index];
   const photoTwo = TEAM_PHOTOS[race.two.index];
-  const badgeOne = document.getElementById("raceTeamOneBadge");
-  const badgeTwo = document.getElementById("raceTeamTwoBadge");
   if (photoOne) {
     badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
   } else {
@@ -217,11 +225,69 @@ function renderChampionshipRace() {
   }
   if (race.favorite) {
     raceStatus.className = "race-status race-favorite";
-    raceFooter.textContent = `${race.favorite.name} lideruet v gonke za chempionstvom.`;
+    raceFooter.textContent = `${race.favorite.name} leads the championship race.`;
   } else {
     raceStatus.className = "race-status";
-    raceFooter.textContent = "Komandy idut ravnonomerno, pobeditel otkrit.";
+    raceFooter.textContent = "Teams are even, winner is open.";
   }
+}
+
+function drawRaceChart() {
+  const ctx = raceChartCanvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = raceChartCanvas.getBoundingClientRect();
+  raceChartCanvas.width = rect.width * dpr;
+  raceChartCanvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width;
+  const h = rect.height;
+  ctx.clearRect(0, 0, w, h);
+  if (championshipHistory.length < 2) return;
+  const pad = 24;
+  const innerW = w - pad * 2;
+  const innerH = h - pad * 2;
+  const minX = championshipHistory[0].t;
+  const maxX = championshipHistory[championshipHistory.length - 1].t;
+  const rangeX = maxX - minX || 1;
+  const maxY = 100;
+  const minY = 0;
+  const rangeY = maxY - minY;
+  const lineOne = [];
+  const lineTwo = [];
+  championshipHistory.forEach(p => {
+    lineOne.push({ x: pad + ((p.t - minX) / rangeX) * innerW, y: pad + innerH - ((p.one - minY) / rangeY) * innerH });
+    lineTwo.push({ x: pad + ((p.t - minX) / rangeX) * innerW, y: pad + innerH - ((p.two - minY) / rangeY) * innerH });
+  });
+  ctx.beginPath();
+  ctx.moveTo(lineOne[0].x, lineOne[0].y);
+  lineOne.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = "#d3ff57";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(lineTwo[0].x, lineTwo[0].y);
+  lineTwo.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = "#9c78ff";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + innerH);
+  ctx.lineTo(w - pad, pad + innerH);
+  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pad, pad);
+  ctx.lineTo(pad, pad + innerH);
+  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#d3ff57";
+  ctx.font = "10px Inter, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(`${championshipHistory[championshipHistory.length - 1].one}%`, w - pad, pad + 10);
+  ctx.fillStyle = "#9c78ff";
+  ctx.fillText(`${championshipHistory[championshipHistory.length - 1].two}%`, w - pad, pad + innerH - 4);
 }
 
 async function deleteMatch(id) {
