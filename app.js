@@ -3,7 +3,8 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
 
 const initialState = {
   teams: [{ name: "FC Promashkov" }, { name: "FC Lionslav" }],
-  matches: []
+  matches: [],
+  championships: { "0": 0, "1": 0 }
 };
 const TEAM_PHOTOS = [
   "img/logo-promashkov.webp",
@@ -25,6 +26,7 @@ let pollTimer = null;
 let toastTimer;
 let newsPreviewUrl = null;
 let newsItems = [];
+let currentSeason = 1;
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -40,6 +42,12 @@ const newsDialog = document.getElementById("newsDialog");
 const newsViewDialog = document.getElementById("newsViewDialog");
 const newsList = document.getElementById("newsList");
 const raceChartCanvas = document.getElementById("raceChart");
+const seasonInfo = document.getElementById("seasonInfo");
+const seasonBadge = document.getElementById("seasonBadge");
+const matchCounter = document.getElementById("matchCounter");
+const championshipList = document.getElementById("championshipList");
+const h2hList = document.getElementById("h2hList");
+const newSeasonBtn = document.getElementById("newSeasonBtn");
 
 let championshipHistory = [];
 
@@ -48,6 +56,7 @@ function render() {
   renderMatches();
   renderNews();
   renderChampionshipRace();
+  renderSeasonInfo();
 }
 
 function renderNews() {
@@ -420,6 +429,111 @@ function drawRaceChart() {
   ctx.fill();
 }
 
+function getMatchesInSeason(season) {
+  return state.matches.filter(m => m.season === season);
+}
+
+function getChampionships() {
+  return state.championships || { "0": 0, "1": 0 };
+}
+
+function getHeadToHead() {
+  const matches = state.matches;
+  let t0Wins = 0, t0Draws = 0, t0Losses = 0;
+  let t0GoalsFor = 0, t0GoalsAgainst = 0;
+  matches.forEach(m => {
+    const isHome0 = m.home === 0;
+    const myGoals = isHome0 ? m.homeGoals : m.awayGoals;
+    const oppGoals = isHome0 ? m.awayGoals : m.homeGoals;
+    t0GoalsFor += myGoals;
+    t0GoalsAgainst += oppGoals;
+    if (myGoals > oppGoals) t0Wins++;
+    else if (myGoals === oppGoals) t0Draws++;
+    else t0Losses++;
+  });
+  return {
+    team0Wins: t0Wins,
+    team0Draws: t0Draws,
+    team0Losses: t0Losses,
+    team0GoalsFor: t0GoalsFor,
+    team0GoalsAgainst: t0GoalsAgainst,
+    team1Wins: t0Losses,
+    team1Draws: t0Draws,
+    team1Losses: t0Wins,
+    team1GoalsFor: t0GoalsAgainst,
+    team1GoalsAgainst: t0GoalsFor,
+    total: matches.length
+  };
+}
+
+async function startNewSeason() {
+  if (!session) {
+    showToast("Sign in to start a new season.");
+    return;
+  }
+  const matchesInSeason = getMatchesInSeason(currentSeason);
+  if (matchesInSeason.length < 36) {
+    showToast("Cannot start new season before 36 matches are played.");
+    return;
+  }
+  const standings = getStandings().filter(t => t.index === 0 || t.index === 1);
+  const winnerIdx = standings[0].points > standings[1].points ? 0 : 1;
+  const championships = { ...getChampionships() };
+  championships[String(winnerIdx)] = (championships[String(winnerIdx)] || 0) + 1;
+  try {
+    const { error } = await supabase.from("league_settings")
+      .update({ season: currentSeason + 1, championships })
+      .eq("id", true);
+    if (error) throw error;
+    currentSeason++;
+    showToast("New season started!");
+    await refreshFromServer();
+  } catch (error) {
+    console.error("Failed to start new season:", error);
+    showToast(`Could not start new season: ${error.message}`);
+  }
+}
+
+function renderSeasonInfo() {
+  const matchesInSeason = getMatchesInSeason(currentSeason);
+  const seasonLimit = 36;
+  const remaining = Math.max(0, seasonLimit - matchesInSeason.length);
+  const seasonComplete = matchesInSeason.length >= seasonLimit;
+  const champs = getChampionships();
+  const h2h = getHeadToHead();
+
+  seasonBadge.textContent = `Season ${currentSeason}`;
+  matchCounter.textContent = `${matchesInSeason.length}/${seasonLimit}`;
+
+  if (seasonComplete) {
+    matchButton.disabled = true;
+    matchButton.textContent = "Season Complete";
+    newSeasonBtn.disabled = false;
+    newSeasonBtn.style.display = "inline-flex";
+  } else {
+    matchButton.disabled = !configReady || !session || !dataReady;
+    matchButton.textContent = "Add match";
+    newSeasonBtn.style.display = "none";
+  }
+
+  document.getElementById("champTeam0").textContent = state.teams[0]?.name || "Team 1";
+  document.getElementById("champCount0").textContent = champs["0"] || 0;
+  document.getElementById("champTeam1").textContent = state.teams[1]?.name || "Team 2";
+  document.getElementById("champCount1").textContent = champs["1"] || 0;
+
+  document.getElementById("h2hTeam0Wins").textContent = h2h.team0Wins;
+  document.getElementById("h2hTeam0Draws").textContent = h2h.team0Draws;
+  document.getElementById("h2hTeam0Losses").textContent = h2h.team0Losses;
+  document.getElementById("h2hTeam1Wins").textContent = h2h.team1Wins;
+  document.getElementById("h2hTeam1Draws").textContent = h2h.team1Draws;
+  document.getElementById("h2hTeam1Losses").textContent = h2h.team1Losses;
+  document.getElementById("h2hTotal").textContent = h2h.total;
+  document.getElementById("h2hTeam0GF").textContent = h2h.team0GoalsFor;
+  document.getElementById("h2hTeam0GA").textContent = h2h.team0GoalsAgainst;
+  document.getElementById("h2hTeam1GF").textContent = h2h.team1GoalsFor;
+  document.getElementById("h2hTeam1GA").textContent = h2h.team1GoalsAgainst;
+}
+
 async function deleteMatch(id) {
   try {
     const { error } = await supabase.from("league_matches").delete().eq("id", id);
@@ -694,7 +808,8 @@ function mapMatch(row) {
     homeGoals: row.home_goals,
     awayGoals: row.away_goals,
     date: row.played_at,
-    stats: row.stats ?? { home: {}, away: {} }
+    stats: row.stats ?? { home: {}, away: {} },
+    season: row.season ?? 1
   };
 }
 
@@ -738,9 +853,9 @@ function validateServerState(settings, matchRows) {
 
 async function fetchServerState() {
   const [settingsResponse, matchesResponse] = await Promise.all([
-    supabase.from("league_settings").select("teams").eq("id", true).maybeSingle(),
+    supabase.from("league_settings").select("teams, season, championships").eq("id", true).maybeSingle(),
     supabase.from("league_matches")
-      .select("id, home_team, away_team, home_goals, away_goals, played_at, stats")
+      .select("id, home_team, away_team, home_goals, away_goals, played_at, stats, season")
       .order("played_at", { ascending: true })
   ]);
   if (settingsResponse.error) throw settingsResponse.error;
@@ -749,9 +864,11 @@ async function fetchServerState() {
     throw new Error("League settings were not found. Run the SQL in supabase.sql.");
   }
   validateServerState(settingsResponse.data, matchesResponse.data);
+  currentSeason = settingsResponse.data.season || 1;
   state = {
     teams: settingsResponse.data.teams,
-    matches: matchesResponse.data.map(mapMatch)
+    matches: matchesResponse.data.map(mapMatch),
+    championships: settingsResponse.data.championships || { "0": 0, "1": 0 }
   };
   dataReady = true;
   render();
@@ -893,6 +1010,10 @@ addNewsButton.addEventListener("click", () => {
   document.getElementById("newsForm").reset();
   clearNewsPreview();
   newsDialog.showModal();
+});
+
+newSeasonBtn.addEventListener("click", () => {
+  void startNewSeason();
 });
 
 function clearNewsPreview() {
@@ -1049,13 +1170,19 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
     errorElement.textContent = "Enter possession for both teams and make the total 100%.";
     return;
   }
+  const matchesInSeason = state.matches.filter(m => m.season === currentSeason);
+  if (matchesInSeason.length >= 36) {
+    errorElement.textContent = "Season limit reached (36 matches). Start a new season to continue.";
+    return;
+  }
   const { data, error } = await supabase.from("league_matches").insert({
     home_team: home,
     away_team: away,
     home_goals: homeGoals,
     away_goals: awayGoals,
-    stats
-  }).select("id, home_team, away_team, home_goals, away_goals, played_at, stats").single();
+    stats,
+    season: currentSeason
+  }).select("id, home_team, away_team, home_goals, away_goals, played_at, stats, season").single();
   if (error) {
     console.error("Failed to save the result to the server:", error);
     errorElement.textContent = `Could not save the result: ${error.message}`;

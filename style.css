@@ -1141,3 +1141,27 @@
       .race-team-badge { width: clamp(52px, 14vw, 72px); height: clamp(52px, 14vw, 72px); }
       #raceChart { margin: 10px 16px 20px; }
     }
+
+    .season-panel { margin-top: 22px; }
+    .season-panel .panel-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 22px 14px; border-bottom: 0; min-height: auto; }
+    .season-header { display: flex; gap: 16px; align-items: center; }
+    .season-badge { font-size: 16px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); text-shadow: 0 0 16px rgba(211,255,87,.35); }
+    .season-counter { font-size: 14px; font-weight: 800; color: var(--ink); background: var(--surface-raised); padding: 6px 12px; border-radius: 9px; border: 1px solid var(--line); }
+    .season-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 22px 18px; background: var(--surface-raised); border-radius: 16px; border: 1px solid var(--line); }
+    .season-card { padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    .season-card h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .champ-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 800; }
+    .champ-row:last-child { border-bottom: 0; }
+    .champ-name { color: var(--ink); }
+    .champ-count { color: var(--lime); }
+    .h2h-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 800; }
+    .h2h-row:last-child { border-bottom: 0; }
+    .h2h-stat { color: var(--ink); }
+    .h2h-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    .h2h-footer { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .season-grid { grid-template-columns: 1fr; gap: 12px; padding: 0 16px 12px; }
+      .season-panel .panel-heading { flex-direction: column; align-items: flex-start; gap: 12px; padding: 0 16px 12px; }
+      .newSeasonBtn { width: 100%; }
+    }

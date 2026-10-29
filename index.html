@@ -73,6 +73,52 @@
                 <canvas id="raceChart" height="120"></canvas>
             </section>
 
+            <section class="season-panel panel" aria-label="Season info">
+                <div class="panel-heading">
+                    <div class="season-header">
+                        <span id="seasonBadge" class="season-badge">Season 1</span>
+                        <span id="matchCounter" class="season-counter">0/36</span>
+                    </div>
+                    <button class="button button-primary" id="newSeasonBtn" style="display:none">New Season</button>
+                </div>
+                <div class="season-grid">
+                    <div class="season-card championships">
+                        <h3>Championships</h3>
+                        <div class="champ-row">
+                            <span id="champTeam0" class="champ-name">Team 1</span>
+                            <span id="champCount0" class="champ-count">0</span>
+                        </div>
+                        <div class="champ-row">
+                            <span id="champTeam1" class="champ-name">Team 2</span>
+                            <span id="champCount1" class="champ-count">0</span>
+                        </div>
+                    </div>
+                    <div class="season-card head2head">
+                        <h3>Head to Head</h3>
+                        <div class="h2h-row">
+                            <span id="h2hTeam0Wins" class="h2h-stat">0</span>
+                            <span class="h2h-label">W</span>
+                            <span id="h2hTeam0Draws" class="h2h-stat">0</span>
+                            <span class="h2h-label">D</span>
+                            <span id="h2hTeam0Losses" class="h2h-stat">0</span>
+                            <span class="h2h-label">L</span>
+                        </div>
+                        <div class="h2h-row">
+                            <span id="h2hTeam1Wins" class="h2h-stat">0</span>
+                            <span class="h2h-label">W</span>
+                            <span id="h2hTeam1Draws" class="h2h-stat">0</span>
+                            <span class="h2h-label">D</span>
+                            <span id="h2hTeam1Losses" class="h2h-stat">0</span>
+                            <span class="h2h-label">L</span>
+                        </div>
+                        <div class="h2h-footer">
+                            <span>Goals: <span id="h2hTeam0GF">0</span> — <span id="h2hTeam1GF">0</span></span>
+                            <span>Total: <span id="h2hTotal">0</span> matches</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <div class="content-grid">
                 <section class="panel" aria-labelledby="tableTitle">
                     <div class="panel-heading">

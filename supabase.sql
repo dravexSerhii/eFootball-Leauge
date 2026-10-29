@@ -1,6 +1,8 @@
 create table public.league_settings (
   id boolean primary key default true check (id = true),
   teams jsonb not null default '[{"name":"FC Promashkov"},{"name":"FC Lionslav"}]'::jsonb,
+  season integer not null default 1,
+  championships jsonb not null default '{"0":0,"1":0}'::jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -16,7 +18,8 @@ create table public.league_matches (
   away_goals smallint not null check (away_goals between 0 and 99),
   stats jsonb not null default '{}'::jsonb,
   played_at timestamptz not null default now(),
-  created_by uuid references auth.users (id) default auth.uid()
+  created_by uuid references auth.users (id) default auth.uid(),
+  season integer not null default 1
 );
 
 create table public.league_news (
