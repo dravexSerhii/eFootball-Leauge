@@ -153,7 +153,6 @@ function openNewsView(item) {
 
 function calculateChampionshipOdds() {
   const matches = state.matches;
-  if (matches.length < 2) return null;
   const teams = [0, 1].map(idx => {
     const name = state.teams[idx].name;
     let points = 0;
@@ -234,16 +233,20 @@ function calculateChampionshipOdds() {
   }
   let favorite = null;
   let statusText = "";
-  const diff = Math.abs(s0 - s1);
-  if (s0 > s1 + 2) {
-    favorite = t0;
-    statusText = `Favorite: ${t0.name}`;
-  } else if (s1 > s0 + 2) {
-    favorite = t1;
-    statusText = `Favorite: ${t1.name}`;
+  if (matches.length === 0) {
+    statusText = "No matches yet";
   } else {
-    favorite = null;
-    statusText = "Even matchup";
+    const diff = Math.abs(s0 - s1);
+    if (s0 > s1 + 2) {
+      favorite = t0;
+      statusText = `Favorite: ${t0.name}`;
+    } else if (s1 > s0 + 2) {
+      favorite = t1;
+      statusText = `Favorite: ${t1.name}`;
+    } else {
+      favorite = null;
+      statusText = "Even matchup";
+    }
   }
   return { one: { ...t0, score: s0 }, two: { ...t1, score: s1 }, oddsOne, oddsTwo, favorite, statusText };
 }
