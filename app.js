@@ -152,36 +152,100 @@ function openNewsView(item) {
 }
 
 function calculateChampionshipOdds() {
-  const stats = getStandings();
-  if (stats.length < 2) return null;
-  const one = stats[0];
-  const two = stats[1];
-  const total = one.points + two.points;
+  const matches = state.matches;
+  if (matches.length < 2) return null;
+  const teams = [0, 1].map(idx => {
+    const name = state.teams[idx].name;
+    let points = 0;
+    let goalsFor = 0;
+    let goalsAgainst = 0;
+    let shotsFor = 0;
+    let shotsAgainst = 0;
+    let sotFor = 0;
+    let sotAgainst = 0;
+    let possSum = 0;
+    let possCount = 0;
+    let passesFor = 0;
+    let passesAgainst = 0;
+    let games = 0;
+    matches.forEach(m => {
+      const isHome = m.home === idx;
+      const opponent = isHome ? m.away : m.home;
+      const myGoals = isHome ? m.homeGoals : m.awayGoals;
+      const oppGoals = isHome ? m.awayGoals : m.homeGoals;
+      games++;
+      if (myGoals > oppGoals) points += 3;
+      else if (myGoals === oppGoals) points += 1;
+      goalsFor += myGoals;
+      goalsAgainst += oppGoals;
+      const st = m.stats;
+      if (st && st.home && st.away) {
+        const mySt = isHome ? st.home : st.away;
+        const oppSt = isHome ? st.away : st.home;
+        if (mySt.shots != null) shotsFor += mySt.shots;
+        if (oppSt.shots != null) shotsAgainst += oppSt.shots;
+        if (mySt.shotsOnTarget != null) sotFor += mySt.shotsOnTarget;
+        if (oppSt.shotsOnTarget != null) sotAgainst += oppSt.shotsOnTarget;
+        if (mySt.possession != null && oppSt.possession != null) {
+          possSum += mySt.possession;
+          possCount++;
+        }
+        if (mySt.passes != null) passesFor += mySt.passes;
+        if (oppSt.passes != null) passesAgainst += oppSt.passes;
+      }
+    });
+    const gd = goalsFor - goalsAgainst;
+    const gdPerGame = games ? gd / games : 0;
+    const ptsPerGame = games ? points / games : 0;
+    const shotDiff = shotsFor - shotsAgainst;
+    const shotRatio = (shotsFor + shotsAgainst) ? shotsFor / (shotsFor + shotsAgainst) : 0.5;
+    const sotRatio = (sotFor + sotAgainst) ? sotFor / (sotFor + sotAgainst) : 0.5;
+    const avgPoss = possCount ? possSum / possCount : 50;
+    const passRatio = (passesFor + passesAgainst) ? passesFor / (passesFor + passesAgainst) : 0.5;
+    return { index: idx, name, points, games, gd, gdPerGame, ptsPerGame, shotDiff, shotRatio, sotRatio, avgPoss, passRatio };
+  });
+  const t0 = teams[0];
+  const t1 = teams[1];
+  const allGd = Math.max(Math.abs(t0.gdPerGame), Math.abs(t1.gdPerGame)) || 1;
+  const allPts = Math.max(t0.ptsPerGame, t1.ptsPerGame) || 1;
+  const score = t => {
+    const ptsScore = (t.ptsPerGame / allPts) * 100;
+    const gdScore = 50 + (t.gdPerGame / allGd) * 25;
+    const shotScore = t.shotRatio * 100;
+    const sotScore = t.sotRatio * 100;
+    const possScore = t.avgPoss;
+    const passScore = t.passRatio * 100;
+    return ptsScore * 0.35 + gdScore * 0.20 + shotScore * 0.15 + sotScore * 0.10 + possScore * 0.10 + passScore * 0.10;
+  };
+  const s0 = score(t0);
+  const s1 = score(t1);
+  const total = s0 + s1;
   let oddsOne, oddsTwo;
   if (total === 0) {
     oddsOne = 50;
     oddsTwo = 50;
   } else {
-    oddsOne = Math.round((one.points / total) * 100);
-    oddsTwo = Math.round((two.points / total) * 100);
+    oddsOne = Math.round((s0 / total) * 100);
+    oddsTwo = Math.round((s1 / total) * 100);
     if (oddsOne + oddsTwo !== 100) {
-      if (one.points > two.points) oddsOne = 100 - oddsTwo;
+      if (s0 > s1) oddsOne = 100 - oddsTwo;
       else oddsTwo = 100 - oddsOne;
     }
   }
   let favorite = null;
   let statusText = "";
-  if (one.points > two.points) {
-    favorite = one;
-    statusText = `Favorite: ${one.name}`;
-  } else if (two.points > one.points) {
-    favorite = two;
-    statusText = `Favorite: ${two.name}`;
+  const diff = Math.abs(s0 - s1);
+  if (s0 > s1 + 2) {
+    favorite = t0;
+    statusText = `Favorite: ${t0.name}`;
+  } else if (s1 > s0 + 2) {
+    favorite = t1;
+    statusText = `Favorite: ${t1.name}`;
   } else {
     favorite = null;
-    statusText = "Equal chances";
+    statusText = "Even matchup";
   }
-  return { one, two, oddsOne, oddsTwo, favorite, statusText };
+  return { one: { ...t0, score: s0 }, two: { ...t1, score: s1 }, oddsOne, oddsTwo, favorite, statusText };
 }
 
 function renderChampionshipRace() {
