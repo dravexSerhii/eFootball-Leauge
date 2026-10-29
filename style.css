@@ -418,7 +418,8 @@
       min-width: 0;
       min-height: 0;
       border-radius: inherit;
-      object-fit: contain;
+      object-fit: cover;
+      object-position: center;
     }
 
     .points {
@@ -1108,25 +1109,30 @@
     }
 
     .championship-race { margin-top: 22px; }
-    .championship-race .panel-heading { min-height: auto; padding: 0 22px 14px; border-bottom: 0; }
-    .championship-race h2 { margin: 0 0 4px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); }
-    .race-status { color: var(--muted); font-size: 11px; }
-    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 22px 18px; border-bottom: 1px solid var(--line); }
-    .race-team { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .championship-race .panel-heading { min-height: auto; padding: 16px 22px 12px; border-bottom: 0; }
+    .championship-race h2 { margin: 0 0 8px; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); text-shadow: 0 0 16px rgba(211,255,87,.35); }
+    .race-status { color: var(--ink); font-size: 12px; font-weight: 800; text-shadow: 0 0 10px rgba(211,255,87,.25); }
+    .race-favorite { color: var(--lime); font-weight: 900; text-shadow: 0 0 14px rgba(211,255,87,.5); }
+    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 22px 6px; background: var(--surface-raised); border-radius: 16px; border: 1px solid var(--line); }
+    .race-team { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); position: relative; }
     .race-team:last-child { border-bottom: 0; }
-    .race-team-badge { position: relative; width: clamp(42px, 5vw, 52px); height: clamp(42px, 5vw, 52px); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 14px; font-size: 11px; font-weight: 900; background: var(--surface-raised); color: var(--ink); }
-    .race-team-info { flex: 1; }
-    .race-team-name { font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
-    .race-team-points { color: var(--muted); font-size: 11px; margin-top: 2px; }
-    .race-team-odds { text-align: right; }
+    .race-team::before { content: ""; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(135deg, rgba(211,255,87,.06), rgba(156,120,255,.06)); pointer-events: none; }
+    .race-team-badge { position: relative; width: clamp(48px, 6vw, 60px); height: clamp(48px, 6vw, 60px); display: grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 16px; font-size: 12px; font-weight: 900; background: var(--surface); color: var(--ink); box-shadow: 0 8px 24px rgba(0,0,0,.35); border: 1px solid var(--line); z-index: 2; }
+    .race-team-badge img { width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: inherit; }
+    .race-team-info { flex: 1; position: relative; z-index: 2; }
+    .race-team-name { margin: 0 0 3px; font-size: 17px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); text-shadow: 0 0 12px rgba(255,255,255,.15); }
+    .race-team-points { color: var(--muted); font-size: 12px; font-weight: 700; margin-top: 1px; }
+    .race-team-odds { text-align: right; position: relative; z-index: 2; }
     .race-odds-label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .race-odds-value { font-size: 20px; font-weight: 900; color: var(--ink); }
-    .race-footer { padding: 10px 22px 18px; font-size: 11px; color: var(--muted); }
-    .race-favorite { color: var(--lime); font-weight: 800; }
-    #raceChart { display: block; width: 100%; height: 120px; margin: 0 22px 18px; background: rgba(8,7,13,.28); border-radius: 12px; border: 1px solid var(--line); }
+    .race-odds-value { font-size: 26px; font-weight: 900; color: var(--ink); text-shadow: 0 0 14px rgba(255,255,255,.2); }
+    .race-odds-value.favorite { color: var(--lime); text-shadow: 0 0 18px rgba(211,255,87,.6); }
+    .race-footer { padding: 10px 22px 18px; font-size: 12px; color: #cbc9d1; font-weight: 600; }
+    #raceChart { display: block; width: 100%; height: 120px; margin: 10px 22px 20px; background: rgba(8,7,13,.4); border-radius: 16px; border: 1px solid var(--line); box-shadow: inset 0 0 20px rgba(0,0,0,.4); }
 
     @media (max-width: 600px) {
-      .race-grid { grid-template-columns: 1fr; gap: 10px; }
-      .race-team { flex-direction: column; align-items: flex-start; gap: 8px; padding: 10px 0; }
+      .race-grid { grid-template-columns: 1fr; gap: 10px; padding: 0 16px 6px; }
+      .race-team { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 0; }
       .race-team-odds { text-align: left; margin-top: 4px; }
+      .race-team-badge { width: clamp(44px, 12vw, 52px); height: clamp(44px, 12vw, 52px); }
+      #raceChart { margin: 10px 16px 20px; }
     }

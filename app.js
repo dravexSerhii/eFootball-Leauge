@@ -210,16 +210,18 @@ function renderChampionshipRace() {
   document.getElementById("raceTeamTwoPts").textContent = `${race.two.points} pts`;
   document.getElementById("raceTeamOneOdds").textContent = `${race.oddsOne}%`;
   document.getElementById("raceTeamTwoOdds").textContent = `${race.oddsTwo}%`;
+  document.getElementById("raceTeamOneOdds").className = race.favorite?.index === race.one.index ? "race-odds-value favorite" : "race-odds-value";
+  document.getElementById("raceTeamTwoOdds").className = race.favorite?.index === race.two.index ? "race-odds-value favorite" : "race-odds-value";
   raceStatus.textContent = race.statusText;
   const photoOne = TEAM_PHOTOS[race.one.index];
   const photoTwo = TEAM_PHOTOS[race.two.index];
   if (photoOne) {
-    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
+    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
   } else {
     badgeOne.textContent = race.one.index === 0 ? "01" : "02";
   }
   if (photoTwo) {
-    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
+    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
   } else {
     badgeTwo.textContent = race.two.index === 0 ? "01" : "02";
   }
