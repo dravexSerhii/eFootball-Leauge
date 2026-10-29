@@ -44,6 +44,7 @@ function render() {
   renderStandings();
   renderMatches();
   renderNews();
+  renderChampionshipRace();
 }
 
 function renderNews() {
@@ -145,6 +146,82 @@ function openNewsView(item) {
   imgEl.src = supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
   imgEl.alt = item.title;
   newsViewDialog.showModal();
+}
+
+function calculateChampionshipOdds() {
+  const stats = getStandings();
+  if (stats.length < 2) return null;
+  const one = stats[0];
+  const two = stats[1];
+  const total = one.points + two.points;
+  let oddsOne, oddsTwo;
+  if (total === 0) {
+    oddsOne = 50;
+    oddsTwo = 50;
+  } else {
+    oddsOne = Math.round((one.points / total) * 100);
+    oddsTwo = Math.round((two.points / total) * 100);
+    if (oddsOne + oddsTwo !== 100) {
+      if (one.points > two.points) oddsOne = 100 - oddsTwo;
+      else oddsTwo = 100 - oddsOne;
+    }
+  }
+  let favorite = null;
+  let statusText = "";
+  if (one.points > two.points) {
+    favorite = one;
+    statusText = `Facvorit: ${one.name}`;
+  } else if (two.points > one.points) {
+    favorite = two;
+    statusText = `Facvorit: ${two.name}`;
+  } else {
+    favorite = null;
+    statusText = "Ravnovshiya shansы";
+  }
+  return { one, two, oddsOne, oddsTwo, favorite, statusText };
+}
+
+function renderChampionshipRace() {
+  const race = calculateChampionshipOdds();
+  const raceGrid = document.getElementById("raceGrid");
+  const raceStatus = document.getElementById("raceStatus");
+  const raceFooter = document.getElementById("raceFooter");
+  if (!race) {
+    raceGrid.replaceChildren();
+    raceStatus.textContent = "Net dannyh";
+    raceFooter.textContent = "";
+    return;
+  }
+  const badgeOne = document.getElementById("raceTeamOneBadge") || document.createElement("div");
+  const badgeTwo = document.getElementById("raceTeamTwoBadge") || document.createElement("div");
+  document.getElementById("raceTeamOneName").textContent = race.one.name;
+  document.getElementById("raceTeamTwoName").textContent = race.two.name;
+  document.getElementById("raceTeamOnePts").textContent = `${race.one.points} pts`;
+  document.getElementById("raceTeamTwoPts").textContent = `${race.two.points} pts`;
+  document.getElementById("raceTeamOneOdds").textContent = `${race.oddsOne}%`;
+  document.getElementById("raceTeamTwoOdds").textContent = `${race.oddsTwo}%`;
+  raceStatus.textContent = race.statusText;
+  const photoOne = TEAM_PHOTOS[race.one.index];
+  const photoTwo = TEAM_PHOTOS[race.two.index];
+  const badgeOne = document.getElementById("raceTeamOneBadge");
+  const badgeTwo = document.getElementById("raceTeamTwoBadge");
+  if (photoOne) {
+    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
+  } else {
+    badgeOne.textContent = race.one.index === 0 ? "01" : "02";
+  }
+  if (photoTwo) {
+    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
+  } else {
+    badgeTwo.textContent = race.two.index === 0 ? "01" : "02";
+  }
+  if (race.favorite) {
+    raceStatus.className = "race-status race-favorite";
+    raceFooter.textContent = `${race.favorite.name} lideruet v gonke za chempionstvom.`;
+  } else {
+    raceStatus.className = "race-status";
+    raceFooter.textContent = "Komandy idut ravnonomerno, pobeditel otkrit.";
+  }
 }
 
 async function deleteMatch(id) {
