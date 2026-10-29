@@ -6,6 +6,256 @@ const initialState = {
   matches: [],
   championships: { "0": 0, "1": 0 }
 };
+
+const TRANSLATIONS = {
+  en: {
+    authStatus: "Connecting to database…",
+    authButton: "Sign in",
+    eyebrow: "eFootball League",
+    editTeams: "Teams",
+    addMatch: "Add match",
+    championshipTitle: "Championship Race",
+    chance: "Chance",
+    newSeason: "New Season",
+    championships: "Championships",
+    headToHead: "Head to Head",
+    winsLabel: "W",
+    drawsLabel: "D",
+    lossesLabel: "L",
+    goalsLabel: "Goals: {0} — {1}",
+    totalMatches: "Total: {0} matches",
+    tableTitle: "Table",
+    updatedAfterMatch: "UPDATED AFTER EACH MATCH",
+    colPos: "#",
+    colTeam: "Team",
+    colForm: "Form",
+    colPlayed: "Pld",
+    colW: "W",
+    colD: "D",
+    colL: "L",
+    colGD: "GD",
+    colPts: "Pts",
+    tableFooter: "Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points",
+    latestMatches: "Latest matches",
+    tipText: "A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.",
+    leagueNews: "League news",
+    newsSubtitle: "Stories, photos and updates from the league",
+    addNews: "Add news",
+    loadingNews: "Loading news…",
+    footer1: "eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP",
+    footer2: "Every match counts.",
+    matchDialogTitle: "Add match result",
+    matchDialogDesc: "Enter the score for a match you played",
+    homeTeam: "Home team",
+    awayTeam: "Away team",
+    goals: "Goals",
+    matchStats: "Match statistics <span>Optional</span>",
+    statsOptional: "Leave any statistic blank if you do not have it.",
+    statistic: "Statistic",
+    shots: "Shots",
+    shotsOnTarget: "Shots on target",
+    possession: "Possession (%)",
+    passes: "Passes",
+    cancel: "Cancel",
+    saveResult: "Save result",
+    teamsDialogTitle: "Your teams",
+    teamsDialogDesc: "Choose names for your league",
+    newsDialogTitle: "Publish league news",
+    newsDialogDesc: "Add a photo and a story for everyone to see",
+    headline: "Headline",
+    description: "Description",
+    photoLabel: "Photo (JPEG, PNG or WebP, up to 5 MB)",
+    publishNews: "Publish news",
+    authDialogTitle: "Sign in to your league",
+    authDialogDesc: "Use an account created in Supabase",
+    email: "Email",
+    password: "Password",
+    signIn: "Sign in",
+    favorite: "Favorite: {0}",
+    evenMatchup: "Even matchup",
+    noData: "No data",
+    noMatches: "No matches yet",
+    newsDeleted: "News deleted",
+    matchDeleted: "Match deleted",
+    matchDeleteError: "Could not delete match: {0}",
+    deleteNews: "Delete",
+    favoriteLeads: "{0} leads the championship race."
+    newsPublished: "League news published",
+    newsUploadError: "Could not upload the photo: {0}",
+    newsInsertError: "Could not publish news: {0}",
+    newsLoadError: "Could not load league news: {0}",
+    newsDeleteError: "Could not delete news: {0}",
+    matchSaveError: "Could not save the result: {0}",
+    teamSaveError: "Could not save team names: {0}",
+    seasonStartError: "Could not start new season: {0}",
+    seasonLimit: "Season limit reached (36 matches). Start a new season to continue.",
+    seasonStart: "New season started!",
+    seasonStartBlocked: "Cannot start new season before 36 matches are played.",
+    signInRequired: "Sign in to start a new season.",
+    signInNews: "Sign in before publishing league news.",
+    fillNews: "Enter a headline and description, and choose a photo.",
+    invalidImage: "Choose a JPEG, PNG or WebP image up to 5 MB.",
+    syncError: "Sync error",
+    loadError: "Loading error",
+    signInError: "Sign-in error",
+    syncErrorToast: "Could not refresh the league: {0}",
+    loadErrorToast: "Could not load the league: {0}",
+    signOutError: "Could not sign out: {0}",
+    signInCheckError: "Could not check sign-in: {0}",
+    setupRequired: "Supabase setup required",
+    signedOut: "Signed out",
+    loadingLeague: "Loading league…",
+    setup: "Setup",
+    retry: "Retry",
+    syncingPeriodically: "Syncing periodically",
+    refreshNewsLabel: "News deleted",
+    teamsInvalid: "The database has invalid team names. Check the league_settings table.",
+    matchesInvalid: "The database contains a match with invalid data.",
+    teamsSame: "Team names must be different.",
+    teamsRequired: "Enter names for both teams.",
+    teamsDiff: "Select two different teams.",
+    scoreRange: "Enter a score between 0 and 99 goals.",
+    statsWhole: "Enter whole numbers for match statistics.",
+    sotLimit: "Shots on target cannot exceed total shots.",
+    possessionRule: "Enter possession for both teams and make the total 100%.",
+    matchSaved: "Match result saved to the server",
+    teamsSaved: "Team names saved to the server",
+    signInFailed: "Sign-in failed: {0}",
+    imageSizeLimit: "The image must be 5 MB or smaller.",
+    signInNews: "Sign in before publishing league news.",
+    fillNews: "Enter a headline and description, and choose a photo.",
+    invalidImageFile: "Choose a JPEG, PNG or WebP image up to 5 MB.",
+    signOutError: "Could not sign out: {0}",
+    signOut: "Sign out",
+    seasonComplete: "Season Complete",
+    addMatchBtn: "Add match",
+    noMatchesPlayed: "No matches played yet. Add the first result to get your league started!",
+    noNews: "No news yet. Check back soon for league updates."
+  },
+  ru: {
+    authStatus: "Подключение к базе данных…",
+    authButton: "Войти",
+    eyebrow: "eFootball Лига",
+    editTeams: "Команды",
+    addMatch: "Добавить матч",
+    championshipTitle: "Гонка за чемпионством",
+    chance: "Шанс",
+    newSeason: "Новый сезон",
+    championships: "Чемпионства",
+    headToHead: "История встреч",
+    winsLabel: "П",
+    drawsLabel: "Н",
+    lossesLabel: "Ппр",
+    goalsLabel: "Голы: {0} — {1}",
+    totalMatches: "Всего матчей: {0}",
+    tableTitle: "Таблица",
+    updatedAfterMatch: "ОБНОВЛЯЕТСЯ ПОСЛЕ КАЖДОГО МАТЧА",
+    colPos: "#",
+    colTeam: "Команда",
+    colForm: "Форма",
+    colPlayed: "И",
+    colW: "В",
+    colD: "Н",
+    colL: "П",
+    colGD: "РМ",
+    colPts: "О",
+    tableFooter: "Форма: последние пять результатов (зелёный — जीत · серый — ничья · красный — поражение) · Pld — сыпл · W — побед · D — ничьих · L — поражений · GD — разница мячей · Pts — очков",
+    latestMatches: "Последние матчи",
+    tipText: "Победа приносит <strong>3 очка</strong>; ничья приносит <strong>1</strong>. Войдите, чтобы сохранять результаты в общей лиге и синхронизировать их.",
+    leagueNews: "Новости лиги",
+    newsSubtitle: "Истории, фото и обновления из лиги",
+    addNews: "Добавить новость",
+    loadingNews: "Загрузка новостей…",
+    footer1: "eFOOTBALL ЛИГА · ВАШ ЧЕМПИОНАТ",
+    footer2: "Каждый матч имеет значение.",
+    matchDialogTitle: "Добавить результат матча",
+    matchDialogDesc: "Введите счёт сыгранного матча",
+    homeTeam: "Хозяева",
+    awayTeam: "Гости",
+    goals: "Голы",
+    matchStats: "Статистика матча <span>Необязательно</span>",
+    statsOptional: "Оставьте любую статистику пустой, если у вас её нет.",
+    statistic: "Статистика",
+    shots: "Удары",
+    shotsOnTarget: "Удары в створ",
+    possession: "Владение мячом (%)",
+    passes: "Пасы",
+    cancel: "Отмена",
+    saveResult: "Сохранить результат",
+    teamsDialogTitle: "Ваши команды",
+    teamsDialogDesc: "Выберите названия для вашей лиги",
+    newsDialogTitle: "Опубликовать новость лиги",
+    newsDialogDesc: "Добавьте фото и историю для всех",
+    headline: "Заголовок",
+    description: "Описание",
+    photoLabel: "Фото (JPEG, PNG или WebP, до 5 МБ)",
+    publishNews: "Опубликовать",
+    authDialogTitle: "Войти в свою лигу",
+    authDialogDesc: "Используйте аккаунт, созданный в Supabase",
+    email: "Электронная почта",
+    password: "Пароль",
+    signIn: "Войти",
+    favorite: "Фаворит: {0}",
+    evenMatchup: "Равные шансы",
+    noData: "Нет данных",
+    noMatches: "Ещё нет матчей",
+    newsDeleted: "Новость удалена",
+    matchDeleted: "Матч удалён",
+    matchDeleteError: "Не удалось удалить матч: {0}",
+    newsPublished: "Новость лиги опубликована",
+    newsUploadError: "Не удалось загрузить фото: {0}",
+    newsInsertError: "Не удалось опубликовать новость: {0}",
+    newsLoadError: "Не удалось загрузить новости лиги: {0}",
+    newsDeleteError: "Не удалось удалить новость: {0}",
+    matchSaveError: "Не удалось сохранить результат: {0}",
+    teamSaveError: "Не удалось сохранить названия команд: {0}",
+    seasonStartError: "Не удалось начать новый сезон: {0}",
+    seasonLimit: "Лимит сезона достигнут (36 матчей). Начните новый сезон для продолжения.",
+    seasonStart: "Новый сезон начат!",
+    seasonStartBlocked: "Нельзя начать новый сезон до сыграния 36 матчей.",
+    signInRequired: "Войдите, чтобы начать новый сезон.",
+    signInNews: "Войдите перед публикацией новости лиги.",
+    fillNews: "Введите заголовок и описание, и выберите фото.",
+    invalidImage: "Выберите фото JPEG, PNG или WebP до 5 МБ.",
+    syncError: "Ошибка синхронизации",
+    loadError: "Ошибка загрузки",
+    signInError: "Ошибка входа",
+    syncErrorToast: "Не удалось обновить лигу: {0}",
+    loadErrorToast: "Не удалось загрузить лигу: {0}",
+    signOutError: "Не удалось выйти: {0}",
+    signOut: "Выйти",
+    signInCheckError: "Не удалось проверить вход: {0}",
+    setupRequired: "Требуется настройка Supabase",
+    signedOut: "Вы вышли",
+    loadingLeague: "Загрузка лиги…",
+    setup: "Настройка",
+    retry: "Повторить",
+    syncingPeriodically: "Синхронизация…",
+    refreshNewsLabel: "Новость удалена",
+    teamsInvalid: "В базе данных неверные названия команд. Проверьте таблицу league_settings.",
+    matchesInvalid: "В базе данных содержится матч с неверными данными.",
+    teamsSame: "Названия команд должны быть разными.",
+    teamsRequired: "Введите названия обеих команд.",
+    teamsDiff: "Выберите две разные команды.",
+    scoreRange: "Введите счёт от 0 до 99 голов.",
+    statsWhole: "Введите целые числа для статистики матча.",
+    sotLimit: "Удары в створ не могут превышать общее количество ударов.",
+    possessionRule: "Введите владение для обеих команд и сделайте сумму 100%.",
+    matchSaved: "Результат матча сохранён на сервер",
+    teamsSaved: "Названия команд сохранены на сервер",
+    signInFailed: "Ошибка входа: {0}",
+    imageSizeLimit: "Изображение должно быть не более 5 МБ.",
+    signInNews: "Войдите перед публикацией новости лиги.",
+    fillNews: "Введите заголовок и описание, и выберите фото.",
+    invalidImageFile: "Выберите фото JPEG, PNG или WebP до 5 МБ.",
+    deleteNews: "Удалить",
+    favoriteLeads: "{0} лидирует в гонке за чемпионством",
+    seasonComplete: "Сезон завершён",
+    addMatchBtn: "Добавить матч",
+    noMatchesPlayed: "Ещё нет матчей. Добавьте первый результат, чтобы начать лигу!",
+    noNews: "Пока новостей нет. Заглядывайте позже за обновлениями лиги."
+  }
+};
 const TEAM_PHOTOS = [
   "img/logo-promashkov.webp",
   "img/logo-lionslav.webp"
@@ -27,6 +277,7 @@ let toastTimer;
 let newsPreviewUrl = null;
 let newsItems = [];
 let currentSeason = 1;
+let currentLang = localStorage.getItem("leagueLang") || "en";
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -64,7 +315,7 @@ function renderNews() {
   if (newsItems.length === 0) {
     const empty = document.createElement("p");
     empty.className = "news-empty";
-    empty.textContent = "No news yet. Check back soon for league updates.";
+    empty.textContent = t("noNews");
     newsList.append(empty);
     return;
   }
@@ -97,7 +348,7 @@ function renderNews() {
     card.append(image, content);
     const deleteButton = document.createElement("button");
     deleteButton.className = "button button-quiet news-delete";
-    deleteButton.textContent = "Удалить";
+    deleteButton.textContent = t("deleteNews");
     deleteButton.addEventListener("click", () => {
       if (confirm(`Удалить новость "${item.title}"?`)) {
         void deleteNews(item.id, item.image_path);
@@ -124,7 +375,7 @@ async function refreshNews() {
     console.error("Failed to load league news:", error);
     const message = document.createElement("p");
     message.className = "news-empty";
-    message.textContent = `Could not load league news: ${error.message}`;
+    message.textContent = t("newsLoadError", error.message);
     newsList.replaceChildren(message);
   }
 }
@@ -138,10 +389,10 @@ async function deleteNews(id, imagePath) {
       if (storageError) console.error("Could not remove the news photo:", storageError);
     }
     await refreshNews();
-    showToast("Новость удалена");
+    showToast(t("newsDeleted"));
   } catch (error) {
     console.error("Failed to delete league news:", error);
-    showToast(`Не удалось удалить новость: ${error.message}`);
+    showToast(t("newsDeleteError", error.message));
   }
 }
 
@@ -267,7 +518,7 @@ function renderChampionshipRace() {
   const raceFooter = document.getElementById("raceFooter");
   if (!race) {
     raceGrid.replaceChildren();
-    raceStatus.textContent = "No data";
+    raceStatus.textContent = t("noData");
     raceFooter.textContent = "";
     return;
   }
@@ -306,10 +557,10 @@ function renderChampionshipRace() {
   }
   if (race.favorite) {
     raceStatus.className = "race-status race-favorite";
-    raceFooter.textContent = `${race.favorite.name} leads the championship race.`;
+    raceFooter.textContent = t("favoriteLeads", race.favorite.name);
   } else {
     raceStatus.className = "race-status";
-    raceFooter.textContent = "Teams are even, winner is open.";
+    raceFooter.textContent = t("evenMatchup");
   }
 }
 
@@ -468,12 +719,12 @@ function getHeadToHead() {
 
 async function startNewSeason() {
   if (!session) {
-    showToast("Sign in to start a new season.");
+    showToast(t("signInRequired"));
     return;
   }
   const matchesInSeason = getMatchesInSeason(currentSeason);
   if (matchesInSeason.length < 36) {
-    showToast("Cannot start new season before 36 matches are played.");
+    showToast(t("seasonStartBlocked"));
     return;
   }
   const standings = getStandings().filter(t => t.index === 0 || t.index === 1);
@@ -486,11 +737,11 @@ async function startNewSeason() {
       .eq("id", true);
     if (error) throw error;
     currentSeason++;
-    showToast("New season started!");
+    showToast(t("seasonStart"));
     await refreshFromServer();
   } catch (error) {
     console.error("Failed to start new season:", error);
-    showToast(`Could not start new season: ${error.message}`);
+    showToast(t("seasonStartError", error.message));
   }
 }
 
@@ -508,14 +759,14 @@ function renderSeasonInfo() {
 
   if (seasonComplete) {
     matchButton.disabled = true;
-    matchButton.textContent = "Season Complete";
+    matchButton.textContent = t("seasonComplete");
     if (newSeasonBtn) {
       newSeasonBtn.disabled = false;
       newSeasonBtn.style.display = "inline-flex";
     }
   } else {
     matchButton.disabled = !configReady || !session || !dataReady;
-    matchButton.textContent = "Add match";
+    matchButton.textContent = t("addMatchBtn");
     if (newSeasonBtn) {
       newSeasonBtn.style.display = "none";
     }
@@ -559,10 +810,10 @@ async function deleteMatch(id) {
     const { error } = await supabase.from("league_matches").delete().eq("id", id);
     if (error) throw error;
     await refreshFromServer();
-    showToast("Матч удалён");
+    showToast(t("matchDeleted"));
   } catch (error) {
     console.error("Failed to delete match:", error);
-    showToast(`Не удалось удалить матч: ${error.message}`);
+    showToast(t("matchDeleteError", error.message));
   }
 }
 
@@ -695,7 +946,7 @@ function renderMatches() {
   if (state.matches.length === 0) {
     const empty = document.createElement("div");
     empty.className = "empty-matches";
-    empty.textContent = "No matches played yet. Add the first result to get your league started!";
+    empty.textContent = t("noMatchesPlayed");
     matchList.append(empty);
     return;
   }
@@ -730,7 +981,7 @@ function renderMatches() {
     }
     const deleteButton = document.createElement("button");
     deleteButton.className = "button button-quiet match-delete";
-    deleteButton.textContent = "Удалить";
+    deleteButton.textContent = t("deleteNews");
     deleteButton.addEventListener("click", () => {
       if (confirm("Удалить этот матч?")) {
         void deleteMatch(match.id);
@@ -746,7 +997,7 @@ function renderMatchStats(match) {
   section.className = "match-stats";
   const title = document.createElement("h3");
   title.className = "match-stats-title";
-  title.textContent = "Match statistics";
+  title.innerHTML = t("matchStats");
   const table = document.createElement("table");
   const head = document.createElement("thead");
   const headerRow = document.createElement("tr");
@@ -788,6 +1039,35 @@ function pluralize(count, singular, plural) {
   return count === 1 ? singular : plural;
 }
 
+function t(key, ...args) {
+  const dict = TRANSLATIONS[currentLang];
+  let text = dict && dict[key] ? dict[key] : TRANSLATIONS.en[key] || key;
+  if (args.length) {
+    args.forEach((arg, i) => {
+      text = text.replace(`{${i}}`, arg);
+    });
+  }
+  return text;
+}
+
+function applyLang() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    el.innerHTML = t(key);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.placeholder = t(key);
+  });
+  document.getElementById("authStatus").textContent = t("authStatus");
+  const langBtns = document.querySelectorAll(".lang-btn");
+  langBtns.forEach(btn => {
+    btn.classList.toggle("lang-active", btn.getAttribute("data-lang") === currentLang);
+  });
+  document.documentElement.lang = currentLang;
+  render();
+}
+
 function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
@@ -802,20 +1082,20 @@ function updateAuthUi() {
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
   if (!configReady) {
-    authStatus.textContent = "Supabase setup required";
-    authButton.textContent = "Setup";
+    authStatus.textContent = t("setupRequired");
+    authButton.textContent = t("setup");
     authButton.disabled = true;
   } else if (!session) {
-    authStatus.textContent = "Signed out";
-    authButton.textContent = "Sign in";
+    authStatus.textContent = t("signedOut");
+    authButton.textContent = t("signIn");
     authButton.disabled = false;
   } else if (!dataReady) {
-    authStatus.textContent = "Loading league…";
-    authButton.textContent = "Retry";
+    authStatus.textContent = t("loadingLeague");
+    authButton.textContent = t("retry");
     authButton.disabled = false;
   } else {
     authStatus.textContent = session.user.email;
-    authButton.textContent = "Sign out";
+    authButton.textContent = t("signOut");
     authButton.disabled = false;
   }
 }
@@ -903,8 +1183,8 @@ async function refreshFromServer() {
     await refreshNews();
   } catch (error) {
     console.error("Failed to refresh the league from the server:", error);
-    authStatus.textContent = "Sync error";
-    showToast(`Could not refresh the league: ${error.message}`);
+    authStatus.textContent = t("syncError");
+    showToast(t("syncErrorToast", error.message));
   }
 }
 
@@ -920,7 +1200,7 @@ function subscribeToChanges(generation) {
     .subscribe(status => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
         console.error(`Supabase Realtime is unavailable: ${status}`);
-        if (session && dataReady) authStatus.textContent = "Syncing periodically";
+        if (session && dataReady) authStatus.textContent = t("syncingPeriodically");
       }
     });
 }
@@ -952,10 +1232,10 @@ async function handleSession(nextSession) {
   } catch (error) {
     if (generation !== sessionGeneration) return;
     console.error("Failed to load the league from the server:", error);
-    authStatus.textContent = "Loading error";
-    authButton.textContent = "Retry";
+    authStatus.textContent = t("loadError");
+    authButton.textContent = t("retry");
     authButton.disabled = false;
-    showToast(`Could not load the league: ${error.message}`);
+    showToast(t("loadErrorToast", error.message));
   }
 }
 
@@ -990,7 +1270,7 @@ authButton.addEventListener("click", async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       console.error("Failed to sign out:", error);
-      showToast(`Could not sign out: ${error.message}`);
+      showToast(t("signOutError", error.message));
     }
     return;
   }
@@ -1006,7 +1286,7 @@ document.getElementById("authForm").addEventListener("submit", async event => {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     console.error("Sign-in failed:", error);
-    errorElement.textContent = `Sign-in failed: ${error.message}`;
+    errorElement.textContent = t("signInFailed", error.message);
     return;
   }
   authDialog.close();
@@ -1039,6 +1319,14 @@ if (newSeasonBtn) {
   });
 }
 
+document.querySelectorAll(".lang-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentLang = btn.getAttribute("data-lang");
+    localStorage.setItem("leagueLang", currentLang);
+    applyLang();
+  });
+});
+
 function clearNewsPreview() {
   if (newsPreviewUrl) URL.revokeObjectURL(newsPreviewUrl);
   newsPreviewUrl = null;
@@ -1054,12 +1342,12 @@ document.getElementById("newsImageInput").addEventListener("change", event => {
   clearNewsPreview();
   if (!file) return;
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-    errorElement.textContent = "Choose a JPEG, PNG or WebP image.";
+    errorElement.textContent = t("invalidImage");
     event.target.value = "";
     return;
   }
   if (file.size > 5 * 1024 * 1024) {
-    errorElement.textContent = "The image must be 5 MB or smaller.";
+    errorElement.textContent = t("imageSizeLimit");
     event.target.value = "";
     return;
   }
@@ -1077,16 +1365,16 @@ document.getElementById("newsForm").addEventListener("submit", async event => {
   const description = document.getElementById("newsDescriptionInput").value.trim();
   const file = document.getElementById("newsImageInput").files[0];
   if (!session) {
-    errorElement.textContent = "Sign in before publishing league news.";
+    errorElement.textContent = t("signInNews");
     return;
   }
   if (!title || !description || !file) {
-    errorElement.textContent = "Enter a headline and description, and choose a photo.";
+    errorElement.textContent = t("fillNews");
     return;
   }
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
     file.size > 5 * 1024 * 1024) {
-    errorElement.textContent = "Choose a JPEG, PNG or WebP image up to 5 MB.";
+    errorElement.textContent = t("invalidImageFile");
     return;
   }
 
@@ -1097,14 +1385,14 @@ document.getElementById("newsForm").addEventListener("submit", async event => {
   try {
     const { error: uploadError } = await supabase.storage.from("news-images")
       .upload(imagePath, file, { contentType: file.type, cacheControl: "3600", upsert: false });
-    if (uploadError) throw new Error(`Could not upload the photo: ${uploadError.message}`);
+    if (uploadError) throw new Error(t("newsUploadError", uploadError.message));
     photoUploaded = true;
     const { error: insertError } = await supabase.from("league_news").insert({
       title,
       description,
       image_path: imagePath
     });
-    if (insertError) throw new Error(`Could not publish news: ${insertError.message}`);
+    if (insertError) throw new Error(t("newsInsertError", insertError.message));
   } catch (error) {
     console.error("Failed to publish league news:", error);
     if (photoUploaded) {
@@ -1125,7 +1413,7 @@ document.getElementById("newsForm").addEventListener("submit", async event => {
   document.getElementById("newsForm").reset();
   newsDialog.close();
   await refreshNews();
-  showToast("League news published");
+  showToast(t("newsPublished"));
 });
 
 ["homeTeam", "awayTeam"].forEach(id => {
@@ -1148,12 +1436,12 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
   const awayGoals = Number(document.getElementById("awayGoals").value);
   const errorElement = document.getElementById("matchError");
   if (home === away) {
-    errorElement.textContent = "Select two different teams.";
+    errorElement.textContent = t("teamsDiff");
     return;
   }
   if (!Number.isInteger(homeGoals) || !Number.isInteger(awayGoals) ||
     homeGoals < 0 || awayGoals < 0 || homeGoals > 99 || awayGoals > 99) {
-    errorElement.textContent = "Enter a score between 0 and 99 goals.";
+    errorElement.textContent = t("scoreRange");
     return;
   }
   const readStat = id => {
@@ -1176,26 +1464,26 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
   };
   if ([...Object.values(stats.home), ...Object.values(stats.away)]
     .some(value => value !== null && !Number.isInteger(value))) {
-    errorElement.textContent = "Enter whole numbers for match statistics.";
+    errorElement.textContent = t("statsWhole");
     return;
   }
   if (stats.home.shotsOnTarget !== null && stats.home.shots !== null &&
     stats.home.shotsOnTarget > stats.home.shots ||
     stats.away.shotsOnTarget !== null && stats.away.shots !== null &&
     stats.away.shotsOnTarget > stats.away.shots) {
-    errorElement.textContent = "Shots on target cannot exceed total shots.";
+    errorElement.textContent = t("sotLimit");
     return;
   }
   const hasHomePossession = stats.home.possession !== null;
   const hasAwayPossession = stats.away.possession !== null;
   if (hasHomePossession !== hasAwayPossession ||
     hasHomePossession && stats.home.possession + stats.away.possession !== 100) {
-    errorElement.textContent = "Enter possession for both teams and make the total 100%.";
+    errorElement.textContent = t("possessionRule");
     return;
   }
   const matchesInSeason = state.matches.filter(m => m.season === currentSeason);
   if (matchesInSeason.length >= 36) {
-    errorElement.textContent = "Season limit reached (36 matches). Start a new season to continue.";
+    errorElement.textContent = t("seasonLimit");
     return;
   }
   const { data, error } = await supabase.from("league_matches").insert({
@@ -1208,14 +1496,14 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
   }).select("id, home_team, away_team, home_goals, away_goals, played_at, stats, season").single();
   if (error) {
     console.error("Failed to save the result to the server:", error);
-    errorElement.textContent = `Could not save the result: ${error.message}`;
+    errorElement.textContent = t("matchSaveError", error.message);
     return;
   }
   state.matches.push(mapMatch(data));
   state.matches.sort((a, b) => new Date(a.date) - new Date(b.date));
   render();
   matchDialog.close();
-  showToast("Match result saved to the server");
+  showToast(t("matchSaved"));
 });
 
 document.getElementById("teamsForm").addEventListener("submit", async event => {
@@ -1224,11 +1512,11 @@ document.getElementById("teamsForm").addEventListener("submit", async event => {
   const second = document.getElementById("teamNameTwo").value.trim();
   const errorElement = document.getElementById("teamsError");
   if (!first || !second) {
-    errorElement.textContent = "Enter names for both teams.";
+    errorElement.textContent = t("teamsRequired");
     return;
   }
   if (first.localeCompare(second, "en", { sensitivity: "base" }) === 0) {
-    errorElement.textContent = "Team names must be different.";
+    errorElement.textContent = t("teamsSame");
     return;
   }
   const teams = [{ name: first }, { name: second }];
@@ -1236,13 +1524,13 @@ document.getElementById("teamsForm").addEventListener("submit", async event => {
     .update({ teams }).eq("id", true).select("teams").single();
   if (error) {
     console.error("Failed to save team names to the server:", error);
-    errorElement.textContent = `Could not save team names: ${error.message}`;
+    errorElement.textContent = t("teamSaveError", error.message);
     return;
   }
   state.teams = teams;
   render();
   teamsDialog.close();
-  showToast("Team names saved to the server");
+  showToast(t("teamsSaved"));
 });
 
 document.querySelectorAll("[data-close]").forEach(button => {
@@ -1257,7 +1545,7 @@ document.querySelectorAll("[data-close]").forEach(button => {
 
 newsDialog.addEventListener("close", clearNewsPreview);
 
-render();
+applyLang();
 updateAuthUi();
 
 if (configReady) {
@@ -1267,8 +1555,8 @@ if (configReady) {
   const { data, error } = await supabase.auth.getSession();
   if (error) {
     console.error("Failed to check the Supabase session:", error);
-    authStatus.textContent = "Sign-in error";
-    showToast(`Could not check sign-in: ${error.message}`);
+    authStatus.textContent = t("signInError");
+    showToast(t("signInCheckError", error.message));
   } else {
     await handleSession(data.session);
     supabase.auth.onAuthStateChange((_event, nextSession) => {
@@ -1276,5 +1564,5 @@ if (configReady) {
     });
   }
 } else {
-  authStatus.textContent = "Supabase setup required";
+  authStatus.textContent = t("setupRequired");
 }

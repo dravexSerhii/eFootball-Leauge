@@ -14,21 +14,25 @@
         <header class="topbar">
             <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
             <div class="topbar-right">
-                <span id="authStatus" role="status">Connecting to database…</span>
-                <button class="button button-quiet" id="authButton" type="button" disabled>Sign in</button>
+                <span id="authStatus" role="status" data-i18n="authStatus">Connecting to database…</span>
+                <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
+                <div class="language-toggle" aria-label="Language">
+                    <button class="lang-btn lang-active" data-lang="en" type="button">EN</button>
+                    <button class="lang-btn" data-lang="ru" type="button">RU</button>
+                </div>
             </div>
         </header>
 
         <main>
             <section class="intro">
                 <div>
-                    <p class="eyebrow">eFootball League</p>
+                    <p class="eyebrow" data-i18n="eyebrow">eFootball League</p>
                 </div>
                 <div class="actions">
-                    <button class="button" id="editTeamsButton" type="button"><span aria-hidden="true">✎</span>
+                    <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
-                    <button class="button button-primary" id="addMatchButton" type="button"><span
+                    <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span
                             aria-hidden="true">＋</span> Add match</button>
                 </div>
             </section>
@@ -42,7 +46,7 @@
 
             <section class="championship-race panel" aria-label="Championship race">
                 <div class="panel-heading">
-                    <h2>Championship Race</h2>
+                    <h2 data-i18n="championshipTitle">Championship Race</h2>
                     <span class="race-status" id="raceStatus">—</span>
                 </div>
                 <div class="race-grid" id="raceGrid">
@@ -53,7 +57,7 @@
                             <div class="race-team-points" id="raceTeamOnePts">0 pts</div>
                         </div>
                         <div class="race-team-odds">
-                            <div class="race-odds-label">Chance</div>
+                            <div class="race-odds-label" data-i18n="chance">Chance</div>
                             <div class="race-odds-value" id="raceTeamOneOdds">—</div>
                         </div>
                     </div>
@@ -64,7 +68,7 @@
                             <div class="race-team-points" id="raceTeamTwoPts">0 pts</div>
                         </div>
                         <div class="race-team-odds">
-                            <div class="race-odds-label">Chance</div>
+                            <div class="race-odds-label" data-i18n="chance">Chance</div>
                             <div class="race-odds-value" id="raceTeamTwoOdds">—</div>
                         </div>
                     </div>
@@ -79,11 +83,11 @@
                         <span id="seasonBadge" class="season-badge">Season 1</span>
                         <span id="matchCounter" class="season-counter">0/36</span>
                     </div>
-                    <button class="button button-primary" id="newSeasonBtn" style="display:none">New Season</button>
+                    <button class="button button-primary" id="newSeasonBtn" style="display:none" data-i18n="newSeason">New Season</button>
                 </div>
                 <div class="season-grid">
                     <div class="season-card championships">
-                        <h3>Championships</h3>
+                        <h3 data-i18n="championships">Championships</h3>
                         <div class="champ-row">
                             <span id="champTeam0" class="champ-name">Team 1</span>
                             <span id="champCount0" class="champ-count">0</span>
@@ -94,26 +98,26 @@
                         </div>
                     </div>
                     <div class="season-card head2head">
-                        <h3>Head to Head</h3>
+                        <h3 data-i18n="headToHead">Head to Head</h3>
                         <div class="h2h-row">
                             <span id="h2hTeam0Wins" class="h2h-stat">0</span>
-                            <span class="h2h-label">W</span>
+                            <span class="h2h-label" data-i18n="winsLabel">W</span>
                             <span id="h2hTeam0Draws" class="h2h-stat">0</span>
-                            <span class="h2h-label">D</span>
+                            <span class="h2h-label" data-i18n="drawsLabel">D</span>
                             <span id="h2hTeam0Losses" class="h2h-stat">0</span>
-                            <span class="h2h-label">L</span>
+                            <span class="h2h-label" data-i18n="lossesLabel">L</span>
                         </div>
                         <div class="h2h-row">
                             <span id="h2hTeam1Wins" class="h2h-stat">0</span>
-                            <span class="h2h-label">W</span>
+                            <span class="h2h-label" data-i18n="winsLabel">W</span>
                             <span id="h2hTeam1Draws" class="h2h-stat">0</span>
-                            <span class="h2h-label">D</span>
+                            <span class="h2h-label" data-i18n="drawsLabel">D</span>
                             <span id="h2hTeam1Losses" class="h2h-stat">0</span>
-                            <span class="h2h-label">L</span>
+                            <span class="h2h-label" data-i18n="lossesLabel">L</span>
                         </div>
                         <div class="h2h-footer">
-                            <span>Goals: <span id="h2hTeam0GF">0</span> — <span id="h2hTeam1GF">0</span></span>
-                            <span>Total: <span id="h2hTotal">0</span> matches</span>
+                            <span data-i18n="goalsLabel">Goals: <span id="h2hTeam0GF">0</span> — <span id="h2hTeam1GF">0</span></span>
+                            <span data-i18n="totalMatches">Total: <span id="h2hTotal">0</span> matches</span>
                         </div>
                     </div>
                 </div>
@@ -122,114 +126,114 @@
             <div class="content-grid">
                 <section class="panel" aria-labelledby="tableTitle">
                     <div class="panel-heading">
-                        <h2 id="tableTitle">Table</h2>
-                        <span class="live-label"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
+                        <h2 id="tableTitle" data-i18n="tableTitle">Table</h2>
+                        <span class="live-label" data-i18n="updatedAfterMatch"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
                     </div>
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Team</th>
-                                    <th scope="col" title="Results from the last five matches">Form</th>
-                                    <th scope="col" title="Played">Pld</th>
-                                    <th scope="col" title="Wins">W</th>
-                                    <th scope="col" title="Draws">D</th>
-                                    <th scope="col" title="Losses">L</th>
-                                    <th scope="col" title="Goal difference">GD</th>
-                                    <th scope="col" title="Points">Pts</th>
+                                    <th scope="col" data-i18n="colPos">#</th>
+                                    <th scope="col" data-i18n="colTeam">Team</th>
+                                    <th scope="col" title="Results from the last five matches" data-i18n="colForm">Form</th>
+                                    <th scope="col" title="Played" data-i18n="colPlayed">Pld</th>
+                                    <th scope="col" title="Wins" data-i18n="colW">W</th>
+                                    <th scope="col" title="Draws" data-i18n="colD">D</th>
+                                    <th scope="col" title="Losses" data-i18n="colL">L</th>
+                                    <th scope="col" title="Goal difference" data-i18n="colGD">GD</th>
+                                    <th scope="col" title="Points" data-i18n="colPts">Pts</th>
                                 </tr>
                             </thead>
                             <tbody id="standingsBody"></tbody>
                         </table>
                     </div>
-                    <div class="table-footer">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
+                    <div class="table-footer" data-i18n="tableFooter">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
                     </div>
                 </section>
 
                 <aside>
                     <section class="panel side-panel" aria-labelledby="matchesTitle">
-                        <div class="panel-heading">
-                            <h2 id="matchesTitle">Latest matches</h2><span class="live-label" id="matchesCount">0
-                                matches</span>
-                        </div>
-                        <div class="match-list" id="matchList"></div>
-                    </section>
-                    <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span>A win earns <strong>3
-                                points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared
-                            league and keep them in sync.</span></div>
+                    <div class="panel-heading">
+                        <h2 id="matchesTitle" data-i18n="latestMatches">Latest matches</h2><span class="live-label" id="matchesCount">0
+                            matches</span>
+                    </div>
+                    <div class="match-list" id="matchList"></div>
+                </section>
+                <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span data-i18n="tipText">A win earns <strong>3
+                            points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared
+                        league and keep them in sync.</span></div>
                 </aside>
             </div>
 
             <section class="news-section panel" aria-labelledby="newsTitle">
                 <div class="panel-heading">
                     <div>
-                        <h2 id="newsTitle">League news</h2>
-                        <p class="news-subtitle">Stories, photos and updates from the league</p>
+                        <h2 id="newsTitle" data-i18n="leagueNews">League news</h2>
+                        <p class="news-subtitle" data-i18n="newsSubtitle">Stories, photos and updates from the league</p>
                     </div>
-                    <button class="button button-primary" id="addNewsButton" type="button" disabled>
+                    <button class="button button-primary" id="addNewsButton" type="button" disabled data-i18n="addNews">
                         <span aria-hidden="true">＋</span> Add news
                     </button>
                 </div>
                 <div class="news-grid" id="newsList" aria-live="polite">
-                    <p class="news-empty">Loading news…</p>
+                    <p class="news-empty" data-i18n="loadingNews">Loading news…</p>
                 </div>
             </section>
         </main>
-        <footer><span>eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP</span><span>Every match counts.</span></footer>
+        <footer><span data-i18n="footer1">eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP</span><span data-i18n="footer2">Every match counts.</span></footer>
     </div>
 
     <dialog id="matchDialog" aria-labelledby="matchDialogTitle">
         <form class="dialog-inner" id="matchForm">
             <div class="dialog-header">
                 <div>
-                    <h2 id="matchDialogTitle">Add match result</h2>
-                    <p>Enter the score for a match you played</p>
+                    <h2 id="matchDialogTitle" data-i18n="matchDialogTitle">Add match result</h2>
+                    <p data-i18n="matchDialogDesc">Enter the score for a match you played</p>
                 </div>
                 <button class="close-button" type="button" data-close="matchDialog" aria-label="Close">×</button>
             </div>
-            <div class="field"><label for="homeTeam">Home team</label><select id="homeTeam" required></select>
+            <div class="field"><label for="homeTeam" data-i18n="homeTeam">Home team</label><select id="homeTeam" required></select>
             </div>
             <div class="score-fields">
-                <div class="field"><label for="homeGoals">Goals</label><input id="homeGoals" type="number" min="0"
+                <div class="field"><label for="homeGoals" data-i18n="goals">Goals</label><input id="homeGoals" type="number" min="0"
                         max="99" inputmode="numeric" required></div>
                 <div class="score-divider" aria-hidden="true">:</div>
-                <div class="field"><label for="awayGoals">Goals</label><input id="awayGoals" type="number" min="0"
+                <div class="field"><label for="awayGoals" data-i18n="goals">Goals</label><input id="awayGoals" type="number" min="0"
                         max="99" inputmode="numeric" required></div>
             </div>
-            <div class="field"><label for="awayTeam">Away team</label><select id="awayTeam" required></select>
+            <div class="field"><label for="awayTeam" data-i18n="awayTeam">Away team</label><select id="awayTeam" required></select>
             </div>
             <section class="stats-entry" aria-labelledby="statsEntryTitle">
-                <h3 id="statsEntryTitle">Match statistics <span>Optional</span></h3>
-                <p>Leave any statistic blank if you do not have it.</p>
+                <h3 id="statsEntryTitle" data-i18n="matchStats">Match statistics <span>Optional</span></h3>
+                <p data-i18n="statsOptional">Leave any statistic blank if you do not have it.</p>
                 <div class="stats-entry-head" aria-hidden="true">
-                    <span>Statistic</span><span id="homeStatsTeam">Home</span><span id="awayStatsTeam">Away</span>
+                    <span data-i18n="statistic">Statistic</span><span id="homeStatsTeam">Home</span><span id="awayStatsTeam">Away</span>
                 </div>
                 <div class="stats-entry-row">
-                    <span>Shots</span>
+                    <span data-i18n="shots">Shots</span>
                     <input id="homeShots" type="number" min="0" max="999" inputmode="numeric" aria-label="Home team shots">
                     <input id="awayShots" type="number" min="0" max="999" inputmode="numeric" aria-label="Away team shots">
                 </div>
                 <div class="stats-entry-row">
-                    <span>Shots on target</span>
+                    <span data-i18n="shotsOnTarget">Shots on target</span>
                     <input id="homeShotsOnTarget" type="number" min="0" max="999" inputmode="numeric" aria-label="Home team shots on target">
                     <input id="awayShotsOnTarget" type="number" min="0" max="999" inputmode="numeric" aria-label="Away team shots on target">
                 </div>
                 <div class="stats-entry-row">
-                    <span>Possession (%)</span>
+                    <span data-i18n="possession">Possession (%)</span>
                     <input id="homePossession" type="number" min="0" max="100" inputmode="numeric" aria-label="Home team possession percentage">
                     <input id="awayPossession" type="number" min="0" max="100" inputmode="numeric" aria-label="Away team possession percentage">
                 </div>
                 <div class="stats-entry-row">
-                    <span>Passes</span>
+                    <span data-i18n="passes">Passes</span>
                     <input id="homePasses" type="number" min="0" max="9999" inputmode="numeric" aria-label="Home team passes">
                     <input id="awayPasses" type="number" min="0" max="9999" inputmode="numeric" aria-label="Away team passes">
                 </div>
             </section>
             <p class="form-error" id="matchError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-quiet" type="button"
-                    data-close="matchDialog">Cancel</button><button class="button button-primary"
-                    type="submit">Save result</button></div>
+                    data-close="matchDialog" data-i18n="cancel">Cancel</button><button class="button button-primary"
+                    type="submit" data-i18n="saveResult">Save result</button></div>
         </form>
     </dialog>
 
@@ -237,8 +241,8 @@
         <form class="dialog-inner" id="teamsForm">
             <div class="dialog-header">
                 <div>
-                    <h2 id="teamsDialogTitle">Your teams</h2>
-                    <p>Choose names for your league</p>
+                    <h2 id="teamsDialogTitle" data-i18n="teamsDialogTitle">Your teams</h2>
+                    <p data-i18n="teamsDialogDesc">Choose names for your league</p>
                 </div>
                 <button class="close-button" type="button" data-close="teamsDialog" aria-label="Close">×</button>
             </div>
@@ -248,36 +252,36 @@
                     maxlength="24" aria-label="Second team name" required></div>
             <p class="form-error" id="teamsError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-quiet" type="button"
-                    data-close="teamsDialog">Cancel</button><button class="button button-primary"
-                    type="submit">Save teams</button></div>
+                    data-close="teamsDialog" data-i18n="cancel">Cancel</button><button class="button button-primary"
+                    type="submit" data-i18n="saveTeams">Save teams</button></div>
         </form>
     </dialog>
     <dialog id="newsDialog" aria-labelledby="newsDialogTitle">
         <form class="dialog-inner" id="newsForm">
             <div class="dialog-header">
                 <div>
-                    <h2 id="newsDialogTitle">Publish league news</h2>
-                    <p>Add a photo and a story for everyone to see</p>
+                    <h2 id="newsDialogTitle" data-i18n="newsDialogTitle">Publish league news</h2>
+                    <p data-i18n="newsDialogDesc">Add a photo and a story for everyone to see</p>
                 </div>
                 <button class="close-button" type="button" data-close="newsDialog" aria-label="Close">×</button>
             </div>
             <div class="field">
-                <label for="newsTitleInput">Headline</label>
+                <label for="newsTitleInput" data-i18n="headline">Headline</label>
                 <input id="newsTitleInput" type="text" maxlength="120" required>
             </div>
             <div class="field">
-                <label for="newsDescriptionInput">Description</label>
+                <label for="newsDescriptionInput" data-i18n="description">Description</label>
                 <textarea id="newsDescriptionInput" maxlength="3000" rows="5" required></textarea>
             </div>
             <div class="field">
-                <label for="newsImageInput">Photo (JPEG, PNG or WebP, up to 5 MB)</label>
+                <label for="newsImageInput" data-i18n="photoLabel">Photo (JPEG, PNG or WebP, up to 5 MB)</label>
                 <input id="newsImageInput" type="file" accept="image/jpeg,image/png,image/webp" required>
             </div>
             <img class="news-image-preview" id="newsImagePreview" alt="Selected news photo preview" hidden>
             <p class="form-error" id="newsError" role="alert"></p>
             <div class="dialog-actions">
-                <button class="button button-quiet" type="button" data-close="newsDialog">Cancel</button>
-                <button class="button button-primary" id="publishNewsButton" type="submit">Publish news</button>
+                <button class="button button-quiet" type="button" data-close="newsDialog" data-i18n="cancel">Cancel</button>
+                <button class="button button-primary" id="publishNewsButton" type="submit" data-i18n="publishNews">Publish news</button>
             </div>
         </form>
     </dialog>
@@ -285,7 +289,7 @@
         <div class="dialog-inner">
             <div class="dialog-header">
                 <div>
-                    <h2 id="newsViewDialogTitle">League news</h2>
+                    <h2 id="newsViewDialogTitle" data-i18n="leagueNews">League news</h2>
                     <p class="news-view-date"></p>
                 </div>
                 <button class="close-button" type="button" data-close="newsViewDialog" aria-label="Close">×</button>
@@ -299,17 +303,17 @@
         <form class="dialog-inner" id="authForm">
             <div class="dialog-header">
                 <div>
-                    <h2 id="authDialogTitle">Sign in to your league</h2>
-                    <p>Use an account created in Supabase</p>
+                    <h2 id="authDialogTitle" data-i18n="authDialogTitle">Sign in to your league</h2>
+                    <p data-i18n="authDialogDesc">Use an account created in Supabase</p>
                 </div>
                 <button class="close-button" type="button" data-close="authDialog" aria-label="Close">×</button>
             </div>
-            <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email"
+            <div class="field"><label for="authEmail" data-i18n="email">Email</label><input id="authEmail" type="email"
                     autocomplete="username" required></div>
-            <div class="field"><label for="authPassword">Password</label><input id="authPassword" type="password"
+            <div class="field"><label for="authPassword" data-i18n="password">Password</label><input id="authPassword" type="password"
                     autocomplete="current-password" required></div>
             <p class="form-error" id="authError" role="alert"></p>
-            <div class="dialog-actions"><button class="button button-primary" type="submit">Sign in</button></div>
+            <div class="dialog-actions"><button class="button button-primary" type="submit" data-i18n="signIn">Sign in</button></div>
         </form>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
