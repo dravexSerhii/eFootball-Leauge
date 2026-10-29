@@ -495,6 +495,7 @@ async function startNewSeason() {
 }
 
 function renderSeasonInfo() {
+  if (!seasonBadge || !matchCounter) return;
   const matchesInSeason = getMatchesInSeason(currentSeason);
   const seasonLimit = 36;
   const remaining = Math.max(0, seasonLimit - matchesInSeason.length);
@@ -508,30 +509,49 @@ function renderSeasonInfo() {
   if (seasonComplete) {
     matchButton.disabled = true;
     matchButton.textContent = "Season Complete";
-    newSeasonBtn.disabled = false;
-    newSeasonBtn.style.display = "inline-flex";
+    if (newSeasonBtn) {
+      newSeasonBtn.disabled = false;
+      newSeasonBtn.style.display = "inline-flex";
+    }
   } else {
     matchButton.disabled = !configReady || !session || !dataReady;
     matchButton.textContent = "Add match";
-    newSeasonBtn.style.display = "none";
+    if (newSeasonBtn) {
+      newSeasonBtn.style.display = "none";
+    }
   }
 
-  document.getElementById("champTeam0").textContent = state.teams[0]?.name || "Team 1";
-  document.getElementById("champCount0").textContent = champs["0"] || 0;
-  document.getElementById("champTeam1").textContent = state.teams[1]?.name || "Team 2";
-  document.getElementById("champCount1").textContent = champs["1"] || 0;
+  const champTeam0 = document.getElementById("champTeam0");
+  const champCount0 = document.getElementById("champCount0");
+  const champTeam1 = document.getElementById("champTeam1");
+  const champCount1 = document.getElementById("champCount1");
+  if (champTeam0) champTeam0.textContent = state.teams[0]?.name || "Team 1";
+  if (champCount0) champCount0.textContent = champs["0"] || 0;
+  if (champTeam1) champTeam1.textContent = state.teams[1]?.name || "Team 2";
+  if (champCount1) champCount1.textContent = champs["1"] || 0;
 
-  document.getElementById("h2hTeam0Wins").textContent = h2h.team0Wins;
-  document.getElementById("h2hTeam0Draws").textContent = h2h.team0Draws;
-  document.getElementById("h2hTeam0Losses").textContent = h2h.team0Losses;
-  document.getElementById("h2hTeam1Wins").textContent = h2h.team1Wins;
-  document.getElementById("h2hTeam1Draws").textContent = h2h.team1Draws;
-  document.getElementById("h2hTeam1Losses").textContent = h2h.team1Losses;
-  document.getElementById("h2hTotal").textContent = h2h.total;
-  document.getElementById("h2hTeam0GF").textContent = h2h.team0GoalsFor;
-  document.getElementById("h2hTeam0GA").textContent = h2h.team0GoalsAgainst;
-  document.getElementById("h2hTeam1GF").textContent = h2h.team1GoalsFor;
-  document.getElementById("h2hTeam1GA").textContent = h2h.team1GoalsAgainst;
+  const h2hTeam0Wins = document.getElementById("h2hTeam0Wins");
+  const h2hTeam0Draws = document.getElementById("h2hTeam0Draws");
+  const h2hTeam0Losses = document.getElementById("h2hTeam0Losses");
+  const h2hTeam1Wins = document.getElementById("h2hTeam1Wins");
+  const h2hTeam1Draws = document.getElementById("h2hTeam1Draws");
+  const h2hTeam1Losses = document.getElementById("h2hTeam1Losses");
+  const h2hTotal = document.getElementById("h2hTotal");
+  const h2hTeam0GF = document.getElementById("h2hTeam0GF");
+  const h2hTeam0GA = document.getElementById("h2hTeam0GA");
+  const h2hTeam1GF = document.getElementById("h2hTeam1GF");
+  const h2hTeam1GA = document.getElementById("h2hTeam1GA");
+  if (h2hTeam0Wins) h2hTeam0Wins.textContent = h2h.team0Wins;
+  if (h2hTeam0Draws) h2hTeam0Draws.textContent = h2h.team0Draws;
+  if (h2hTeam0Losses) h2hTeam0Losses.textContent = h2h.team0Losses;
+  if (h2hTeam1Wins) h2hTeam1Wins.textContent = h2h.team1Wins;
+  if (h2hTeam1Draws) h2hTeam1Draws.textContent = h2h.team1Draws;
+  if (h2hTeam1Losses) h2hTeam1Losses.textContent = h2h.team1Losses;
+  if (h2hTotal) h2hTotal.textContent = h2h.total;
+  if (h2hTeam0GF) h2hTeam0GF.textContent = h2h.team0GoalsFor;
+  if (h2hTeam0GA) h2hTeam0GA.textContent = h2h.team0GoalsAgainst;
+  if (h2hTeam1GF) h2hTeam1GF.textContent = h2h.team1GoalsFor;
+  if (h2hTeam1GA) h2hTeam1GA.textContent = h2h.team1GoalsAgainst;
 }
 
 async function deleteMatch(id) {
@@ -853,9 +873,9 @@ function validateServerState(settings, matchRows) {
 
 async function fetchServerState() {
   const [settingsResponse, matchesResponse] = await Promise.all([
-    supabase.from("league_settings").select("teams, season, championships").eq("id", true).maybeSingle(),
+    supabase.from("league_settings").select("*").eq("id", true).maybeSingle(),
     supabase.from("league_matches")
-      .select("id, home_team, away_team, home_goals, away_goals, played_at, stats, season")
+      .select("*")
       .order("played_at", { ascending: true })
   ]);
   if (settingsResponse.error) throw settingsResponse.error;
@@ -863,12 +883,13 @@ async function fetchServerState() {
   if (!settingsResponse.data) {
     throw new Error("League settings were not found. Run the SQL in supabase.sql.");
   }
-  validateServerState(settingsResponse.data, matchesResponse.data);
-  currentSeason = settingsResponse.data.season || 1;
+  const settings = settingsResponse.data;
+  validateServerState(settings, matchesResponse.data);
+  currentSeason = settings.season || 1;
   state = {
-    teams: settingsResponse.data.teams,
+    teams: settings.teams,
     matches: matchesResponse.data.map(mapMatch),
-    championships: settingsResponse.data.championships || { "0": 0, "1": 0 }
+    championships: settings.championships || { "0": 0, "1": 0 }
   };
   dataReady = true;
   render();
@@ -1012,9 +1033,11 @@ addNewsButton.addEventListener("click", () => {
   newsDialog.showModal();
 });
 
-newSeasonBtn.addEventListener("click", () => {
-  void startNewSeason();
-});
+if (newSeasonBtn) {
+  newSeasonBtn.addEventListener("click", () => {
+    void startNewSeason();
+  });
+}
 
 function clearNewsPreview() {
   if (newsPreviewUrl) URL.revokeObjectURL(newsPreviewUrl);
