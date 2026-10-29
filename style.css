@@ -538,6 +538,7 @@
       background: var(--surface-raised);
       margin: 0 0 16px;
     }
+
     .news-view-description {
       margin: 0 0 0;
       color: #cbc9d1;
@@ -546,6 +547,7 @@
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
+
     .news-view-date {
       margin: 0 0 0;
       color: var(--lime);
@@ -1108,60 +1110,341 @@
       }
     }
 
-    .championship-race { margin-top: 22px; }
-    .championship-race .panel-heading { min-height: auto; padding: 16px 22px 12px; border-bottom: 0; }
-    .championship-race h2 { margin: 0 0 8px; font-size: 16px; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); text-shadow: 0 0 16px rgba(211,255,87,.35); }
-    .race-status { color: var(--ink); font-size: 12px; font-weight: 800; text-shadow: 0 0 10px rgba(211,255,87,.25); }
-    .race-favorite { color: var(--lime); font-weight: 900; text-shadow: 0 0 14px rgba(211,255,87,.5); }
-    .race-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 22px 6px; background: var(--surface-raised); border-radius: 16px; border: 1px solid var(--line); }
-    .race-team { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); position: relative; }
-    .race-team:last-child { border-bottom: 0; }
-    .race-team::before { content: ""; position: absolute; inset: 0; border-radius: 16px; background: linear-gradient(135deg, rgba(211,255,87,.06), rgba(156,120,255,.06)); pointer-events: none; }
-    .race-team-badge { position: relative; width: clamp(60px, 7vw, 90px); height: clamp(60px, 7vw, 90px); display: grid; place-items: center; flex-shrink: 0; overflow: visible; border-radius: 20px; font-size: 12px; font-weight: 900; background: var(--surface); color: var(--ink); box-shadow: 0 10px 30px rgba(0,0,0,.45); border: 1px solid var(--line); z-index: 2; }
-    .race-team-badge img { width: 100%; height: 100%; object-fit: contain !important; object-position: center; border-radius: inherit; }
-    .race-team-info { flex: 1; position: relative; z-index: 2; }
-    .race-team-name { margin: 0 0 3px; font-size: 17px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); text-shadow: 0 0 12px rgba(255,255,255,.15); }
-    .race-team-points { color: var(--muted); font-size: 12px; font-weight: 700; margin-top: 1px; }
-    .race-team-odds { text-align: right; position: relative; z-index: 2; }
-    .race-odds-label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .race-odds-value { font-size: 26px; font-weight: 900; color: var(--ink); text-shadow: 0 0 14px rgba(255,255,255,.2); }
-    .race-odds-value.favorite { color: var(--lime); text-shadow: 0 0 18px rgba(211,255,87,.6); }
-    .race-footer { padding: 10px 22px 18px; font-size: 12px; color: #cbc9d1; font-weight: 600; }
-    #raceChart { display: block; width: 100%; height: 120px; margin: 10px 22px 20px; background: rgba(8,7,13,.4); border-radius: 16px; border: 1px solid var(--line); box-shadow: inset 0 0 20px rgba(0,0,0,.4); }
-    #raceChart.live-pulse { animation: racePulse 1.2s ease-in-out; }
+    .championship-race {
+      margin-top: 22px;
+    }
+
+    .championship-race .panel-heading {
+      min-height: auto;
+      padding: 16px 22px 12px;
+      border-bottom: 0;
+    }
+
+    .championship-race h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--lime);
+      text-shadow: 0 0 16px rgba(211, 255, 87, .35);
+    }
+
+    .race-status {
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(211, 255, 87, .25);
+    }
+
+    .race-favorite {
+      color: var(--lime);
+      font-weight: 900;
+      text-shadow: 0 0 14px rgba(211, 255, 87, .5);
+    }
+
+    .race-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 0 22px 6px;
+      background: var(--surface-raised);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .race-team {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    .race-team:last-child {
+      border-bottom: 0;
+    }
+
+    .race-team::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(211, 255, 87, .06), rgba(156, 120, 255, .06));
+      pointer-events: none;
+    }
+
+    .race-team-badge {
+      position: relative;
+      width: clamp(60px, 7vw, 90px);
+      height: clamp(60px, 7vw, 90px);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      overflow: visible;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 900;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+      border: 1px solid var(--line);
+      z-index: 2;
+    }
+
+    .race-team-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain !important;
+      object-position: center;
+      border-radius: inherit;
+    }
+
+    .race-team-info {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .race-team-name {
+      margin: 0 0 3px;
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      text-shadow: 0 0 12px rgba(255, 255, 255, .15);
+    }
+
+    .race-team-points {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    .race-team-odds {
+      text-align: right;
+      position: relative;
+      z-index: 2;
+    }
+
+    .race-odds-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .race-odds-value {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow: 0 0 14px rgba(255, 255, 255, .2);
+    }
+
+    .race-odds-value.favorite {
+      color: var(--lime);
+      text-shadow: 0 0 18px rgba(211, 255, 87, .6);
+    }
+
+    .race-footer {
+      padding: 10px 22px 18px;
+      font-size: 12px;
+      color: #cbc9d1;
+      font-weight: 600;
+    }
+
+    #raceChart {
+      display: block;
+      width: 100%;
+      height: 120px;
+      margin: 10px 22px 20px;
+      background: rgba(8, 7, 13, .4);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, .4);
+    }
+
+    #raceChart.live-pulse {
+      animation: racePulse 1.2s ease-in-out;
+    }
+
     @keyframes racePulse {
-      0%, 100% { box-shadow: inset 0 0 20px rgba(0,0,0,.4), 0 0 0 rgba(211,255,87,0); }
-      50% { box-shadow: inset 0 0 20px rgba(0,0,0,.4), 0 0 12px rgba(211,255,87,.35); }
+
+      0%,
+      100% {
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, .4), 0 0 0 rgba(211, 255, 87, 0);
+      }
+
+      50% {
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, .4), 0 0 12px rgba(211, 255, 87, .35);
+      }
     }
 
     @media (max-width: 600px) {
-      .race-grid { grid-template-columns: 1fr; gap: 10px; padding: 0 16px 6px; }
-      .race-team { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 0; }
-      .race-team-odds { text-align: left; margin-top: 4px; }
-      .race-team-badge { width: clamp(52px, 14vw, 72px); height: clamp(52px, 14vw, 72px); }
-      #raceChart { margin: 10px 16px 20px; }
+      .race-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 0 16px 6px;
+      }
+
+      .race-team {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 0;
+      }
+
+      .race-team-odds {
+        text-align: left;
+        margin-top: 4px;
+      }
+
+      .race-team-badge {
+        width: clamp(52px, 14vw, 72px);
+        height: clamp(52px, 14vw, 72px);
+      }
+
+      #raceChart {
+        margin: 10px 16px 20px;
+      }
     }
 
-    .season-panel { margin-top: 22px; }
-    .season-panel .panel-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 22px 14px; border-bottom: 0; min-height: auto; }
-    .season-header { display: flex; gap: 16px; align-items: center; }
-    .season-badge { font-size: 16px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); text-shadow: 0 0 16px rgba(211,255,87,.35); }
-    .season-counter { font-size: 14px; font-weight: 800; color: var(--ink); background: var(--surface-raised); padding: 6px 12px; border-radius: 9px; border: 1px solid var(--line); }
-    .season-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 22px 18px; background: var(--surface-raised); border-radius: 16px; border: 1px solid var(--line); }
-    .season-card { padding: 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
-    .season-card h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-    .champ-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 800; }
-    .champ-row:last-child { border-bottom: 0; }
-    .champ-name { color: var(--ink); }
-    .champ-count { color: var(--lime); }
-    .h2h-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 800; }
-    .h2h-row:last-child { border-bottom: 0; }
-    .h2h-stat { color: var(--ink); }
-    .h2h-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-    .h2h-footer { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); font-weight: 700; }
+    .season-panel {
+      margin-top: 22px;
+    }
+
+    .season-panel .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px 14px;
+      border-bottom: 0;
+      min-height: auto;
+    }
+
+    .season-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .season-badge {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--lime);
+      text-shadow: 0 0 16px rgba(211, 255, 87, .35);
+    }
+
+    .season-counter {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--ink);
+      background: var(--surface-raised);
+      padding: 6px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--line);
+    }
+
+    .season-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 0 22px 18px;
+      background: var(--surface-raised);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .season-card {
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .season-card h3 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .champ-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .champ-row:last-child {
+      border-bottom: 0;
+    }
+
+    .champ-name {
+      color: var(--ink);
+    }
+
+    .champ-count {
+      color: var(--lime);
+    }
+
+    .h2h-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .h2h-row:last-child {
+      border-bottom: 0;
+    }
+
+    .h2h-stat {
+      color: var(--ink);
+    }
+
+    .h2h-label {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .h2h-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
 
     @media (max-width: 600px) {
-      .season-grid { grid-template-columns: 1fr; gap: 12px; padding: 0 16px 12px; }
-      .season-panel .panel-heading { flex-direction: column; align-items: flex-start; gap: 12px; padding: 0 16px 12px; }
-      .newSeasonBtn { width: 100%; }
+      .season-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 16px 12px;
+      }
+
+      .season-panel .panel-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 0 16px 12px;
+      }
+
+      .newSeasonBtn {
+        width: 100%;
+      }
     }

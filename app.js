@@ -1545,8 +1545,12 @@ document.querySelectorAll("[data-close]").forEach(button => {
 
 newsDialog.addEventListener("close", clearNewsPreview);
 
-applyLang();
 updateAuthUi();
+try {
+  applyLang();
+} catch (error) {
+  console.error("Language initialization error:", error);
+}
 
 if (configReady) {
   void refreshNews();
