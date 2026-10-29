@@ -219,12 +219,12 @@ function renderChampionshipRace() {
   const photoOne = TEAM_PHOTOS[race.one.index];
   const photoTwo = TEAM_PHOTOS[race.two.index];
   if (photoOne) {
-    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
   } else {
     badgeOne.textContent = race.one.index === 0 ? "01" : "02";
   }
   if (photoTwo) {
-    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
   } else {
     badgeTwo.textContent = race.two.index === 0 ? "01" : "02";
   }
