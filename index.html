@@ -81,6 +81,44 @@
                 <canvas id="raceChart" height="120"></canvas>
             </section>
 
+            <section class="upcoming-match panel" aria-labelledby="upcomingMatchTitle">
+                <div class="upcoming-match-heading">
+                    <div>
+                        <h2 id="upcomingMatchTitle" data-i18n="upcomingMatchTitle">Upcoming match</h2>
+                        <p data-i18n="upcomingMatchSubtitle">Match odds are separate from championship chances</p>
+                    </div>
+                    <span class="race-live-indicator"><span class="race-live-dot"></span><span data-i18n="liveSimulation">LIVE SIMULATION</span></span>
+                </div>
+                <div class="upcoming-fixture">
+                    <div class="upcoming-team">
+                        <span class="upcoming-team-badge" id="upcomingHomeBadge"></span>
+                        <span class="upcoming-team-name" id="upcomingHomeName">FC Promashkov</span>
+                    </div>
+                    <span class="upcoming-vs" data-i18n="versus">VS</span>
+                    <div class="upcoming-team upcoming-team-away">
+                        <span class="upcoming-team-name" id="upcomingAwayName">FC Lionslav</span>
+                        <span class="upcoming-team-badge" id="upcomingAwayBadge"></span>
+                    </div>
+                </div>
+                <div class="upcoming-odds-grid" aria-live="polite">
+                    <div class="upcoming-odds-item">
+                        <span id="upcomingHomeLabel">FC Promashkov</span>
+                        <strong id="upcomingHomeOdds">33.3%</strong>
+                    </div>
+                    <div class="upcoming-odds-item draw">
+                        <span data-i18n="predictionDraw">Draw</span>
+                        <strong id="upcomingDrawOdds">33.4%</strong>
+                    </div>
+                    <div class="upcoming-odds-item away">
+                        <span id="upcomingAwayLabel">FC Lionslav</span>
+                        <strong id="upcomingAwayOdds">33.3%</strong>
+                    </div>
+                </div>
+                <canvas id="matchOddsChart" height="112" aria-label="Upcoming match outcome probability chart"></canvas>
+                <p class="upcoming-match-note" id="upcomingMatchNote">No previous matches — equal starting estimate</p>
+                <p class="upcoming-match-disclaimer" data-i18n="upcomingMatchDisclaimer">Historical match statistics with simulated movement. Not live-match data.</p>
+            </section>
+
             <section class="season-panel panel" aria-label="Season info">
                 <div class="panel-heading">
                     <div class="season-header">

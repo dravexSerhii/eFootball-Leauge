@@ -47,8 +47,16 @@ const TRANSLATIONS = {
     loadingNews: "Loading news…",
     footer1: "eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP",
     footer2: "Every match counts.",
+    upcomingMatchTitle: "Upcoming match",
+    upcomingMatchSubtitle: "Match odds are separate from championship chances",
+    upcomingMatchDisclaimer: "Historical match statistics with simulated movement. Not live-match data.",
+    upcomingMatchSamples: "Previous matches used: {0}",
+    upcomingMatchChartLabel: "{0} and {1} match outcome probabilities",
+    versus: "VS",
     matchDialogTitle: "Add match result",
     matchDialogDesc: "Enter the score for a match you played",
+    predictionDraw: "Draw",
+    predictionNoHistory: "No previous matches — equal starting estimate",
     homeTeam: "Home team",
     awayTeam: "Away team",
     goals: "Goals",
@@ -174,8 +182,16 @@ const TRANSLATIONS = {
     loadingNews: "Загрузка новостей…",
     footer1: "eFOOTBALL ЛИГА · ВАШ ЧЕМПИОНАТ",
     footer2: "Каждый матч имеет значение.",
+    upcomingMatchTitle: "Предстоящий матч",
+    upcomingMatchSubtitle: "Шансы на матч рассчитываются отдельно от чемпионства",
+    upcomingMatchDisclaimer: "История матчей и симуляция колебаний. Это не данные матча в реальном времени.",
+    upcomingMatchSamples: "Учтено предыдущих матчей: {0}",
+    upcomingMatchChartLabel: "Вероятности исхода матча {0} и {1}",
+    versus: "ПРОТИВ",
     matchDialogTitle: "Добавить результат матча",
     matchDialogDesc: "Введите счёт сыгранного матча",
+    predictionDraw: "Ничья",
+    predictionNoHistory: "Предыдущих матчей нет — начальная оценка поровну",
     homeTeam: "Хозяева",
     awayTeam: "Гости",
     goals: "Голы",
@@ -299,6 +315,7 @@ const newsDialog = document.getElementById("newsDialog");
 const newsViewDialog = document.getElementById("newsViewDialog");
 const newsList = document.getElementById("newsList");
 const raceChartCanvas = document.getElementById("raceChart");
+const matchOddsChartCanvas = document.getElementById("matchOddsChart");
 const seasonInfo = document.getElementById("seasonInfo");
 const seasonBadge = document.getElementById("seasonBadge");
 const matchCounter = document.getElementById("matchCounter");
@@ -316,6 +333,16 @@ let nextHistorySample = 0;
 let nextRaceDraw = 0;
 let lastRaceFrame = 0;
 let nextOddsDelay = 1000;
+let upcomingMatchOdds = null;
+let upcomingBaseProbabilities = [1 / 3, 1 / 3, 1 / 3];
+let liveUpcomingProbabilities = [1 / 3, 1 / 3, 1 / 3];
+let targetUpcomingProbabilities = [1 / 3, 1 / 3, 1 / 3];
+let upcomingMatchHistory = [];
+let upcomingMatchSignature = "";
+let nextUpcomingOddsTick = 0;
+let nextUpcomingSample = 0;
+let nextUpcomingDraw = 0;
+let lastUpcomingFrame = 0;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function render() {
@@ -323,6 +350,7 @@ function render() {
   renderMatches();
   renderNews();
   renderChampionshipRace();
+  renderUpcomingMatch();
   renderSeasonInfo();
 }
 
@@ -598,7 +626,7 @@ function updateRaceOddsDisplay() {
 function animateChampionshipRace(now) {
   const elapsed = lastRaceFrame ? Math.min(now - lastRaceFrame, 100) : 16;
   lastRaceFrame = now;
-  if (championshipRace && !prefersReducedMotion) {
+  if (championshipRace && state.matches.length > 0 && !prefersReducedMotion) {
     if (now >= nextOddsTick) {
       const currentOdds = liveOddsOne;
       const marketNoise = (Math.random() - 0.5) * 2.4;
@@ -631,6 +659,7 @@ function animateChampionshipRace(now) {
     drawRaceChart(now);
     nextRaceDraw = now + 33;
   }
+  animateUpcomingMatch(now);
   window.requestAnimationFrame(animateChampionshipRace);
 }
 
@@ -1306,6 +1335,229 @@ function updateStatsTeamLabels() {
   document.getElementById("awayStatsTeam").textContent = state.teams[away]?.name ?? "Away";
 }
 
+function calculateUpcomingMatchOdds() {
+  const history = state.matches.filter(match =>
+    (match.home === 0 && match.away === 1) ||
+    (match.home === 1 && match.away === 0)
+  );
+  if (history.length === 0) return { probabilities: [1 / 3, 1 / 3, 1 / 3], count: 0 };
+
+  const predictions = history.map(match => {
+    const teamZeroHome = match.home === 0;
+    const homeGoals = teamZeroHome ? match.homeGoals : match.awayGoals;
+    const awayGoals = teamZeroHome ? match.awayGoals : match.homeGoals;
+    const teamZeroStats = match.stats?.[teamZeroHome ? "home" : "away"] ?? {};
+    const teamOneStats = match.stats?.[teamZeroHome ? "away" : "home"] ?? {};
+    const signals = [[Math.tanh((homeGoals - awayGoals) / 1.5), 0.45]];
+    const addShareSignal = (homeValue, awayValue, weight) => {
+      if (Number.isFinite(homeValue) && Number.isFinite(awayValue) &&
+        homeValue + awayValue > 0) {
+        signals.push([(homeValue - awayValue) / (homeValue + awayValue), weight]);
+      }
+    };
+    addShareSignal(teamZeroStats.shots, teamOneStats.shots, 0.12);
+    addShareSignal(teamZeroStats.shotsOnTarget, teamOneStats.shotsOnTarget, 0.18);
+    if (Number.isFinite(teamZeroStats.possession) && Number.isFinite(teamOneStats.possession)) {
+      signals.push([(teamZeroStats.possession - teamOneStats.possession) / 100, 0.12]);
+    }
+    addShareSignal(teamZeroStats.passes, teamOneStats.passes, 0.08);
+
+    const totalWeight = signals.reduce((sum, [, weight]) => sum + weight, 0);
+    const performanceEdge = signals.reduce((sum, [value, weight]) =>
+      sum + value * weight, 0) / totalWeight + 0.06;
+    const drawChance = 0.08 + 0.38 * Math.exp(-3 * Math.abs(performanceEdge));
+    const homeShare = 1 / (1 + Math.exp(-4 * performanceEdge));
+    return [
+      (1 - drawChance) * homeShare,
+      drawChance,
+      (1 - drawChance) * (1 - homeShare)
+    ];
+  });
+
+  const priorWeight = 2;
+  const probabilities = [0, 1, 2].map(index =>
+    (predictions.reduce((sum, prediction) => sum + prediction[index], 0) +
+      priorWeight / 3) / (history.length + priorWeight)
+  );
+  return { probabilities, count: history.length };
+}
+
+function renderUpcomingMatch() {
+  const prediction = calculateUpcomingMatchOdds();
+  upcomingMatchOdds = prediction;
+  upcomingBaseProbabilities = prediction.probabilities;
+  const homeName = state.teams[0]?.name ?? t("homeTeam");
+  const awayName = state.teams[1]?.name ?? t("awayTeam");
+  document.getElementById("upcomingHomeName").textContent = homeName;
+  document.getElementById("upcomingAwayName").textContent = awayName;
+  document.getElementById("upcomingHomeLabel").textContent = homeName;
+  document.getElementById("upcomingAwayLabel").textContent = awayName;
+  setRaceBadge(document.getElementById("upcomingHomeBadge"), 0, TEAM_PHOTOS[0]);
+  setRaceBadge(document.getElementById("upcomingAwayBadge"), 1, TEAM_PHOTOS[1]);
+  matchOddsChartCanvas.setAttribute("aria-label", t("upcomingMatchChartLabel", homeName, awayName));
+  document.getElementById("upcomingMatchNote").textContent = prediction.count === 0
+    ? t("predictionNoHistory")
+    : t("upcomingMatchSamples", prediction.count);
+
+  const signature = JSON.stringify(state.matches.map(match => [
+    match.id, match.home, match.away, match.homeGoals, match.awayGoals, match.stats
+  ]));
+  if (signature !== upcomingMatchSignature) {
+    upcomingMatchSignature = signature;
+    liveUpcomingProbabilities = [...upcomingBaseProbabilities];
+    targetUpcomingProbabilities = [...upcomingBaseProbabilities];
+    const now = performance.now();
+    upcomingMatchHistory = [
+      { t: now - 60000, probabilities: [...liveUpcomingProbabilities] },
+      { t: now, probabilities: [...liveUpcomingProbabilities] }
+    ];
+  }
+  updateUpcomingOddsDisplay();
+}
+
+function getDisplayedMatchProbabilities(probabilities) {
+  const totalTenths = 1000;
+  const exactTenths = probabilities.map(probability => probability * totalTenths);
+  const displayedTenths = exactTenths.map(Math.floor);
+  let remainder = totalTenths - displayedTenths.reduce((sum, value) => sum + value, 0);
+  const order = exactTenths
+    .map((value, index) => ({ index, fraction: value - displayedTenths[index] }))
+    .sort((a, b) => b.fraction - a.fraction);
+  for (let index = 0; index < remainder; index++) {
+    displayedTenths[order[index].index]++;
+  }
+  return displayedTenths.map(value => value / 10);
+}
+
+function updateUpcomingOddsDisplay() {
+  if (!upcomingMatchOdds) return;
+  const percentages = getDisplayedMatchProbabilities(liveUpcomingProbabilities);
+  ["upcomingHomeOdds", "upcomingDrawOdds", "upcomingAwayOdds"].forEach((id, index) => {
+    document.getElementById(id).textContent = `${percentages[index].toFixed(1)}%`;
+  });
+}
+
+function animateUpcomingMatch(now) {
+  const elapsed = lastUpcomingFrame ? Math.min(now - lastUpcomingFrame, 100) : 16;
+  lastUpcomingFrame = now;
+  if (upcomingMatchOdds && upcomingMatchOdds.count > 0 && !prefersReducedMotion) {
+    if (now >= nextUpcomingOddsTick) {
+      const maxDeviation = 0.06;
+      const homeTarget = Math.max(
+        Math.max(0.02, upcomingBaseProbabilities[0] - maxDeviation),
+        Math.min(Math.min(0.96, upcomingBaseProbabilities[0] + maxDeviation), liveUpcomingProbabilities[0] +
+          (Math.random() - 0.5) * 0.08 +
+          (upcomingBaseProbabilities[0] - liveUpcomingProbabilities[0]) * 0.16)
+      );
+      const maxDrawTarget = Math.min(0.75, 0.98 - homeTarget, upcomingBaseProbabilities[1] + maxDeviation);
+      const drawTarget = Math.max(Math.min(0.02, maxDrawTarget),
+        Math.min(maxDrawTarget, liveUpcomingProbabilities[1] +
+          (Math.random() - 0.5) * 0.05 +
+          (upcomingBaseProbabilities[1] - liveUpcomingProbabilities[1]) * 0.16)
+      );
+      targetUpcomingProbabilities = [homeTarget, drawTarget, 1 - homeTarget - drawTarget];
+      nextUpcomingOddsTick = now + 700 + Math.random() * 900;
+    }
+    const easing = 1 - Math.exp(-elapsed / 700);
+    liveUpcomingProbabilities = liveUpcomingProbabilities.map((value, index) =>
+      value + (targetUpcomingProbabilities[index] - value) * easing
+    );
+    const total = liveUpcomingProbabilities.reduce((sum, value) => sum + value, 0);
+    liveUpcomingProbabilities = liveUpcomingProbabilities.map(value => value / total);
+  } else if (upcomingMatchOdds) {
+    liveUpcomingProbabilities = [...upcomingBaseProbabilities];
+    targetUpcomingProbabilities = [...upcomingBaseProbabilities];
+  }
+
+  if (upcomingMatchOdds && now >= nextUpcomingSample) {
+    upcomingMatchHistory.push({ t: now, probabilities: [...liveUpcomingProbabilities] });
+    const cutoff = now - 60000;
+    while (upcomingMatchHistory.length > 2 && upcomingMatchHistory[1].t < cutoff) {
+      upcomingMatchHistory.shift();
+    }
+    nextUpcomingSample = now + 100;
+    updateUpcomingOddsDisplay();
+  }
+  if (upcomingMatchOdds && now >= nextUpcomingDraw) {
+    drawMatchOddsChart(now);
+    nextUpcomingDraw = now + 50;
+  }
+}
+
+function drawMatchOddsChart(now = performance.now()) {
+  const ctx = matchOddsChartCanvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const rect = matchOddsChartCanvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const pixelWidth = Math.round(rect.width * dpr);
+  const pixelHeight = Math.round(rect.height * dpr);
+  if (matchOddsChartCanvas.width !== pixelWidth || matchOddsChartCanvas.height !== pixelHeight) {
+    matchOddsChartCanvas.width = pixelWidth;
+    matchOddsChartCanvas.height = pixelHeight;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const width = rect.width;
+  const height = rect.height;
+  ctx.clearRect(0, 0, width, height);
+  const left = 34;
+  const right = 12;
+  const top = 8;
+  const bottom = 18;
+  const chartWidth = Math.max(1, width - left - right);
+  const chartHeight = Math.max(1, height - top - bottom);
+  const startTime = now - 60000;
+
+  [0, 50, 100].forEach(value => {
+    const y = top + chartHeight - (value / 100) * chartHeight;
+    ctx.beginPath();
+    ctx.moveTo(left, y);
+    ctx.lineTo(width - right, y);
+    ctx.strokeStyle = value === 50 ? "rgba(255,255,255,.13)" : "rgba(255,255,255,.06)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash(value === 50 ? [3, 4] : []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(255,255,255,.42)";
+    ctx.font = "9px Inter, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`${value}%`, 3, y + 3);
+  });
+  ctx.fillStyle = "rgba(255,255,255,.4)";
+  ctx.font = "9px Inter, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("-60s", left, height - 4);
+  ctx.textAlign = "center";
+  ctx.fillText("-30s", left + chartWidth / 2, height - 4);
+  ctx.textAlign = "right";
+  ctx.fillText("now", width - right, height - 4);
+
+  const traces = [
+    { index: 0, color: "#d3ff57" },
+    { index: 1, color: "#9c78ff" },
+    { index: 2, color: "#55c5ff" }
+  ];
+  traces.forEach(trace => {
+    ctx.beginPath();
+    upcomingMatchHistory.forEach((point, index) => {
+      const x = left + ((point.t - startTime) / 60000) * chartWidth;
+      const y = top + chartHeight - point.probabilities[trace.index] * chartHeight;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    const currentY = top + chartHeight -
+      liveUpcomingProbabilities[trace.index] * chartHeight;
+    ctx.lineTo(width - right, currentY);
+    ctx.strokeStyle = trace.color;
+    ctx.lineWidth = 1.8;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.shadowColor = trace.color;
+    ctx.shadowBlur = 7;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+}
+
 authButton.addEventListener("click", async () => {
   if (session && !dataReady) {
     await handleSession(session);
@@ -1598,7 +1850,11 @@ try {
 }
 
 window.requestAnimationFrame(animateChampionshipRace);
-window.addEventListener("resize", () => drawRaceChart(performance.now()));
+window.addEventListener("resize", () => {
+  const now = performance.now();
+  drawRaceChart(now);
+  drawMatchOddsChart(now);
+});
 
 if (configReady) {
   void refreshNews();
