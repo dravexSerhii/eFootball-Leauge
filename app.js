@@ -1887,50 +1887,23 @@ function updateMatchTeamBadges() {
 }
 
 function calculateUpcomingMatchOdds() {
-  const history = state.matches.filter(match =>
-    (match.home === 0 && match.away === 1) ||
-    (match.home === 1 && match.away === 0)
-  );
-  if (history.length === 0) return { probabilities: [1 / 3, 1 / 3, 1 / 3], count: 0 };
+  const history = state.matches
+    .filter(match =>
+      (match.home === 0 && match.away === 1) ||
+      (match.home === 1 && match.away === 0)
+    )
+    .filter(match =>
+      match.homeGoals != null && match.awayGoals != null &&
+      Number.isFinite(Number(match.homeGoals)) &&
+      Number.isFinite(Number(match.awayGoals))
+    )
+    .slice()
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(-10);
+  if (!history.length) return { probabilities: [1 / 3, 1 / 3, 1 / 3], count: 0 };
 
-  const predictions = history.map(match => {
-    const teamZeroHome = match.home === 0;
-    const homeGoals = teamZeroHome ? match.homeGoals : match.awayGoals;
-    const awayGoals = teamZeroHome ? match.awayGoals : match.homeGoals;
-    const teamZeroStats = match.stats?.[teamZeroHome ? "home" : "away"] ?? {};
-    const teamOneStats = match.stats?.[teamZeroHome ? "away" : "home"] ?? {};
-    const signals = [[Math.tanh((homeGoals - awayGoals) / 1.5), 0.45]];
-    const addShareSignal = (homeValue, awayValue, weight) => {
-      if (Number.isFinite(homeValue) && Number.isFinite(awayValue) &&
-        homeValue + awayValue > 0) {
-        signals.push([(homeValue - awayValue) / (homeValue + awayValue), weight]);
-      }
-    };
-    addShareSignal(teamZeroStats.shots, teamOneStats.shots, 0.12);
-    addShareSignal(teamZeroStats.shotsOnTarget, teamOneStats.shotsOnTarget, 0.18);
-    if (Number.isFinite(teamZeroStats.possession) && Number.isFinite(teamOneStats.possession)) {
-      signals.push([(teamZeroStats.possession - teamOneStats.possession) / 100, 0.12]);
-    }
-    addShareSignal(teamZeroStats.passes, teamOneStats.passes, 0.08);
-
-    const totalWeight = signals.reduce((sum, [, weight]) => sum + weight, 0);
-    const performanceEdge = signals.reduce((sum, [value, weight]) =>
-      sum + value * weight, 0) / totalWeight + 0.06;
-    const drawChance = 0.08 + 0.38 * Math.exp(-3 * Math.abs(performanceEdge));
-    const homeShare = 1 / (1 + Math.exp(-4 * performanceEdge));
-    return [
-      (1 - drawChance) * homeShare,
-      drawChance,
-      (1 - drawChance) * (1 - homeShare)
-    ];
-  });
-
-  const priorWeight = 2;
-  const probabilities = [0, 1, 2].map(index =>
-    (predictions.reduce((sum, prediction) => sum + prediction[index], 0) +
-      priorWeight / 3) / (history.length + priorWeight)
-  );
-  return { probabilities, count: history.length };
+  const forecast = calculateForecastFromRecentMatches(history, 0, 1, 1);
+  return { probabilities: forecast.probabilities, count: forecast.sampleSize };
 }
 
 function renderUpcomingMatch() {
