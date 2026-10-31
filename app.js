@@ -2096,19 +2096,10 @@ function renderFiveMatchForecast() {
       fixture.append(team);
     });
 
-    const score = document.createElement("strong");
-    score.className = `forecast-five-score${forecast.available ? "" : " forecast-five-unavailable"}`;
-    score.textContent = forecast.available
-      ? `${forecast.homeGoals} : ${forecast.awayGoals}`
-      : t("forecastUnavailable");
-    if (forecast.available) {
-      score.setAttribute("aria-label", `${t("forecastScore")}: ${forecast.homeGoals} to ${forecast.awayGoals}`);
-    }
-
     const pick = document.createElement("div");
     pick.className = "forecast-five-pick";
     if (!forecast.available) {
-      pick.textContent = "";
+      pick.textContent = t("forecastUnavailable");
     } else if (forecast.predictedOutcome === 1) {
       const drawMark = document.createElement("span");
       drawMark.className = "forecast-five-draw";
@@ -2148,9 +2139,9 @@ function renderFiveMatchForecast() {
         segment.style.width = `${probability * 100}%`;
         bar.append(segment);
       });
-      item.append(number, fixture, score, pick, outcomes, bar);
+      item.append(number, fixture, pick, outcomes, bar);
     } else {
-      item.append(number, fixture, score);
+      item.append(number, fixture, pick);
     }
     list.append(item);
   });
