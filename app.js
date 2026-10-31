@@ -159,7 +159,7 @@ const TRANSLATIONS = {
     headToHead: "История встреч",
     winsLabel: "П",
     drawsLabel: "Н",
-    lossesLabel: "Ппр",
+    lossesLabel: "П",
     goalsLabel: "Голы: {0} — {1}",
     totalMatches: "Всего матчей: {0}",
     tableTitle: "Таблица",
@@ -763,7 +763,9 @@ function getChampionships() {
 }
 
 function getHeadToHead() {
-  const matches = state.matches;
+  const matches = state.matches.filter(m =>
+    (m.home === 0 && m.away === 1) || (m.home === 1 && m.away === 0)
+  );
   let t0Wins = 0, t0Draws = 0, t0Losses = 0;
   let t0GoalsFor = 0, t0GoalsAgainst = 0;
   matches.forEach(m => {
@@ -861,22 +863,24 @@ function renderSeasonInfo() {
   const h2hTeam1Wins = document.getElementById("h2hTeam1Wins");
   const h2hTeam1Draws = document.getElementById("h2hTeam1Draws");
   const h2hTeam1Losses = document.getElementById("h2hTeam1Losses");
-  const h2hTotal = document.getElementById("h2hTotal");
-  const h2hTeam0GF = document.getElementById("h2hTeam0GF");
-  const h2hTeam0GA = document.getElementById("h2hTeam0GA");
-  const h2hTeam1GF = document.getElementById("h2hTeam1GF");
-  const h2hTeam1GA = document.getElementById("h2hTeam1GA");
+  const h2hTeam0Name = document.getElementById("h2hTeam0Name");
+  const h2hTeam1Name = document.getElementById("h2hTeam1Name");
+  const h2hGoalsSummary = document.getElementById("h2hGoalsSummary");
+  const h2hMatchesSummary = document.getElementById("h2hMatchesSummary");
+  if (h2hTeam0Name) h2hTeam0Name.textContent = state.teams[0]?.name || "Team 1";
+  if (h2hTeam1Name) h2hTeam1Name.textContent = state.teams[1]?.name || "Team 2";
   if (h2hTeam0Wins) h2hTeam0Wins.textContent = h2h.team0Wins;
   if (h2hTeam0Draws) h2hTeam0Draws.textContent = h2h.team0Draws;
   if (h2hTeam0Losses) h2hTeam0Losses.textContent = h2h.team0Losses;
   if (h2hTeam1Wins) h2hTeam1Wins.textContent = h2h.team1Wins;
   if (h2hTeam1Draws) h2hTeam1Draws.textContent = h2h.team1Draws;
   if (h2hTeam1Losses) h2hTeam1Losses.textContent = h2h.team1Losses;
-  if (h2hTotal) h2hTotal.textContent = h2h.total;
-  if (h2hTeam0GF) h2hTeam0GF.textContent = h2h.team0GoalsFor;
-  if (h2hTeam0GA) h2hTeam0GA.textContent = h2h.team0GoalsAgainst;
-  if (h2hTeam1GF) h2hTeam1GF.textContent = h2h.team1GoalsFor;
-  if (h2hTeam1GA) h2hTeam1GA.textContent = h2h.team1GoalsAgainst;
+  if (h2hGoalsSummary) {
+    h2hGoalsSummary.textContent = t("goalsLabel", h2h.team0GoalsFor, h2h.team1GoalsFor);
+  }
+  if (h2hMatchesSummary) {
+    h2hMatchesSummary.textContent = t("totalMatches", h2h.total);
+  }
 }
 
 async function deleteMatch(id) {
