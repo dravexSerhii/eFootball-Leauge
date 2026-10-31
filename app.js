@@ -83,14 +83,14 @@ const TRANSLATIONS = {
     upcomingMatchDisclaimer: "Historical match statistics with simulated movement. Not live-match data.",
     upcomingMatchSamples: "Previous matches used: {0}",
     forecastFiveTitle: "Next 5 match forecast",
-    forecastFiveSubtitle: "Uses average goals and actual outcome frequency from the latest 10 matches",
+    forecastFiveSubtitle: "Projects scoring rates and recent form trends from the latest 10 matches",
     forecastDataModel: "DATA MODEL",
     forecastMatch: "Match {0}",
     forecastHomeWin: "Home",
     forecastAwayWin: "Away",
     forecastDraw: "Draw",
     forecastScore: "Projected score",
-    forecastDataNote: "Forecasts are calculated from all of the latest 10 played matches, with each match counted equally.",
+    forecastDataNote: "Each forecast uses the latest 10 played matches. Projected form trends change with each forecast horizon.",
     forecastNoHistory: "No match history yet.",
     forecastNeedTen: "Forecasts will appear after 10 matches. Currently recorded: {0}.",
     forecastUnavailable: "No past match with this home/away setup — not enough data to forecast.",
@@ -272,14 +272,14 @@ const TRANSLATIONS = {
     upcomingMatchDisclaimer: "История матчей и симуляция колебаний. Это не данные матча в реальном времени.",
     upcomingMatchSamples: "Учтено предыдущих матчей: {0}",
     forecastFiveTitle: "Прогноз на следующие 5 матчей",
-    forecastFiveSubtitle: "Среднее число голов и частота исходов за последние 10 матчей",
+    forecastFiveSubtitle: "Прогноз по результативности и динамике формы за последние 10 матчей",
     forecastDataModel: "РАСЧЁТ ПО ДАННЫМ",
     forecastMatch: "Матч {0}",
     forecastHomeWin: "Хозяева",
     forecastAwayWin: "Гости",
     forecastDraw: "Ничья",
     forecastScore: "Прогноз счёта",
-    forecastDataNote: "Прогнозы рассчитаны по всем 10 последним матчам, каждый матч учитывается одинаково.",
+    forecastDataNote: "Каждый прогноз использует последние 10 матчей. Динамика формы учитывается отдельно для каждого горизонта.",
     forecastNoHistory: "Истории матчей пока нет.",
     forecastNeedTen: "Прогноз появится после 10 матчей. Сейчас записано: {0}.",
     forecastUnavailable: "Матчей с таким распределением ролей хозяев и гостей не было — данных для прогноза недостаточно.",
@@ -1993,7 +1993,8 @@ function getFiveMatchForecast() {
     const prediction = calculateForecastFromRecentMatches(
       recentMatches,
       fixture.homeTeam,
-      fixture.awayTeam
+      fixture.awayTeam,
+      index + 1
     );
     fixtureIndex = (fixtureIndex + 1) % fixtures.length;
     return {
@@ -2005,37 +2006,77 @@ function getFiveMatchForecast() {
   });
 }
 
-function calculateForecastFromRecentMatches(matches, homeTeam, awayTeam) {
-  const outcomeCounts = [0, 0, 0];
-  let homeGoalsTotal = 0;
-  let awayGoalsTotal = 0;
-
-  matches.forEach(match => {
+function calculateForecastFromRecentMatches(matches, homeTeam, awayTeam, forecastHorizon) {
+  let homeScoredTotal = 0;
+  let homeConcededTotal = 0;
+  let awayScoredTotal = 0;
+  let awayConcededTotal = 0;
+  const goalDifferences = matches.map(match => {
+    const homeGoals = Number(match.homeGoals);
+    const awayGoals = Number(match.awayGoals);
     const homeTeamGoals = match.home === homeTeam
-      ? Number(match.homeGoals)
-      : Number(match.awayGoals);
+      ? homeGoals
+      : awayGoals;
     const awayTeamGoals = match.home === awayTeam
-      ? Number(match.homeGoals)
-      : Number(match.awayGoals);
-    homeGoalsTotal += homeTeamGoals;
-    awayGoalsTotal += awayTeamGoals;
-    outcomeCounts[homeTeamGoals > awayTeamGoals ? 0 : homeTeamGoals === awayTeamGoals ? 1 : 2]++;
+      ? homeGoals
+      : awayGoals;
+    homeScoredTotal += homeTeamGoals;
+    homeConcededTotal += awayTeamGoals;
+    awayScoredTotal += awayTeamGoals;
+    awayConcededTotal += homeTeamGoals;
+    return homeTeamGoals - awayTeamGoals;
   });
 
   const sampleSize = matches.length;
-  const probabilities = outcomeCounts.map(count => count / sampleSize);
+  const homeAverage = (homeScoredTotal + awayConcededTotal) / (2 * sampleSize);
+  const awayAverage = (awayScoredTotal + homeConcededTotal) / (2 * sampleSize);
+  const meanIndex = (sampleSize - 1) / 2;
+  const meanDifference = goalDifferences.reduce((sum, value) => sum + value, 0) / sampleSize;
+  const covariance = goalDifferences.reduce((sum, value, index) =>
+    sum + (index - meanIndex) * (value - meanDifference), 0);
+  const variance = goalDifferences.reduce((sum, _, index) =>
+    sum + (index - meanIndex) ** 2, 0);
+  const formTrend = variance ? covariance / variance : 0;
+  const forecastMargin = meanDifference + formTrend * Math.min(forecastHorizon, 5) * 0.35;
+  const marginAdjustment = (forecastMargin - (homeAverage - awayAverage)) / 2;
+  const homeExpectedGoals = Math.max(0.05, Math.min(8, homeAverage + marginAdjustment));
+  const awayExpectedGoals = Math.max(0.05, Math.min(8, awayAverage - marginAdjustment));
+  const probabilities = getPoissonMatchProbabilities(homeExpectedGoals, awayExpectedGoals);
   const maxProbability = Math.max(...probabilities);
   const leaders = probabilities
     .map((probability, index) => probability === maxProbability ? index : -1)
     .filter(index => index >= 0);
 
   return {
-    homeGoals: Math.round(homeGoalsTotal / sampleSize),
-    awayGoals: Math.round(awayGoalsTotal / sampleSize),
+    homeGoals: Math.round(homeExpectedGoals),
+    awayGoals: Math.round(awayExpectedGoals),
     probabilities,
     predictedOutcome: leaders.length === 1 ? leaders[0] : null,
     sampleSize
   };
+}
+
+function getPoissonMatchProbabilities(homeExpectedGoals, awayExpectedGoals) {
+  const getPoissonDistribution = expectedGoals => {
+    const probabilities = [Math.exp(-expectedGoals)];
+    for (let goals = 1; goals <= 12; goals++) {
+      probabilities.push(probabilities[goals - 1] * expectedGoals / goals);
+    }
+    return probabilities;
+  };
+  const homeScoreProbabilities = getPoissonDistribution(homeExpectedGoals);
+  const awayScoreProbabilities = getPoissonDistribution(awayExpectedGoals);
+  const outcomes = [0, 0, 0];
+
+  homeScoreProbabilities.forEach((homeProbability, homeGoals) => {
+    awayScoreProbabilities.forEach((awayProbability, awayGoals) => {
+      const outcome = homeGoals > awayGoals ? 0 : homeGoals === awayGoals ? 1 : 2;
+      outcomes[outcome] += homeProbability * awayProbability;
+    });
+  });
+
+  const totalProbability = outcomes.reduce((sum, probability) => sum + probability, 0);
+  return outcomes.map(probability => probability / totalProbability);
 }
 
 function renderFiveMatchForecast() {
