@@ -119,6 +119,14 @@
                 <p class="upcoming-match-disclaimer" data-i18n="upcomingMatchDisclaimer">Historical match statistics with simulated movement. Not live-match data.</p>
             </section>
 
+            <section class="last-match-panel panel" id="lastMatchPanel" aria-labelledby="lastMatchTitle" hidden>
+                <div class="last-match-heading">
+                    <h2 id="lastMatchTitle" data-i18n="lastMatchTitle">Last match</h2>
+                    <span class="last-match-date" id="lastMatchDate"></span>
+                </div>
+                <div class="last-match-result" id="lastMatchResult"></div>
+            </section>
+
             <section class="season-panel panel" aria-label="Season info">
                 <div class="panel-heading">
                     <div class="season-header">
@@ -196,6 +204,7 @@
                             matches</span>
                     </div>
                     <div class="match-list" id="matchList"></div>
+                    <button class="match-history-toggle" id="matchHistoryToggle" type="button" aria-controls="matchList" aria-expanded="false" hidden></button>
                 </section>
                 <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span data-i18n="tipText">A win earns <strong>3
                             points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared

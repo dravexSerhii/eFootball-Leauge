@@ -74,6 +74,9 @@ const TRANSLATIONS = {
     upcomingMatchSamples: "Previous matches used: {0}",
     upcomingMatchChartLabel: "{0} and {1} match outcome probabilities",
     versus: "VS",
+    lastMatchTitle: "Last match",
+    matchHistoryShow: "Show all match history ({0})",
+    matchHistoryHide: "Show latest matches",
     matchDialogTitle: "Add match result",
     matchDialogDesc: "Enter the score for a match you played",
     predictionDraw: "Draw",
@@ -230,6 +233,9 @@ const TRANSLATIONS = {
     upcomingMatchSamples: "Учтено предыдущих матчей: {0}",
     upcomingMatchChartLabel: "Вероятности исхода матча {0} и {1}",
     versus: "ПРОТИВ",
+    lastMatchTitle: "Последний матч",
+    matchHistoryShow: "Вся история матчей ({0})",
+    matchHistoryHide: "Показать последние матчи",
     matchDialogTitle: "Добавить результат матча",
     matchDialogDesc: "Введите счёт сыгранного матча",
     predictionDraw: "Ничья",
@@ -342,6 +348,7 @@ let newsPreviewUrl = null;
 let newsItems = [];
 let currentSeason = 1;
 let currentLang = localStorage.getItem("leagueLang") || "en";
+let showAllMatches = false;
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -390,6 +397,7 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 function render() {
   renderStandings();
   renderMatches();
+  renderLastMatch();
   renderNews();
   renderChampionshipRace();
   renderUpcomingMatch();
@@ -1029,48 +1037,55 @@ function renderTeamStats() {
 
   const recordedNote = count => t("statRecordedIn", count, stats.played);
   const cards = [
-    { label: "statPlayed", value: String(stats.played), note: t("statAllMatches") },
+    { label: "statPlayed", value: String(stats.played), note: t("statAllMatches"), tone: "results" },
     {
       label: "statWinRate",
       value: stats.played ? `${formatTeamStat(stats.wins / stats.played * 100)}%` : "—",
-      note: t("statWinsOutOf", stats.wins, stats.played)
+      note: t("statWinsOutOf", stats.wins, stats.played),
+      tone: "results"
     },
-    { label: "statGoals", value: String(stats.goals), note: t("statAllMatches") },
+    { label: "statGoals", value: String(stats.goals), note: t("statAllMatches"), tone: "goals" },
     {
       label: "statGoalsPerMatch",
       value: stats.played ? formatTeamStat(stats.goals / stats.played) : "—",
-      note: t("statAllMatches")
+      note: t("statAllMatches"),
+      tone: "goals"
     },
     {
       label: "statPossession",
       value: stats.possessionMatches
         ? `${formatTeamStat(stats.possessionTotal / stats.possessionMatches)}%`
         : "—",
-      note: recordedNote(stats.possessionMatches)
+      note: recordedNote(stats.possessionMatches),
+      tone: "possession"
     },
     {
       label: "statPasses",
       value: stats.passesMatches ? formatTeamStat(stats.passesTotal / stats.passesMatches) : "—",
-      note: recordedNote(stats.passesMatches)
+      note: recordedNote(stats.passesMatches),
+      tone: "possession"
     },
     {
       label: "statShots",
       value: stats.shotsMatches ? formatTeamStat(stats.shotsTotal / stats.shotsMatches) : "—",
-      note: recordedNote(stats.shotsMatches)
+      note: recordedNote(stats.shotsMatches),
+      tone: "shots"
     },
     {
       label: "statShotsOnTarget",
       value: stats.shotsOnTargetMatches
         ? formatTeamStat(stats.shotsOnTargetTotal / stats.shotsOnTargetMatches)
         : "—",
-      note: recordedNote(stats.shotsOnTargetMatches)
+      note: recordedNote(stats.shotsOnTargetMatches),
+      tone: "shots"
     },
     {
       label: "statShotConversion",
       value: stats.shotsTotal
         ? `${formatTeamStat(stats.goalsInShotMatches / stats.shotsTotal * 100)}%`
         : "—",
-      note: recordedNote(stats.shotsMatches)
+      note: recordedNote(stats.shotsMatches),
+      tone: "goals"
     }
   ];
   const grid = document.getElementById("teamStatsGrid");
@@ -1078,6 +1093,7 @@ function renderTeamStats() {
   cards.forEach(card => {
     const element = document.createElement("article");
     element.className = "team-stat-card";
+    element.dataset.tone = card.tone;
     const label = document.createElement("span");
     label.className = "team-stat-label";
     label.textContent = t(card.label);
@@ -1229,6 +1245,7 @@ function getTeamForm(teamIndex) {
 
 function renderMatches() {
   matchList.replaceChildren();
+  const historyToggle = document.getElementById("matchHistoryToggle");
   document.getElementById("matchesCount").textContent =
     `${state.matches.length} ${pluralize(state.matches.length, "match", "matches")}`;
   if (state.matches.length === 0) {
@@ -1236,28 +1253,45 @@ function renderMatches() {
     empty.className = "empty-matches";
     empty.textContent = t("noMatchesPlayed");
     matchList.append(empty);
+    historyToggle.hidden = true;
+    historyToggle.setAttribute("aria-expanded", "false");
     return;
   }
-  state.matches.slice().reverse().slice(0, 6).forEach(match => {
+  const matches = state.matches.slice().reverse();
+  const visibleMatches = showAllMatches ? matches : matches.slice(0, 6);
+  historyToggle.hidden = matches.length <= 6;
+  historyToggle.setAttribute("aria-expanded", String(showAllMatches));
+  historyToggle.textContent = showAllMatches
+    ? t("matchHistoryHide")
+    : t("matchHistoryShow", matches.length);
+  visibleMatches.forEach(match => {
     const hasStats = match.stats && Object.values(match.stats.home ?? {})
       .concat(Object.values(match.stats.away ?? {})).some(value => value !== null);
     const item = document.createElement(hasStats ? "details" : "div");
     item.className = hasStats ? "match-item match-item-details" : "match-item";
     const teams = document.createElement("div");
     teams.className = "match-teams";
-    const first = document.createElement("span");
-    first.textContent = state.teams[match.home].name;
-    const second = document.createElement("span");
-    second.textContent = state.teams[match.away].name;
+    const first = createMatchTeamDisplay(match.home);
+    const second = createMatchTeamDisplay(match.away);
     const date = document.createElement("span");
     date.className = "match-date";
     const parsedDate = new Date(match.date);
     date.textContent = Number.isNaN(parsedDate.getTime()) ? "" :
-      parsedDate.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+      parsedDate.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB", {
+        day: "numeric",
+        month: "short"
+      });
     teams.append(first, second, date);
     const score = document.createElement("span");
     score.className = "match-score";
-    score.textContent = `${match.homeGoals} : ${match.awayGoals}`;
+    const scoreHome = document.createElement("span");
+    scoreHome.textContent = String(match.homeGoals);
+    const scoreSeparator = document.createElement("span");
+    scoreSeparator.className = "match-score-separator";
+    scoreSeparator.textContent = ":";
+    const scoreAway = document.createElement("span");
+    scoreAway.textContent = String(match.awayGoals);
+    score.append(scoreHome, scoreSeparator, scoreAway);
     score.setAttribute("aria-label", `Score ${match.homeGoals} to ${match.awayGoals}`);
     if (hasStats) {
       const summary = document.createElement("summary");
@@ -1278,6 +1312,60 @@ function renderMatches() {
     item.append(deleteButton);
     matchList.append(item);
   });
+}
+
+function createMatchTeamDisplay(teamIndex) {
+  const team = document.createElement("span");
+  team.className = "match-team";
+  const badge = document.createElement("span");
+  badge.className = `match-team-badge ${teamIndex === 0 ? "one" : "two"}`;
+  const photo = TEAM_PHOTOS[teamIndex];
+  if (photo) {
+    const image = document.createElement("img");
+    image.src = photo;
+    image.alt = "";
+    image.loading = "lazy";
+    badge.append(image);
+  } else {
+    badge.textContent = teamIndex === 0 ? "01" : "02";
+  }
+  const name = document.createElement("span");
+  name.className = "match-team-name";
+  name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
+  team.append(badge, name);
+  return team;
+}
+
+function renderLastMatch() {
+  const panel = document.getElementById("lastMatchPanel");
+  const result = document.getElementById("lastMatchResult");
+  const dateLabel = document.getElementById("lastMatchDate");
+  if (!state.matches.length) {
+    panel.hidden = true;
+    result.replaceChildren();
+    return;
+  }
+  const lastMatch = state.matches.reduce((latest, match) =>
+    new Date(match.date) > new Date(latest.date) ? match : latest
+  );
+  panel.hidden = false;
+  const parsedDate = new Date(lastMatch.date);
+  dateLabel.textContent = Number.isNaN(parsedDate.getTime())
+    ? ""
+    : parsedDate.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  result.replaceChildren();
+  const homeTeam = createMatchTeamDisplay(lastMatch.home);
+  homeTeam.classList.add("last-match-team");
+  const awayTeam = createMatchTeamDisplay(lastMatch.away);
+  awayTeam.classList.add("last-match-team");
+  const score = document.createElement("strong");
+  score.className = "last-match-score";
+  score.textContent = `${lastMatch.homeGoals} : ${lastMatch.awayGoals}`;
+  result.append(homeTeam, score, awayTeam);
 }
 
 function renderMatchStats(match) {
@@ -1840,6 +1928,10 @@ document.querySelectorAll(".lang-btn").forEach(btn => {
 
 document.getElementById("teamStatsTeamSelect").addEventListener("change", renderTeamStats);
 document.getElementById("teamStatsSeasonSelect").addEventListener("change", renderTeamStats);
+document.getElementById("matchHistoryToggle").addEventListener("click", () => {
+  showAllMatches = !showAllMatches;
+  renderMatches();
+});
 
 function clearNewsPreview() {
   if (newsPreviewUrl) URL.revokeObjectURL(newsPreviewUrl);
