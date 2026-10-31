@@ -874,15 +874,6 @@
       padding: 0 0 14px;
     }
 
-    .match-stats-title {
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
     #lastMatchStats {
       margin-top: 16px;
       padding-top: 15px;
@@ -967,6 +958,15 @@
       color: var(--muted);
       font-size: 11px;
       line-height: 1.5;
+    }
+
+    .match-stat-edge {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 650;
+      line-height: 1.5;
+      text-align: right;
     }
 
     .empty-matches {

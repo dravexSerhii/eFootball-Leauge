@@ -79,6 +79,8 @@ const TRANSLATIONS = {
     matchHistoryShow: "Show all match history ({0})",
     matchHistoryHide: "Show latest matches",
     noMatchStats: "No statistics were recorded for this match.",
+    statEdge: "Statistical edge: {0}",
+    statsEven: "Stats are even",
     matchDialogTitle: "Add match result",
     matchDialogDesc: "Enter the score for a match you played",
     predictionDraw: "Draw",
@@ -240,6 +242,8 @@ const TRANSLATIONS = {
     matchHistoryShow: "Вся история матчей ({0})",
     matchHistoryHide: "Показать последние матчи",
     noMatchStats: "Статистика этого матча не записана.",
+    statEdge: "Статистическое преимущество: {0}",
+    statsEven: "По статистике равенство",
     matchDialogTitle: "Добавить результат матча",
     matchDialogDesc: "Введите счёт сыгранного матча",
     predictionDraw: "Ничья",
@@ -1377,25 +1381,29 @@ function renderLastMatch() {
 function renderMatchStats(match) {
   const section = document.createElement("div");
   section.className = "match-stats";
-  const title = document.createElement("h3");
-  title.className = "match-stats-title";
-  title.innerHTML = t("matchStats");
   const rows = [
-    ["shots", ""],
-    ["shotsOnTarget", ""],
-    ["possession", "%"],
-    ["passes", ""]
+    ["shotsOnTarget", 4, ""],
+    ["shots", 2.5, ""],
+    ["possession", 1.5, "%"],
+    ["passes", 0.5, ""]
   ];
   let visibleRows = 0;
-  rows.forEach(([key, suffix]) => {
+  let homeEdge = 0;
+  let awayEdge = 0;
+  rows.forEach(([key, weight, suffix]) => {
     const rawValues = [match.stats?.home?.[key], match.stats?.away?.[key]];
     const values = rawValues.map(value => {
       if (value === null || value === undefined || value === "") return null;
       const number = Number(value);
       return Number.isFinite(number) ? number : null;
     });
-    if (values.every(value => value === null)) return;
+    if (values.some(value => value === null)) return;
     visibleRows += 1;
+    const total = values[0] + values[1];
+    if (total > 0) {
+      homeEdge += weight * values[0] / total;
+      awayEdge += weight * values[1] / total;
+    }
     const row = document.createElement("div");
     row.className = "match-stat-row";
     row.setAttribute("role", "group");
@@ -1431,9 +1439,17 @@ function renderMatchStats(match) {
     const empty = document.createElement("p");
     empty.className = "match-stats-empty";
     empty.textContent = t("noMatchStats");
-    section.append(title, empty);
+    section.append(empty);
   } else {
-    section.prepend(title);
+    const edge = document.createElement("p");
+    edge.className = "match-stat-edge";
+    if (Math.abs(homeEdge - awayEdge) < 0.0001) {
+      edge.textContent = t("statsEven");
+    } else {
+      const strongerTeam = homeEdge > awayEdge ? match.home : match.away;
+      edge.textContent = t("statEdge", state.teams[strongerTeam]?.name ?? `Team ${strongerTeam + 1}`);
+    }
+    section.append(edge);
   }
   return section;
 }
