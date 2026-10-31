@@ -1115,18 +1115,53 @@
     }
 
     .championship-race .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       min-height: auto;
       padding: 16px 22px 12px;
       border-bottom: 0;
     }
 
     .championship-race h2 {
-      margin: 0 0 8px;
+      margin: 0;
       font-size: 16px;
       letter-spacing: .14em;
       text-transform: uppercase;
       color: var(--lime);
       text-shadow: 0 0 16px rgba(211, 255, 87, .35);
+    }
+
+    .race-heading-meta {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+
+    .race-live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #ff777e;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      white-space: nowrap;
+    }
+
+    .race-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 10px currentColor;
+      animation: raceLiveBlink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes raceLiveBlink {
+      50% { opacity: .35; }
     }
 
     .race-status {
@@ -1241,6 +1276,7 @@
       font-weight: 900;
       color: var(--ink);
       text-shadow: 0 0 14px rgba(255, 255, 255, .2);
+      transition: color .25s ease, text-shadow .25s ease;
     }
 
     .race-odds-value.favorite {
@@ -1255,34 +1291,37 @@
       font-weight: 600;
     }
 
+    .race-disclaimer {
+      margin: 0 22px 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
     #raceChart {
       display: block;
-      width: 100%;
+      width: calc(100% - 44px);
       height: 120px;
       margin: 10px 22px 20px;
+      box-sizing: border-box;
       background: rgba(8, 7, 13, .4);
       border-radius: 16px;
       border: 1px solid var(--line);
       box-shadow: inset 0 0 20px rgba(0, 0, 0, .4);
     }
 
-    #raceChart.live-pulse {
-      animation: racePulse 1.2s ease-in-out;
-    }
-
-    @keyframes racePulse {
-
-      0%,
-      100% {
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, .4), 0 0 0 rgba(211, 255, 87, 0);
-      }
-
-      50% {
-        box-shadow: inset 0 0 20px rgba(0, 0, 0, .4), 0 0 12px rgba(211, 255, 87, .35);
-      }
-    }
-
     @media (max-width: 600px) {
+      .championship-race .panel-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px;
+      }
+
+      .race-heading-meta {
+        justify-content: flex-start;
+      }
+
       .race-grid {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -1307,7 +1346,23 @@
       }
 
       #raceChart {
+        width: calc(100% - 32px);
         margin: 10px 16px 20px;
+      }
+
+      .race-disclaimer {
+        margin-right: 16px;
+        margin-left: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .race-live-dot {
+        animation: none;
+      }
+
+      .race-odds-value {
+        transition: none;
       }
     }
 

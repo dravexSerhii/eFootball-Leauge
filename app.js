@@ -15,6 +15,9 @@ const TRANSLATIONS = {
     editTeams: "Teams",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
+    liveSimulation: "LIVE SIMULATION",
+    raceDisclaimer: "Live estimate from season results with simulated momentum. Not live-match odds.",
+    raceChartLabel: "Live championship chance cardiogram",
     chance: "Chance",
     newSeason: "New Season",
     championships: "Championships",
@@ -139,6 +142,9 @@ const TRANSLATIONS = {
     editTeams: "Команды",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
+    liveSimulation: "ЖИВАЯ СИМУЛЯЦИЯ",
+    raceDisclaimer: "Оценка по результатам сезона с моделируемой динамикой. Это не шансы во время матча.",
+    raceChartLabel: "Кардиограмма шансов на чемпионство в реальном времени",
     chance: "Шанс",
     newSeason: "Новый сезон",
     championships: "Чемпионства",
@@ -301,6 +307,16 @@ const h2hList = document.getElementById("h2hList");
 const newSeasonBtn = document.getElementById("newSeasonBtn");
 
 let championshipHistory = [];
+let championshipRace = null;
+let championshipBaseOdds = 50;
+let liveOddsOne = 50;
+let targetOddsOne = 50;
+let nextOddsTick = 0;
+let nextHistorySample = 0;
+let nextRaceDraw = 0;
+let lastRaceFrame = 0;
+let nextOddsDelay = 1000;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function render() {
   renderStandings();
@@ -522,162 +538,191 @@ function renderChampionshipRace() {
     raceFooter.textContent = "";
     return;
   }
-  const now = Date.now();
-  const last = championshipHistory[championshipHistory.length - 1];
-  if (!last || last.one !== race.oddsOne || last.two !== race.oddsTwo) {
-    championshipHistory.push({ t: now, one: race.oddsOne, two: race.oddsTwo });
-    if (championshipHistory.length > 50) championshipHistory.shift();
+  championshipRace = race;
+  championshipBaseOdds = race.oddsOne;
+  if (championshipHistory.length === 0) {
+    liveOddsOne = targetOddsOne = championshipBaseOdds;
+    const now = performance.now();
+    championshipHistory.push(
+      { t: now - 60000, one: liveOddsOne, two: 100 - liveOddsOne },
+      { t: now, one: liveOddsOne, two: 100 - liveOddsOne }
+    );
   }
-  drawRaceChart();
-  raceChartCanvas.classList.remove("live-pulse");
-  void raceChartCanvas.offsetWidth;
-  raceChartCanvas.classList.add("live-pulse");
+  raceChartCanvas.setAttribute("aria-label", t("raceChartLabel"));
   const badgeOne = document.getElementById("raceTeamOneBadge");
   const badgeTwo = document.getElementById("raceTeamTwoBadge");
   document.getElementById("raceTeamOneName").textContent = race.one.name;
   document.getElementById("raceTeamTwoName").textContent = race.two.name;
   document.getElementById("raceTeamOnePts").textContent = `${race.one.points} pts`;
   document.getElementById("raceTeamTwoPts").textContent = `${race.two.points} pts`;
-  document.getElementById("raceTeamOneOdds").textContent = `${race.oddsOne}%`;
-  document.getElementById("raceTeamTwoOdds").textContent = `${race.oddsTwo}%`;
-  document.getElementById("raceTeamOneOdds").className = race.favorite?.index === race.one.index ? "race-odds-value favorite" : "race-odds-value";
-  document.getElementById("raceTeamTwoOdds").className = race.favorite?.index === race.two.index ? "race-odds-value favorite" : "race-odds-value";
-  raceStatus.textContent = race.statusText;
   const photoOne = TEAM_PHOTOS[race.one.index];
   const photoTwo = TEAM_PHOTOS[race.two.index];
-  if (photoOne) {
-    badgeOne.innerHTML = `<img src="${photoOne}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
-  } else {
-    badgeOne.textContent = race.one.index === 0 ? "01" : "02";
-  }
-  if (photoTwo) {
-    badgeTwo.innerHTML = `<img src="${photoTwo}" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">`;
-  } else {
-    badgeTwo.textContent = race.two.index === 0 ? "01" : "02";
-  }
-  if (race.favorite) {
+  setRaceBadge(badgeOne, race.one.index, photoOne);
+  setRaceBadge(badgeTwo, race.two.index, photoTwo);
+  updateRaceOddsDisplay();
+}
+
+function updateRaceOddsDisplay() {
+  if (!championshipRace) return;
+  const displayedOddsOne = Math.round(liveOddsOne * 10) / 10;
+  const displayedOddsTwo = Math.round((100 - liveOddsOne) * 10) / 10;
+  const displayedFavorite = state.matches.length === 0
+    ? null
+    : displayedOddsOne - displayedOddsTwo > 4
+      ? championshipRace.one
+      : displayedOddsTwo - displayedOddsOne > 4
+        ? championshipRace.two
+        : null;
+  document.getElementById("raceTeamOneOdds").textContent = `${displayedOddsOne.toFixed(1)}%`;
+  document.getElementById("raceTeamTwoOdds").textContent = `${displayedOddsTwo.toFixed(1)}%`;
+  document.getElementById("raceTeamOneOdds").className =
+    displayedFavorite?.index === championshipRace.one.index ? "race-odds-value favorite" : "race-odds-value";
+  document.getElementById("raceTeamTwoOdds").className =
+    displayedFavorite?.index === championshipRace.two.index ? "race-odds-value favorite" : "race-odds-value";
+  const raceStatus = document.getElementById("raceStatus");
+  const raceFooter = document.getElementById("raceFooter");
+  raceStatus.textContent = state.matches.length === 0
+    ? t("noMatches")
+    : displayedFavorite
+      ? t("favorite", displayedFavorite.name)
+      : t("evenMatchup");
+  if (displayedFavorite) {
     raceStatus.className = "race-status race-favorite";
-    raceFooter.textContent = t("favoriteLeads", race.favorite.name);
+    raceFooter.textContent = t("favoriteLeads", displayedFavorite.name);
   } else {
     raceStatus.className = "race-status";
-    raceFooter.textContent = t("evenMatchup");
+    raceFooter.textContent = state.matches.length === 0 ? t("noMatches") : t("evenMatchup");
   }
 }
 
-function drawRaceChart() {
+function animateChampionshipRace(now) {
+  const elapsed = lastRaceFrame ? Math.min(now - lastRaceFrame, 100) : 16;
+  lastRaceFrame = now;
+  if (championshipRace && !prefersReducedMotion) {
+    if (now >= nextOddsTick) {
+      const currentOdds = liveOddsOne;
+      const marketNoise = (Math.random() - 0.5) * 2.4;
+      const meanReversion = (championshipBaseOdds - currentOdds) * 0.12;
+      const maxDeviation = 9;
+      const minOdds = Math.max(0, championshipBaseOdds - maxDeviation);
+      const maxOdds = Math.min(100, championshipBaseOdds + maxDeviation);
+      targetOddsOne = Math.max(
+        minOdds,
+        Math.min(maxOdds, currentOdds + marketNoise + meanReversion)
+      );
+      nextOddsDelay = 650 + Math.random() * 850;
+      nextOddsTick = now + nextOddsDelay;
+    }
+    liveOddsOne += (targetOddsOne - liveOddsOne) * (1 - Math.exp(-elapsed / 650));
+  } else if (championshipRace) {
+    liveOddsOne = targetOddsOne = championshipBaseOdds;
+  }
+
+  if (championshipRace && now >= nextHistorySample) {
+    championshipHistory.push({ t: now, one: liveOddsOne, two: 100 - liveOddsOne });
+    const cutoff = now - 60000;
+    while (championshipHistory.length > 2 && championshipHistory[1].t < cutoff) {
+      championshipHistory.shift();
+    }
+    nextHistorySample = now + 100;
+    updateRaceOddsDisplay();
+  }
+  if (championshipRace && now >= nextRaceDraw) {
+    drawRaceChart(now);
+    nextRaceDraw = now + 33;
+  }
+  window.requestAnimationFrame(animateChampionshipRace);
+}
+
+function setRaceBadge(badge, teamIndex, photo) {
+  const currentPhoto = badge.dataset.photo ?? "";
+  if (currentPhoto === photo) return;
+  badge.dataset.photo = photo;
+  badge.replaceChildren();
+  if (!photo) {
+    badge.textContent = teamIndex === 0 ? "01" : "02";
+    return;
+  }
+  const image = document.createElement("img");
+  image.src = photo;
+  image.alt = "";
+  badge.append(image);
+}
+
+function drawRaceChart(now = performance.now()) {
   const ctx = raceChartCanvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
   const rect = raceChartCanvas.getBoundingClientRect();
-  raceChartCanvas.width = rect.width * dpr;
-  raceChartCanvas.height = rect.height * dpr;
-  ctx.scale(dpr, dpr);
+  if (!rect.width || !rect.height) return;
+  const pixelWidth = Math.round(rect.width * dpr);
+  const pixelHeight = Math.round(rect.height * dpr);
+  if (raceChartCanvas.width !== pixelWidth || raceChartCanvas.height !== pixelHeight) {
+    raceChartCanvas.width = pixelWidth;
+    raceChartCanvas.height = pixelHeight;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const w = rect.width;
   const h = rect.height;
   ctx.clearRect(0, 0, w, h);
-  if (championshipHistory.length < 2) return;
-  const pad = 26;
-  const innerW = w - pad * 2;
-  const innerH = h - pad * 2;
-  const minX = championshipHistory[0].t;
-  const maxX = championshipHistory[championshipHistory.length - 1].t;
-  const rangeX = maxX - minX || 1;
-  const rangeY = 100;
-  const pts = championshipHistory.map(p => ({
-    x: pad + ((p.t - minX) / rangeX) * innerW,
-    yOne: pad + innerH - (p.one / rangeY) * innerH,
-    yTwo: pad + innerH - (p.two / rangeY) * innerH
-  }));
-  const last = pts[pts.length - 1];
-  const gradOne = ctx.createLinearGradient(0, pad, 0, pad + innerH);
-  gradOne.addColorStop(0, "rgba(211,255,87,.35)");
-  gradOne.addColorStop(1, "rgba(211,255,87,.02)");
-  const gradTwo = ctx.createLinearGradient(0, pad, 0, pad + innerH);
-  gradTwo.addColorStop(0, "rgba(156,120,255,.35)");
-  gradTwo.addColorStop(1, "rgba(156,120,255,.02)");
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pad + innerH);
-  pts.forEach(p => ctx.lineTo(p.x, p.yOne));
-  ctx.lineTo(w - pad, pad + innerH);
-  ctx.closePath();
-  ctx.fillStyle = gradOne;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pad + innerH);
-  pts.forEach(p => ctx.lineTo(p.x, p.yTwo));
-  ctx.lineTo(w - pad, pad + innerH);
-  ctx.closePath();
-  ctx.fillStyle = gradTwo;
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].yOne);
-  pts.forEach(p => ctx.lineTo(p.x, p.yOne));
-  ctx.strokeStyle = "#d3ff57";
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].yTwo);
-  pts.forEach(p => ctx.lineTo(p.x, p.yTwo));
-  ctx.strokeStyle = "#9c78ff";
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-  ctx.stroke();
-  pts.forEach((p, i) => {
-    if (i === 0 || i === pts.length - 1) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.yOne, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#d3ff57";
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(p.x, p.yTwo, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#9c78ff";
-      ctx.fill();
-    }
-  });
-  ctx.beginPath();
-  ctx.moveTo(pad, pad + innerH);
-  ctx.lineTo(w - pad, pad + innerH);
-  ctx.strokeStyle = "rgba(255,255,255,.06)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(pad, pad);
-  ctx.lineTo(pad, pad + innerH);
-  ctx.strokeStyle = "rgba(255,255,255,.06)";
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  for (let y = 25; y <= 100; y += 25) {
-    const yy = pad + innerH - (y / 100) * innerH;
+  const left = 34;
+  const right = 12;
+  const top = 12;
+  const bottom = 20;
+  const innerW = Math.max(1, w - left - right);
+  const innerH = Math.max(1, h - top - bottom);
+  const startTime = now - 60000;
+  for (let y = 0; y <= 100; y += 25) {
+    const yy = top + innerH - (y / 100) * innerH;
     ctx.beginPath();
-    ctx.moveTo(pad, yy);
-    ctx.lineTo(w - pad, yy);
-    ctx.strokeStyle = "rgba(255,255,255,.03)";
+    ctx.moveTo(left, yy);
+    ctx.lineTo(w - right, yy);
+    ctx.strokeStyle = y === 50 ? "rgba(255,255,255,.12)" : "rgba(255,255,255,.055)";
     ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
+    ctx.setLineDash(y === 50 ? [4, 5] : []);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = "rgba(255,255,255,.35)";
+    ctx.fillStyle = "rgba(255,255,255,.45)";
     ctx.font = "9px Inter, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(y + "%", pad + 4, yy - 4);
+    ctx.fillText(`${y}%`, 5, yy + 3);
   }
-  const lastHist = championshipHistory[championshipHistory.length - 1];
-  ctx.fillStyle = "#d3ff57";
-  ctx.font = "bold 12px Inter, sans-serif";
+
+  ctx.fillStyle = "rgba(255,255,255,.4)";
+  ctx.font = "9px Inter, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("-60s", left, h - 5);
+  ctx.textAlign = "center";
+  ctx.fillText("-30s", left + innerW / 2, h - 5);
   ctx.textAlign = "right";
-  ctx.fillText(`${lastHist.one}%`, w - pad - 8, last.yOne - 8);
-  ctx.fillStyle = "#9c78ff";
-  ctx.fillText(`${lastHist.two}%`, w - pad - 8, last.yTwo + 14);
-  ctx.beginPath();
-  ctx.arc(last.x, last.yOne, 5, 0, Math.PI * 2);
-  ctx.fillStyle = "#d3ff57";
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(last.x, last.yTwo, 5, 0, Math.PI * 2);
-  ctx.fillStyle = "#9c78ff";
-  ctx.fill();
+  ctx.fillText("now", w - right, h - 5);
+
+  const history = championshipHistory.length
+    ? championshipHistory
+    : [{ t: now - 60000, one: 50, two: 50 }];
+  const traces = [
+    { key: "one", color: "#d3ff57" },
+    { key: "two", color: "#9c78ff" }
+  ];
+  traces.forEach(trace => {
+    ctx.beginPath();
+    history.forEach((point, index) => {
+      const x = left + ((point.t - startTime) / 60000) * innerW;
+      const y = top + innerH - (point[trace.key] / 100) * innerH;
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    const currentY = top + innerH - ((trace.key === "one" ? liveOddsOne : 100 - liveOddsOne) / 100) * innerH;
+    ctx.lineTo(w - right, currentY);
+    ctx.strokeStyle = trace.color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.shadowColor = trace.color;
+    ctx.shadowBlur = 9;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+
 }
 
 function getMatchesInSeason(season) {
@@ -1551,6 +1596,9 @@ try {
 } catch (error) {
   console.error("Language initialization error:", error);
 }
+
+window.requestAnimationFrame(animateChampionshipRace);
+window.addEventListener("resize", () => drawRaceChart(performance.now()));
 
 if (configReady) {
   void refreshNews();

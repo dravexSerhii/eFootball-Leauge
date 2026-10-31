@@ -47,7 +47,10 @@
             <section class="championship-race panel" aria-label="Championship race">
                 <div class="panel-heading">
                     <h2 data-i18n="championshipTitle">Championship Race</h2>
-                    <span class="race-status" id="raceStatus">—</span>
+                    <div class="race-heading-meta">
+                        <span class="race-live-indicator"><span class="race-live-dot"></span><span data-i18n="liveSimulation">LIVE SIMULATION</span></span>
+                        <span class="race-status" id="raceStatus">—</span>
+                    </div>
                 </div>
                 <div class="race-grid" id="raceGrid">
                     <div class="race-team race-team-one">
@@ -74,6 +77,7 @@
                     </div>
                 </div>
                 <div class="race-footer" id="raceFooter"></div>
+                <p class="race-disclaimer" data-i18n="raceDisclaimer">Live estimate from season results with simulated momentum. Not live-match odds.</p>
                 <canvas id="raceChart" height="120"></canvas>
             </section>
 
