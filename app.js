@@ -82,6 +82,16 @@ const TRANSLATIONS = {
     upcomingMatchSubtitle: "Match odds are separate from championship chances",
     upcomingMatchDisclaimer: "Historical match statistics with simulated movement. Not live-match data.",
     upcomingMatchSamples: "Previous matches used: {0}",
+    forecastFiveTitle: "Next 5 match forecast",
+    forecastFiveSubtitle: "Deterministic estimates from recent results and recorded match stats",
+    forecastDataModel: "DATA MODEL",
+    forecastMatch: "Match {0}",
+    forecastHomeWin: "Home",
+    forecastAwayWin: "Away",
+    forecastDraw: "Draw",
+    forecastScore: "Projected score",
+    forecastDataNote: "Based on weighted head-to-head results, goals and available shots, possession and passes. Estimates are not guarantees.",
+    forecastNoHistory: "No match history yet. Starting estimates use a neutral 1–1 baseline.",
     upcomingMatchChartLabel: "{0} and {1} match outcome probabilities",
     versus: "VS",
     lastMatchTitle: "Last match",
@@ -256,6 +266,16 @@ const TRANSLATIONS = {
     upcomingMatchSubtitle: "Шансы на матч рассчитываются отдельно от чемпионства",
     upcomingMatchDisclaimer: "История матчей и симуляция колебаний. Это не данные матча в реальном времени.",
     upcomingMatchSamples: "Учтено предыдущих матчей: {0}",
+    forecastFiveTitle: "Прогноз на следующие 5 матчей",
+    forecastFiveSubtitle: "Расчёт по недавним результатам и записанной статистике",
+    forecastDataModel: "РАСЧЁТ ПО ДАННЫМ",
+    forecastMatch: "Матч {0}",
+    forecastHomeWin: "Хозяева",
+    forecastAwayWin: "Гости",
+    forecastDraw: "Ничья",
+    forecastScore: "Прогноз счёта",
+    forecastDataNote: "Учитываются история встреч с весом недавних матчей, голы и доступная статистика ударов, владения и пасов. Это оценка, а не гарантия.",
+    forecastNoHistory: "Истории матчей пока нет. Начальная оценка — нейтральный счёт 1:1.",
     upcomingMatchChartLabel: "Вероятности исхода матча {0} и {1}",
     versus: "ПРОТИВ",
     lastMatchTitle: "Последний матч",
@@ -432,6 +452,7 @@ function render() {
   renderNews();
   renderChampionshipRace();
   renderUpcomingMatch();
+  renderFiveMatchForecast();
   renderSeasonInfo();
   renderTeamStats();
 }
@@ -1929,6 +1950,172 @@ function renderUpcomingMatch() {
     ];
   }
   updateUpcomingOddsDisplay();
+}
+
+function getFiveMatchForecast() {
+  const history = state.matches
+    .filter(match => (match.home === 0 && match.away === 1) ||
+      (match.home === 1 && match.away === 0))
+    .slice(-12);
+  const priorWeight = 2.5;
+  const neutralGoals = 1.35;
+  const goalTotals = [0, 0];
+  let totalGoalWeight = 0;
+  let performanceTotal = 0;
+  let performanceWeight = 0;
+
+  history.forEach((match, index) => {
+    const recencyWeight = Math.pow(0.82, history.length - index - 1);
+    const teamZeroHome = match.home === 0;
+    const goals = teamZeroHome
+      ? [match.homeGoals, match.awayGoals]
+      : [match.awayGoals, match.homeGoals];
+    goalTotals[0] += goals[0] * recencyWeight;
+    goalTotals[1] += goals[1] * recencyWeight;
+    totalGoalWeight += recencyWeight;
+
+    const teamZeroStats = match.stats?.[teamZeroHome ? "home" : "away"] ?? {};
+    const teamOneStats = match.stats?.[teamZeroHome ? "away" : "home"] ?? {};
+    const signals = [[Math.tanh((goals[0] - goals[1]) / 1.5), 0.55]];
+    const addShareSignal = (teamZeroValue, teamOneValue, weight) => {
+      const valueZero = Number(teamZeroValue);
+      const valueOne = Number(teamOneValue);
+      if (Number.isFinite(valueZero) && Number.isFinite(valueOne) &&
+        valueZero + valueOne > 0) {
+        signals.push([(valueZero - valueOne) / (valueZero + valueOne), weight]);
+      }
+    };
+    addShareSignal(teamZeroStats.shots, teamOneStats.shots, 0.1);
+    addShareSignal(teamZeroStats.shotsOnTarget, teamOneStats.shotsOnTarget, 0.18);
+    const possessionZero = Number(teamZeroStats.possession);
+    const possessionOne = Number(teamOneStats.possession);
+    if (Number.isFinite(possessionZero) && Number.isFinite(possessionOne)) {
+      signals.push([(possessionZero - possessionOne) / 100, 0.1]);
+    }
+    addShareSignal(teamZeroStats.passes, teamOneStats.passes, 0.04);
+    const matchWeight = signals.reduce((sum, [, weight]) => sum + weight, 0);
+    const matchEdge = signals.reduce((sum, [value, weight]) =>
+      sum + value * weight, 0) / matchWeight;
+    performanceTotal += matchEdge * recencyWeight;
+    performanceWeight += recencyWeight;
+  });
+
+  const averageGoals = [0, 1].map(teamIndex =>
+    (goalTotals[teamIndex] + neutralGoals * priorWeight) /
+      (totalGoalWeight + priorWeight)
+  );
+  const historicalEdge = performanceTotal / (performanceWeight + priorWeight);
+  const lastMatch = state.matches[state.matches.length - 1];
+  let homeTeam = lastMatch && (lastMatch.home === 0 || lastMatch.home === 1)
+    ? 1 - lastMatch.home
+    : 0;
+
+  return Array.from({ length: 5 }, (_, index) => {
+    const awayTeam = 1 - homeTeam;
+    const venueEdge = homeTeam === 0 ? 0.07 : -0.07;
+    const edge = Math.max(-0.75, Math.min(0.75, historicalEdge + venueEdge));
+    const draw = 0.08 + 0.38 * Math.exp(-3 * Math.abs(edge));
+    const homeShare = 1 / (1 + Math.exp(-4 * edge));
+    const teamZeroProbabilities = [
+      (1 - draw) * homeShare,
+      draw,
+      (1 - draw) * (1 - homeShare)
+    ];
+    const probabilities = homeTeam === 0
+      ? teamZeroProbabilities
+      : [teamZeroProbabilities[2], teamZeroProbabilities[1], teamZeroProbabilities[0]];
+    const homeGoals = homeTeam === 0 ? averageGoals[0] : averageGoals[1];
+    const awayGoals = awayTeam === 0 ? averageGoals[0] : averageGoals[1];
+    const venueAdjustment = 0.12;
+    const projectedHomeGoals = Math.max(0, Math.round(homeGoals + venueAdjustment));
+    const projectedAwayGoals = Math.max(0, Math.round(awayGoals - venueAdjustment));
+    const forecast = {
+      number: index + 1,
+      homeTeam,
+      awayTeam,
+      homeGoals: projectedHomeGoals,
+      awayGoals: projectedAwayGoals,
+      probabilities
+    };
+    homeTeam = awayTeam;
+    return forecast;
+  });
+}
+
+function renderFiveMatchForecast() {
+  const list = document.getElementById("forecastFiveList");
+  if (!list) return;
+  list.replaceChildren();
+  const forecasts = getFiveMatchForecast();
+  forecasts.forEach(forecast => {
+    const item = document.createElement("article");
+    item.className = "forecast-five-item";
+
+    const number = document.createElement("span");
+    number.className = "forecast-five-number";
+    number.textContent = String(forecast.number).padStart(2, "0");
+
+    const fixture = document.createElement("div");
+    fixture.className = "forecast-five-fixture";
+    [forecast.homeTeam, forecast.awayTeam].forEach(teamIndex => {
+      const team = document.createElement("span");
+      team.className = `forecast-five-team ${teamIndex === 0 ? "one" : "two"}`;
+      const badge = document.createElement("img");
+      badge.src = TEAM_PHOTOS[teamIndex];
+      badge.alt = "";
+      badge.loading = "lazy";
+      const name = document.createElement("span");
+      name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
+      team.append(badge, name);
+      fixture.append(team);
+    });
+
+    const score = document.createElement("strong");
+    score.className = "forecast-five-score";
+    score.textContent = `${forecast.homeGoals} : ${forecast.awayGoals}`;
+    score.setAttribute("aria-label", `${t("forecastScore")}: ${forecast.homeGoals} to ${forecast.awayGoals}`);
+
+    const outcomes = document.createElement("div");
+    outcomes.className = "forecast-five-outcomes";
+    const labels = ["forecastHomeWin", "forecastDraw", "forecastAwayWin"];
+    const displayedProbabilities = getRoundedForecastProbabilities(forecast.probabilities);
+    displayedProbabilities.forEach((percentValue, index) => {
+      const outcome = document.createElement("div");
+      outcome.className = `forecast-five-outcome outcome-${index}`;
+      const label = document.createElement("span");
+      label.textContent = t(labels[index]);
+      const percent = document.createElement("strong");
+      percent.textContent = `${percentValue}%`;
+      outcome.append(label, percent);
+      outcomes.append(outcome);
+    });
+
+    const bar = document.createElement("div");
+    bar.className = "forecast-five-bar";
+    forecast.probabilities.forEach((probability, index) => {
+      const segment = document.createElement("span");
+      segment.className = `forecast-five-segment outcome-${index}`;
+      segment.style.width = `${probability * 100}%`;
+      bar.append(segment);
+    });
+    item.append(number, fixture, score, outcomes, bar);
+    list.append(item);
+  });
+  document.getElementById("forecastFiveNote").textContent =
+    state.matches.length ? t("forecastDataNote") : t("forecastNoHistory");
+}
+
+function getRoundedForecastProbabilities(probabilities) {
+  const percentages = probabilities.map(probability => probability * 100);
+  const rounded = percentages.map(Math.floor);
+  let remainder = 100 - rounded.reduce((sum, value) => sum + value, 0);
+  const order = percentages
+    .map((value, index) => ({ index, fraction: value - rounded[index] }))
+    .sort((a, b) => b.fraction - a.fraction);
+  for (let index = 0; index < remainder; index++) {
+    rounded[order[index].index]++;
+  }
+  return rounded;
 }
 
 function getDisplayedMatchProbabilities(probabilities) {

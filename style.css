@@ -1704,6 +1704,185 @@
       background: linear-gradient(135deg, rgba(156, 120, 255, .055), rgba(211, 255, 87, .025));
     }
 
+    .five-match-forecast {
+      margin-top: 16px;
+      padding: 18px 20px;
+      border-color: rgba(85, 197, 255, .18);
+      background:
+        linear-gradient(120deg, rgba(85, 197, 255, .045), transparent 50%),
+        var(--surface);
+    }
+
+    .forecast-five-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .forecast-five-heading h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .forecast-five-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .forecast-model-badge {
+      flex: 0 0 auto;
+      padding: 6px 8px;
+      border: 1px solid rgba(85, 197, 255, .2);
+      border-radius: 7px;
+      background: rgba(85, 197, 255, .06);
+      color: #8bd6ff;
+      font-size: 8px;
+      font-weight: 850;
+      letter-spacing: .06em;
+    }
+
+    .forecast-five-list {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .forecast-five-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-content: start;
+      gap: 10px 6px;
+      min-width: 0;
+      padding: 11px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(8, 7, 13, .22);
+    }
+
+    .forecast-five-number {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+
+    .forecast-five-fixture {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .forecast-five-team {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+      color: var(--ink);
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .forecast-five-team.two {
+      color: #d3c4ff;
+    }
+
+    .forecast-five-team img {
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    .forecast-five-team span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .forecast-five-score {
+      align-self: center;
+      color: var(--lime);
+      font-size: 14px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .forecast-five-outcomes {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .forecast-five-outcome {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .forecast-five-outcome span {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 8px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .forecast-five-outcome strong {
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .forecast-five-outcome.outcome-1 {
+      text-align: center;
+    }
+
+    .forecast-five-outcome.outcome-2 {
+      text-align: right;
+    }
+
+    .forecast-five-bar {
+      grid-column: 1 / -1;
+      display: flex;
+      height: 4px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .forecast-five-segment {
+      display: block;
+      height: 100%;
+    }
+
+    .forecast-five-segment.outcome-0 {
+      background: var(--lime);
+    }
+
+    .forecast-five-segment.outcome-1 {
+      background: #9c78ff;
+    }
+
+    .forecast-five-segment.outcome-2 {
+      background: #55c5ff;
+    }
+
+    .forecast-five-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.5;
+    }
+
     .upcoming-match-heading {
       display: flex;
       align-items: center;
@@ -1919,6 +2098,18 @@
 
       .upcoming-match {
         padding: 14px;
+      }
+
+      .five-match-forecast {
+        padding: 15px 14px;
+      }
+
+      .forecast-five-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .forecast-five-item:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
       }
 
       .upcoming-match-heading {
