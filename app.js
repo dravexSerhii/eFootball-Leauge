@@ -89,6 +89,8 @@ const TRANSLATIONS = {
     forecastHomeWin: "Home",
     forecastAwayWin: "Away",
     forecastDraw: "Draw",
+    forecastHomeLabel: "HOME",
+    forecastAwayLabel: "AWAY",
     forecastScore: "Projected score",
     forecastDataNote: "Each forecast uses the latest 10 played matches. Projected form trends change with each forecast horizon.",
     forecastNoHistory: "No match history yet.",
@@ -278,6 +280,8 @@ const TRANSLATIONS = {
     forecastHomeWin: "Хозяева",
     forecastAwayWin: "Гости",
     forecastDraw: "Ничья",
+    forecastHomeLabel: "ДОМА",
+    forecastAwayLabel: "В ГОСТЯХ",
     forecastScore: "Прогноз счёта",
     forecastDataNote: "Каждый прогноз использует последние 10 матчей. Динамика формы учитывается отдельно для каждого горизонта.",
     forecastNoHistory: "Истории матчей пока нет.",
@@ -2101,9 +2105,14 @@ function renderFiveMatchForecast() {
       badge.src = TEAM_PHOTOS[teamIndex];
       badge.alt = "";
       badge.loading = "lazy";
+      const venue = document.createElement("span");
+      venue.className = "forecast-five-venue";
+      venue.textContent = t(teamIndex === forecast.homeTeam ? "forecastHomeLabel" : "forecastAwayLabel");
+      venue.setAttribute("aria-label", teamIndex === forecast.homeTeam ? t("homeTeam") : t("awayTeam"));
       const name = document.createElement("span");
+      name.className = "forecast-five-name";
       name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
-      team.append(badge, name);
+      team.append(badge, venue, name);
       if (forecast.available && forecast.predictedOutcome === (teamIndex === forecast.homeTeam ? 0 : 2)) {
         const crown = document.createElement("span");
         crown.className = "forecast-five-mark";

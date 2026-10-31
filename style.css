@@ -1792,6 +1792,28 @@
       color: #d3c4ff;
     }
 
+    .forecast-five-venue {
+      flex: 0 0 auto;
+      padding: 2px 4px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 7px;
+      font-weight: 850;
+      letter-spacing: .04em;
+      line-height: 1.2;
+    }
+
+    .forecast-five-team.one .forecast-five-venue {
+      border-color: rgba(85, 197, 255, .22);
+      color: #8bd6ff;
+    }
+
+    .forecast-five-team.two .forecast-five-venue {
+      border-color: rgba(174, 143, 255, .22);
+      color: #c4aaff;
+    }
+
     .forecast-five-team img {
       flex: 0 0 18px;
       width: 18px;
@@ -1799,7 +1821,7 @@
       object-fit: contain;
     }
 
-    .forecast-five-team span {
+    .forecast-five-team .forecast-five-name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
