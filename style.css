@@ -1859,6 +1859,25 @@
       border-radius: 50%;
       background: #9ce85b;
       box-shadow: 0 0 0 2px rgba(156, 232, 91, .15), 0 0 9px rgba(156, 232, 91, .65);
+      animation: forecast-favorite-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes forecast-favorite-pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 2px rgba(156, 232, 91, .15), 0 0 7px rgba(156, 232, 91, .5);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(156, 232, 91, .08), 0 0 13px rgba(156, 232, 91, .85);
+        transform: scale(1.12);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .forecast-five-favorite {
+        animation: none;
+      }
     }
 
     .forecast-five-pick {
