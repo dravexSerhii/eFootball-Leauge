@@ -22,6 +22,27 @@ const TRANSLATIONS = {
     newSeason: "New Season",
     championships: "Championships",
     headToHead: "Head to Head",
+    teamStatsTitle: "Team statistics",
+    teamStatsDescription: "Detailed performance for a season or all seasons",
+    teamStatsTeam: "Team",
+    teamStatsPeriod: "Period",
+    allSeasons: "All seasons",
+    seasonOption: "Season {0}",
+    statsRecord: "{0} matches · {1} W · {2} D · {3} L",
+    statPlayed: "Matches played",
+    statWinRate: "Win rate",
+    statGoals: "Goals scored",
+    statGoalsPerMatch: "Goals per match",
+    statPossession: "Average possession",
+    statPasses: "Average passes",
+    statShots: "Average shots",
+    statShotsOnTarget: "Average shots on target",
+    statShotConversion: "Shot conversion",
+    statAllMatches: "All matches in period",
+    statWinsOutOf: "{0} wins from {1} matches",
+    statRecordedIn: "Recorded in {0} of {1} matches",
+    teamStatsFootnote: "Averages use only matches where each statistic was recorded. Shot conversion = goals in matches with shot data divided by recorded shots.",
+    noTeamStats: "No matches for this selection yet.",
     winsLabel: "W",
     drawsLabel: "D",
     lossesLabel: "L",
@@ -157,6 +178,27 @@ const TRANSLATIONS = {
     newSeason: "Новый сезон",
     championships: "Чемпионства",
     headToHead: "История встреч",
+    teamStatsTitle: "Статистика команды",
+    teamStatsDescription: "Подробные показатели за сезон или за все сезоны",
+    teamStatsTeam: "Команда",
+    teamStatsPeriod: "Период",
+    allSeasons: "Все сезоны",
+    seasonOption: "Сезон {0}",
+    statsRecord: "{0} матчей · {1} В · {2} Н · {3} П",
+    statPlayed: "Сыграно матчей",
+    statWinRate: "Процент побед",
+    statGoals: "Забито голов",
+    statGoalsPerMatch: "Голов за матч",
+    statPossession: "Среднее владение",
+    statPasses: "Среднее количество пасов",
+    statShots: "Среднее количество ударов",
+    statShotsOnTarget: "Удары в створ в среднем",
+    statShotConversion: "Реализация ударов",
+    statAllMatches: "Все матчи периода",
+    statWinsOutOf: "{0} побед из {1} матчей",
+    statRecordedIn: "Статистика есть в {0} из {1} матчей",
+    teamStatsFootnote: "Средние значения учитывают только матчи, где показатель был записан. Реализация = голы в матчах со статистикой ударов / общее число записанных ударов.",
+    noTeamStats: "За выбранный период матчей пока нет.",
     winsLabel: "П",
     drawsLabel: "Н",
     lossesLabel: "П",
@@ -352,6 +394,7 @@ function render() {
   renderChampionshipRace();
   renderUpcomingMatch();
   renderSeasonInfo();
+  renderTeamStats();
 }
 
 function renderNews() {
@@ -881,6 +924,173 @@ function renderSeasonInfo() {
   if (h2hMatchesSummary) {
     h2hMatchesSummary.textContent = t("totalMatches", h2h.total);
   }
+}
+
+function calculateTeamSeasonStats(teamIndex, selectedSeason) {
+  const matches = state.matches.filter(match =>
+    (match.home === teamIndex || match.away === teamIndex) &&
+    (selectedSeason === "all" || (match.season ?? 1) === Number(selectedSeason))
+  );
+  const stats = {
+    played: matches.length,
+    wins: 0,
+    draws: 0,
+    losses: 0,
+    goals: 0,
+    possessionTotal: 0,
+    possessionMatches: 0,
+    passesTotal: 0,
+    passesMatches: 0,
+    shotsTotal: 0,
+    shotsMatches: 0,
+    shotsOnTargetTotal: 0,
+    shotsOnTargetMatches: 0,
+    goalsInShotMatches: 0
+  };
+
+  matches.forEach(match => {
+    const isHome = match.home === teamIndex;
+    const goalsFor = isHome ? match.homeGoals : match.awayGoals;
+    const goalsAgainst = isHome ? match.awayGoals : match.homeGoals;
+    const teamMatchStats = match.stats?.[isHome ? "home" : "away"] ?? {};
+    stats.goals += goalsFor;
+    if (goalsFor > goalsAgainst) stats.wins++;
+    else if (goalsFor === goalsAgainst) stats.draws++;
+    else stats.losses++;
+
+    if (Number.isFinite(teamMatchStats.possession)) {
+      stats.possessionTotal += teamMatchStats.possession;
+      stats.possessionMatches++;
+    }
+    if (Number.isFinite(teamMatchStats.passes)) {
+      stats.passesTotal += teamMatchStats.passes;
+      stats.passesMatches++;
+    }
+    if (Number.isFinite(teamMatchStats.shots)) {
+      stats.shotsTotal += teamMatchStats.shots;
+      stats.shotsMatches++;
+      stats.goalsInShotMatches += goalsFor;
+    }
+    if (Number.isFinite(teamMatchStats.shotsOnTarget)) {
+      stats.shotsOnTargetTotal += teamMatchStats.shotsOnTarget;
+      stats.shotsOnTargetMatches++;
+    }
+  });
+
+  return stats;
+}
+
+function formatTeamStat(value) {
+  if (!Number.isFinite(value)) return "—";
+  return value.toLocaleString(currentLang === "ru" ? "ru-RU" : "en-GB", {
+    maximumFractionDigits: 1
+  });
+}
+
+function renderTeamStats() {
+  const teamSelect = document.getElementById("teamStatsTeamSelect");
+  const seasonSelect = document.getElementById("teamStatsSeasonSelect");
+  if (!teamSelect || !seasonSelect) return;
+
+  const previousTeam = teamSelect.value || "0";
+  const previousSeason = seasonSelect.value || String(currentSeason);
+  teamSelect.replaceChildren();
+  state.teams.forEach((team, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = team.name;
+    teamSelect.append(option);
+  });
+  teamSelect.value = state.teams[Number(previousTeam)] ? previousTeam : "0";
+
+  const seasons = [...new Set([
+    Number.isInteger(currentSeason) && currentSeason >= 1 ? currentSeason : 1,
+    ...state.matches.map(match => Number.isInteger(match.season) && match.season >= 1 ? match.season : 1)
+  ])].sort((a, b) => a - b);
+  seasonSelect.replaceChildren();
+  const allSeasonsOption = document.createElement("option");
+  allSeasonsOption.value = "all";
+  allSeasonsOption.textContent = t("allSeasons");
+  seasonSelect.append(allSeasonsOption);
+  seasons.forEach(season => {
+    const option = document.createElement("option");
+    option.value = String(season);
+    option.textContent = t("seasonOption", season);
+    seasonSelect.append(option);
+  });
+  seasonSelect.value = previousSeason === "all" || seasons.includes(Number(previousSeason))
+    ? previousSeason
+    : String(currentSeason);
+
+  const stats = calculateTeamSeasonStats(Number(teamSelect.value), seasonSelect.value);
+  document.getElementById("teamStatsRecord").textContent = t(
+    "statsRecord", stats.played, stats.wins, stats.draws, stats.losses
+  );
+
+  const recordedNote = count => t("statRecordedIn", count, stats.played);
+  const cards = [
+    { label: "statPlayed", value: String(stats.played), note: t("statAllMatches") },
+    {
+      label: "statWinRate",
+      value: stats.played ? `${formatTeamStat(stats.wins / stats.played * 100)}%` : "—",
+      note: t("statWinsOutOf", stats.wins, stats.played)
+    },
+    { label: "statGoals", value: String(stats.goals), note: t("statAllMatches") },
+    {
+      label: "statGoalsPerMatch",
+      value: stats.played ? formatTeamStat(stats.goals / stats.played) : "—",
+      note: t("statAllMatches")
+    },
+    {
+      label: "statPossession",
+      value: stats.possessionMatches
+        ? `${formatTeamStat(stats.possessionTotal / stats.possessionMatches)}%`
+        : "—",
+      note: recordedNote(stats.possessionMatches)
+    },
+    {
+      label: "statPasses",
+      value: stats.passesMatches ? formatTeamStat(stats.passesTotal / stats.passesMatches) : "—",
+      note: recordedNote(stats.passesMatches)
+    },
+    {
+      label: "statShots",
+      value: stats.shotsMatches ? formatTeamStat(stats.shotsTotal / stats.shotsMatches) : "—",
+      note: recordedNote(stats.shotsMatches)
+    },
+    {
+      label: "statShotsOnTarget",
+      value: stats.shotsOnTargetMatches
+        ? formatTeamStat(stats.shotsOnTargetTotal / stats.shotsOnTargetMatches)
+        : "—",
+      note: recordedNote(stats.shotsOnTargetMatches)
+    },
+    {
+      label: "statShotConversion",
+      value: stats.shotsTotal
+        ? `${formatTeamStat(stats.goalsInShotMatches / stats.shotsTotal * 100)}%`
+        : "—",
+      note: recordedNote(stats.shotsMatches)
+    }
+  ];
+  const grid = document.getElementById("teamStatsGrid");
+  grid.replaceChildren();
+  cards.forEach(card => {
+    const element = document.createElement("article");
+    element.className = "team-stat-card";
+    const label = document.createElement("span");
+    label.className = "team-stat-label";
+    label.textContent = t(card.label);
+    const value = document.createElement("strong");
+    value.className = "team-stat-value";
+    value.textContent = card.value;
+    const note = document.createElement("span");
+    note.className = "team-stat-note";
+    note.textContent = card.note;
+    element.append(label, value, note);
+    grid.append(element);
+  });
+  document.getElementById("teamStatsEmpty").hidden = stats.played > 0;
 }
 
 async function deleteMatch(id) {
@@ -1627,6 +1837,9 @@ document.querySelectorAll(".lang-btn").forEach(btn => {
     applyLang();
   });
 });
+
+document.getElementById("teamStatsTeamSelect").addEventListener("change", renderTeamStats);
+document.getElementById("teamStatsSeasonSelect").addEventListener("change", renderTeamStats);
 
 function clearNewsPreview() {
   if (newsPreviewUrl) URL.revokeObjectURL(newsPreviewUrl);

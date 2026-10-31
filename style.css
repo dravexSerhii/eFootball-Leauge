@@ -1693,6 +1693,155 @@
       font-weight: 700;
     }
 
+    .team-stats-panel {
+      margin: 26px 0;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .team-stats-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 76px;
+      padding: 16px 22px;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .team-stats-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .team-stats-summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      flex: 0 0 30px;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--lime);
+      font-size: 20px;
+      line-height: 1;
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .team-stats-panel[open] .team-stats-summary::after {
+      content: "−";
+      background: rgba(211, 255, 87, .08);
+    }
+
+    .team-stats-summary:focus-visible {
+      outline: 2px solid rgba(156, 120, 255, .7);
+      outline-offset: -3px;
+    }
+
+    .team-stats-summary-title {
+      display: grid;
+      gap: 5px;
+    }
+
+    .team-stats-content {
+      padding: 0 22px 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .team-stats-filters {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .team-stats-filter {
+      display: grid;
+      gap: 5px;
+      min-width: 140px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .team-stats-filter select {
+      width: 100%;
+      min-height: 38px;
+      padding: 0 30px 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .team-stats-filter select:focus {
+      outline: 2px solid rgba(156, 120, 255, .6);
+      outline-offset: 1px;
+    }
+
+    .team-stats-record {
+      margin: 14px 0 10px;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .team-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .team-stat-card {
+      display: grid;
+      align-content: start;
+      gap: 6px;
+      min-width: 0;
+      min-height: 90px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .035), rgba(8, 7, 13, .22));
+    }
+
+    .team-stat-label {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .team-stat-value {
+      color: var(--ink);
+      font-size: clamp(17px, 2.4vw, 22px);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .team-stat-note {
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.35;
+    }
+
+    .team-stats-footnote,
+    .team-stats-empty {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .team-stats-empty {
+      color: #cbc9d1;
+    }
+
     @media (max-width: 420px) {
       .h2h-footer {
         flex-direction: column;
@@ -1701,6 +1850,41 @@
     }
 
     @media (max-width: 600px) {
+      .team-stats-panel {
+        margin: 22px 0;
+      }
+
+      .team-stats-summary {
+        min-height: 68px;
+        padding: 14px 16px;
+      }
+
+      .team-stats-summary-title [data-i18n="teamStatsDescription"] {
+        max-width: 250px;
+      }
+
+      .team-stats-content {
+        padding: 0 16px 16px;
+      }
+
+      .team-stats-filters {
+        margin-top: 14px;
+        gap: 8px;
+      }
+
+      .team-stats-filter {
+        min-width: 0;
+        flex: 1;
+      }
+
+      .team-stats-filter select {
+        padding-right: 22px;
+      }
+
+      .team-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .season-grid {
         grid-template-columns: 1fr;
         gap: 12px;

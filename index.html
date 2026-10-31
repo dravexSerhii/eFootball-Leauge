@@ -203,6 +203,31 @@
                 </aside>
             </div>
 
+            <details class="team-stats-panel panel">
+                <summary class="team-stats-summary">
+                    <span class="team-stats-summary-title">
+                        <span id="teamStatsTitle" data-i18n="teamStatsTitle">Team statistics</span>
+                        <span data-i18n="teamStatsDescription">Detailed performance for a season or all seasons</span>
+                    </span>
+                </summary>
+                <div class="team-stats-content">
+                    <div class="team-stats-filters">
+                        <label class="team-stats-filter">
+                            <span data-i18n="teamStatsTeam">Team</span>
+                            <select id="teamStatsTeamSelect"></select>
+                        </label>
+                        <label class="team-stats-filter">
+                            <span data-i18n="teamStatsPeriod">Period</span>
+                            <select id="teamStatsSeasonSelect"></select>
+                        </label>
+                    </div>
+                    <p class="team-stats-record" id="teamStatsRecord"></p>
+                    <div class="team-stats-grid" id="teamStatsGrid" aria-live="polite"></div>
+                    <p class="team-stats-empty" id="teamStatsEmpty" data-i18n="noTeamStats" hidden>No matches for this selection yet.</p>
+                    <p class="team-stats-footnote" data-i18n="teamStatsFootnote">Averages use only matches where each statistic was recorded. Shot conversion = goals in matches with shot data divided by recorded shots.</p>
+                </div>
+            </details>
+
             <section class="news-section panel" aria-labelledby="newsTitle">
                 <div class="panel-heading">
                     <div>
