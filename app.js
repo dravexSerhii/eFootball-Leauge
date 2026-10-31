@@ -89,8 +89,8 @@ const TRANSLATIONS = {
     forecastHomeWin: "Home",
     forecastAwayWin: "Away",
     forecastDraw: "Draw",
-    forecastHomeLabel: "HOME",
-    forecastAwayLabel: "AWAY",
+    forecastHomeLabel: "H",
+    forecastAwayLabel: "A",
     forecastScore: "Projected score",
     forecastDataNote: "Each forecast uses the latest 10 played matches. Projected form trends change with each forecast horizon.",
     forecastNoHistory: "No match history yet.",
@@ -280,8 +280,8 @@ const TRANSLATIONS = {
     forecastHomeWin: "Хозяева",
     forecastAwayWin: "Гости",
     forecastDraw: "Ничья",
-    forecastHomeLabel: "ДОМА",
-    forecastAwayLabel: "В ГОСТЯХ",
+    forecastHomeLabel: "Д",
+    forecastAwayLabel: "Г",
     forecastScore: "Прогноз счёта",
     forecastDataNote: "Каждый прогноз использует последние 10 матчей. Динамика формы учитывается отдельно для каждого горизонта.",
     forecastNoHistory: "Истории матчей пока нет.",
@@ -2087,11 +2087,11 @@ function renderFiveMatchForecast() {
       name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
       team.append(badge, venue, name);
       if (forecast.available && forecast.predictedOutcome === (teamIndex === forecast.homeTeam ? 0 : 2)) {
-        const crown = document.createElement("span");
-        crown.className = "forecast-five-mark";
-        crown.textContent = "👑";
-        crown.setAttribute("aria-label", t("forecastWinnerPick", name.textContent));
-        team.append(crown);
+        const favorite = document.createElement("span");
+        favorite.className = "forecast-five-favorite";
+        favorite.setAttribute("aria-label", t("forecastWinnerPick", name.textContent));
+        favorite.setAttribute("title", t("forecastWinnerPick", name.textContent));
+        team.append(favorite);
       }
       fixture.append(team);
     });
