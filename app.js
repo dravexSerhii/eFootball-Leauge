@@ -87,6 +87,7 @@ const TRANSLATIONS = {
     predictionNoHistory: "No previous matches — equal starting estimate",
     homeTeam: "Home team",
     awayTeam: "Away team",
+    swapTeams: "Swap home and away teams",
     goals: "Goals",
     matchStats: "Match statistics <span>Optional</span>",
     statsOptional: "Leave any statistic blank if you do not have it.",
@@ -250,6 +251,7 @@ const TRANSLATIONS = {
     predictionNoHistory: "Предыдущих матчей нет — начальная оценка поровну",
     homeTeam: "Хозяева",
     awayTeam: "Гости",
+    swapTeams: "Поменять хозяев и гостей местами",
     goals: "Голы",
     matchStats: "Статистика матча <span>Необязательно</span>",
     statsOptional: "Оставьте любую статистику пустой, если у вас её нет.",
@@ -1478,6 +1480,12 @@ function applyLang() {
     const key = el.getAttribute("data-i18n-placeholder");
     el.placeholder = t(key);
   });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => {
+    el.title = t(el.getAttribute("data-i18n-title"));
+  });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+    el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria-label")));
+  });
   document.getElementById("authStatus").textContent = t("authStatus");
   const langBtns = document.querySelectorAll(".lang-btn");
   langBtns.forEach(btn => {
@@ -1678,6 +1686,25 @@ function updateStatsTeamLabels() {
   const away = Number(document.getElementById("awayTeam").value);
   document.getElementById("homeStatsTeam").textContent = state.teams[home]?.name ?? "Home";
   document.getElementById("awayStatsTeam").textContent = state.teams[away]?.name ?? "Away";
+  updateMatchTeamBadges();
+}
+
+function updateMatchTeamBadges() {
+  [["homeTeam", "homeTeamBadge"], ["awayTeam", "awayTeamBadge"]].forEach(([selectId, badgeId]) => {
+    const teamIndex = Number(document.getElementById(selectId).value);
+    const badge = document.getElementById(badgeId);
+    badge.replaceChildren();
+    badge.className = `match-team-picker-badge ${teamIndex === 0 ? "one" : "two"}`;
+    const photo = TEAM_PHOTOS[teamIndex];
+    if (photo) {
+      const image = document.createElement("img");
+      image.src = photo;
+      image.alt = "";
+      badge.append(image);
+    } else {
+      badge.textContent = String(teamIndex + 1).padStart(2, "0");
+    }
+  });
 }
 
 function calculateUpcomingMatchOdds() {
@@ -2067,6 +2094,27 @@ document.getElementById("newsForm").addEventListener("submit", async event => {
 
 ["homeTeam", "awayTeam"].forEach(id => {
   document.getElementById(id).addEventListener("change", updateStatsTeamLabels);
+});
+
+document.getElementById("swapMatchTeams").addEventListener("click", () => {
+  const homeSelect = document.getElementById("homeTeam");
+  const awaySelect = document.getElementById("awayTeam");
+  const previousHome = homeSelect.value;
+  homeSelect.value = awaySelect.value;
+  awaySelect.value = previousHome;
+  [
+    ["homeGoals", "awayGoals"],
+    ["homeShots", "awayShots"],
+    ["homeShotsOnTarget", "awayShotsOnTarget"],
+    ["homePossession", "awayPossession"],
+    ["homePasses", "awayPasses"]
+  ].forEach(([homeId, awayId]) => {
+    const homeInput = document.getElementById(homeId);
+    const previousValue = homeInput.value;
+    homeInput.value = document.getElementById(awayId).value;
+    document.getElementById(awayId).value = previousValue;
+  });
+  updateStatsTeamLabels();
 });
 
 editTeamsButton.addEventListener("click", () => {

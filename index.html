@@ -260,7 +260,24 @@
                 </div>
                 <button class="close-button" type="button" data-close="matchDialog" aria-label="Close">×</button>
             </div>
-            <div class="field"><label for="homeTeam" data-i18n="homeTeam">Home team</label><select id="homeTeam" required></select>
+            <div class="match-team-pickers">
+                <div class="match-team-picker">
+                    <span class="match-team-picker-badge" id="homeTeamBadge" aria-hidden="true"></span>
+                    <div class="field">
+                        <label for="homeTeam" data-i18n="homeTeam">Home team</label>
+                        <select id="homeTeam" required></select>
+                    </div>
+                </div>
+                <button class="match-swap-button" id="swapMatchTeams" type="button" data-i18n-title="swapTeams" data-i18n-aria-label="swapTeams">
+                    <span aria-hidden="true">⇄</span>
+                </button>
+                <div class="match-team-picker">
+                    <span class="match-team-picker-badge" id="awayTeamBadge" aria-hidden="true"></span>
+                    <div class="field">
+                        <label for="awayTeam" data-i18n="awayTeam">Away team</label>
+                        <select id="awayTeam" required></select>
+                    </div>
+                </div>
             </div>
             <div class="score-fields">
                 <div class="field"><label for="homeGoals" data-i18n="goals">Goals</label><input id="homeGoals" type="number" min="0"
@@ -268,8 +285,6 @@
                 <div class="score-divider" aria-hidden="true">:</div>
                 <div class="field"><label for="awayGoals" data-i18n="goals">Goals</label><input id="awayGoals" type="number" min="0"
                         max="99" inputmode="numeric" required></div>
-            </div>
-            <div class="field"><label for="awayTeam" data-i18n="awayTeam">Away team</label><select id="awayTeam" required></select>
             </div>
             <section class="stats-entry" aria-labelledby="statsEntryTitle">
                 <h3 id="statsEntryTitle" data-i18n="matchStats">Match statistics <span>Optional</span></h3>
