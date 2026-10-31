@@ -90,8 +90,12 @@ const TRANSLATIONS = {
     forecastAwayWin: "Away",
     forecastDraw: "Draw",
     forecastScore: "Projected score",
-    forecastDataNote: "Based on weighted head-to-head results, goals and available shots, possession and passes. Estimates are not guarantees.",
-    forecastNoHistory: "No match history yet. Starting estimates use a neutral 1–1 baseline.",
+    forecastDataNote: "Predictions use only matches played in the same home/away roles, with recent results and recorded match stats weighted more heavily. Estimates are not guarantees.",
+    forecastNoHistory: "No venue-specific match history yet. Forecasts will appear when these teams have played in the required home/away roles.",
+    forecastUnavailable: "No past match with this home/away setup — not enough data to forecast.",
+    forecastDrawPick: "Draw is the most likely outcome",
+    forecastWinnerPick: "{0} is the most likely winner",
+    forecastUndecided: "No clear predicted outcome",
     upcomingMatchChartLabel: "{0} and {1} match outcome probabilities",
     versus: "VS",
     lastMatchTitle: "Last match",
@@ -274,8 +278,12 @@ const TRANSLATIONS = {
     forecastAwayWin: "Гости",
     forecastDraw: "Ничья",
     forecastScore: "Прогноз счёта",
-    forecastDataNote: "Учитываются история встреч с весом недавних матчей, голы и доступная статистика ударов, владения и пасов. Это оценка, а не гарантия.",
-    forecastNoHistory: "Истории матчей пока нет. Начальная оценка — нейтральный счёт 1:1.",
+    forecastDataNote: "Учитываются только матчи с таким же распределением ролей хозяев и гостей; недавним результатам и записанной статистике даётся больший вес. Это оценка, а не гарантия.",
+    forecastNoHistory: "Истории встреч в нужных ролях хозяев и гостей пока нет. Прогноз появится, когда команды сыграют в этих ролях.",
+    forecastUnavailable: "Матчей с таким распределением ролей хозяев и гостей не было — данных для прогноза недостаточно.",
+    forecastDrawPick: "Наиболее вероятный исход — ничья",
+    forecastWinnerPick: "Наиболее вероятная победа команды {0}",
+    forecastUndecided: "Нет однозначного прогноза исхода",
     upcomingMatchChartLabel: "Вероятности исхода матча {0} и {1}",
     versus: "ПРОТИВ",
     lastMatchTitle: "Последний матч",
@@ -1952,7 +1960,7 @@ function renderUpcomingMatch() {
   updateUpcomingOddsDisplay();
 }
 
-function getFiveMatchForecast() {
+function getFiveMatchForecastLegacy() {
   const history = state.matches
     .filter(match => (match.home === 0 && match.away === 1) ||
       (match.home === 1 && match.away === 0))
@@ -2042,6 +2050,108 @@ function getFiveMatchForecast() {
   });
 }
 
+function getFiveMatchForecast() {
+  const history = state.matches.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+  const lastMatch = history[history.length - 1];
+  let homeTeam = lastMatch && (lastMatch.home === 0 || lastMatch.home === 1)
+    ? 1 - lastMatch.home
+    : 0;
+
+  return Array.from({ length: 5 }, (_, index) => {
+    const awayTeam = 1 - homeTeam;
+    const venueHistory = history
+      .filter(match => match.home === homeTeam && match.away === awayTeam)
+      .slice(-12);
+    const prediction = venueHistory.length
+      ? calculateVenueSpecificForecast(venueHistory)
+      : null;
+    const fixture = {
+      number: index + 1,
+      homeTeam,
+      awayTeam,
+      available: Boolean(prediction),
+      ...(prediction ?? {})
+    };
+    homeTeam = awayTeam;
+    return fixture;
+  });
+}
+
+function calculateVenueSpecificForecast(history) {
+  let weightTotal = 0;
+  let homeGoalsTotal = 0;
+  let awayGoalsTotal = 0;
+  const outcomeTotals = [0, 0, 0];
+
+  history.forEach((match, index) => {
+    const recencyWeight = Math.pow(0.78, history.length - index - 1);
+    const homeGoals = Number(match.homeGoals);
+    const awayGoals = Number(match.awayGoals);
+    if (!Number.isFinite(homeGoals) || !Number.isFinite(awayGoals)) return;
+    weightTotal += recencyWeight;
+    homeGoalsTotal += homeGoals * recencyWeight;
+    awayGoalsTotal += awayGoals * recencyWeight;
+
+    const resultIndex = homeGoals > awayGoals ? 0 : homeGoals === awayGoals ? 1 : 2;
+    const homeStats = match.stats?.home ?? {};
+    const awayStats = match.stats?.away ?? {};
+    const signals = [];
+    const addShareSignal = (homeValue, awayValue, weight) => {
+      if (homeValue == null || awayValue == null || homeValue === "" || awayValue === "") return;
+      const homeNumber = Number(homeValue);
+      const awayNumber = Number(awayValue);
+      if (Number.isFinite(homeNumber) && Number.isFinite(awayNumber) &&
+        homeNumber + awayNumber > 0) {
+        signals.push([(homeNumber - awayNumber) / (homeNumber + awayNumber), weight]);
+      }
+    };
+    addShareSignal(homeStats.shots, awayStats.shots, 0.2);
+    addShareSignal(homeStats.shotsOnTarget, awayStats.shotsOnTarget, 0.35);
+    addShareSignal(homeStats.passes, awayStats.passes, 0.08);
+    const homePossession = Number(homeStats.possession);
+    const awayPossession = Number(awayStats.possession);
+    if (homeStats.possession != null && awayStats.possession != null &&
+      homeStats.possession !== "" && awayStats.possession !== "" &&
+      Number.isFinite(homePossession) && Number.isFinite(awayPossession)) {
+      signals.push([(homePossession - awayPossession) / 100, 0.18]);
+    }
+
+    outcomeTotals[resultIndex] += recencyWeight * 0.7;
+    if (signals.length) {
+      const signalWeight = signals.reduce((sum, [, weight]) => sum + weight, 0);
+      const performanceEdge = signals.reduce((sum, [value, weight]) =>
+        sum + value * weight, 0) / signalWeight;
+      const drawChance = 0.08 + 0.38 * Math.exp(-3 * Math.abs(performanceEdge));
+      const homeShare = 1 / (1 + Math.exp(-4 * performanceEdge));
+      [
+        (1 - drawChance) * homeShare,
+        drawChance,
+        (1 - drawChance) * (1 - homeShare)
+      ].forEach((probability, outcome) => {
+        outcomeTotals[outcome] += recencyWeight * 0.3 * probability;
+      });
+    } else {
+      outcomeTotals[resultIndex] += recencyWeight * 0.3;
+    }
+  });
+
+  if (!weightTotal) return null;
+  const probabilityWeight = outcomeTotals.reduce((sum, value) => sum + value, 0);
+  const probabilities = outcomeTotals.map(value => value / probabilityWeight);
+  const maxProbability = Math.max(...probabilities);
+  const leaders = probabilities
+    .map((probability, index) => probability === maxProbability ? index : -1)
+    .filter(index => index >= 0);
+
+  return {
+    homeGoals: Math.max(0, Math.round(homeGoalsTotal / weightTotal)),
+    awayGoals: Math.max(0, Math.round(awayGoalsTotal / weightTotal)),
+    probabilities,
+    predictedOutcome: leaders.length === 1 ? leaders[0] : null,
+    sampleSize: history.length
+  };
+}
+
 function renderFiveMatchForecast() {
   const list = document.getElementById("forecastFiveList");
   if (!list) return;
@@ -2067,42 +2177,76 @@ function renderFiveMatchForecast() {
       const name = document.createElement("span");
       name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
       team.append(badge, name);
+      if (forecast.available && forecast.predictedOutcome === (teamIndex === forecast.homeTeam ? 0 : 2)) {
+        const crown = document.createElement("span");
+        crown.className = "forecast-five-mark";
+        crown.textContent = "👑";
+        crown.setAttribute("aria-label", t("forecastWinnerPick", name.textContent));
+        team.append(crown);
+      }
       fixture.append(team);
     });
 
     const score = document.createElement("strong");
-    score.className = "forecast-five-score";
-    score.textContent = `${forecast.homeGoals} : ${forecast.awayGoals}`;
-    score.setAttribute("aria-label", `${t("forecastScore")}: ${forecast.homeGoals} to ${forecast.awayGoals}`);
+    score.className = `forecast-five-score${forecast.available ? "" : " forecast-five-unavailable"}`;
+    score.textContent = forecast.available
+      ? `${forecast.homeGoals} : ${forecast.awayGoals}`
+      : t("forecastUnavailable");
+    if (forecast.available) {
+      score.setAttribute("aria-label", `${t("forecastScore")}: ${forecast.homeGoals} to ${forecast.awayGoals}`);
+    }
 
-    const outcomes = document.createElement("div");
-    outcomes.className = "forecast-five-outcomes";
-    const labels = ["forecastHomeWin", "forecastDraw", "forecastAwayWin"];
-    const displayedProbabilities = getRoundedForecastProbabilities(forecast.probabilities);
-    displayedProbabilities.forEach((percentValue, index) => {
-      const outcome = document.createElement("div");
-      outcome.className = `forecast-five-outcome outcome-${index}`;
-      const label = document.createElement("span");
-      label.textContent = t(labels[index]);
-      const percent = document.createElement("strong");
-      percent.textContent = `${percentValue}%`;
-      outcome.append(label, percent);
-      outcomes.append(outcome);
-    });
+    const pick = document.createElement("div");
+    pick.className = "forecast-five-pick";
+    if (!forecast.available) {
+      pick.textContent = "";
+    } else if (forecast.predictedOutcome === 1) {
+      const drawMark = document.createElement("span");
+      drawMark.className = "forecast-five-draw";
+      drawMark.textContent = "X";
+      drawMark.setAttribute("aria-label", t("forecastDrawPick"));
+      pick.append(drawMark, document.createTextNode(t("forecastDrawPick")));
+    } else if (forecast.predictedOutcome === 0 || forecast.predictedOutcome === 2) {
+      const winnerIndex = forecast.predictedOutcome === 0
+        ? forecast.homeTeam
+        : forecast.awayTeam;
+      pick.textContent = t("forecastWinnerPick", state.teams[winnerIndex]?.name ?? `Team ${winnerIndex + 1}`);
+    } else {
+      pick.textContent = t("forecastUndecided");
+    }
 
-    const bar = document.createElement("div");
-    bar.className = "forecast-five-bar";
-    forecast.probabilities.forEach((probability, index) => {
-      const segment = document.createElement("span");
-      segment.className = `forecast-five-segment outcome-${index}`;
-      segment.style.width = `${probability * 100}%`;
-      bar.append(segment);
-    });
-    item.append(number, fixture, score, outcomes, bar);
+    if (forecast.available) {
+      const outcomes = document.createElement("div");
+      outcomes.className = "forecast-five-outcomes";
+      const labels = ["forecastHomeWin", "forecastDraw", "forecastAwayWin"];
+      const displayedProbabilities = getRoundedForecastProbabilities(forecast.probabilities);
+      displayedProbabilities.forEach((percentValue, index) => {
+        const outcome = document.createElement("div");
+        outcome.className = `forecast-five-outcome outcome-${index}`;
+        const label = document.createElement("span");
+        label.textContent = t(labels[index]);
+        const percent = document.createElement("strong");
+        percent.textContent = `${percentValue}%`;
+        outcome.append(label, percent);
+        outcomes.append(outcome);
+      });
+
+      const bar = document.createElement("div");
+      bar.className = "forecast-five-bar";
+      forecast.probabilities.forEach((probability, index) => {
+        const segment = document.createElement("span");
+        segment.className = `forecast-five-segment outcome-${index}`;
+        segment.style.width = `${probability * 100}%`;
+        bar.append(segment);
+      });
+      item.append(number, fixture, score, pick, outcomes, bar);
+    } else {
+      item.append(number, fixture, score);
+    }
     list.append(item);
   });
   document.getElementById("forecastFiveNote").textContent =
-    state.matches.length ? t("forecastDataNote") : t("forecastNoHistory");
+    forecasts.some(forecast => forecast.available) ? t("forecastDataNote") : t("forecastNoHistory");
 }
 
 function getRoundedForecastProbabilities(probabilities) {
