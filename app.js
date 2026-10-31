@@ -90,8 +90,9 @@ const TRANSLATIONS = {
     forecastAwayWin: "Away",
     forecastDraw: "Draw",
     forecastScore: "Projected score",
-    forecastDataNote: "Forecast based on the last {0} played matches (up to 10), using actual scores. Estimates are not guarantees.",
-    forecastNoHistory: "No match history yet. A forecast will appear after the first match is recorded.",
+    forecastDataNote: "Forecasts are calculated from all of the latest 10 played matches, with each match counted equally.",
+    forecastNoHistory: "No match history yet.",
+    forecastNeedTen: "Forecasts will appear after 10 matches. Currently recorded: {0}.",
     forecastUnavailable: "No past match with this home/away setup — not enough data to forecast.",
     forecastDrawPick: "Draw is the most likely outcome",
     forecastWinnerPick: "{0} is the most likely winner",
@@ -278,8 +279,9 @@ const TRANSLATIONS = {
     forecastAwayWin: "Гости",
     forecastDraw: "Ничья",
     forecastScore: "Прогноз счёта",
-    forecastDataNote: "Прогноз рассчитан на основе последних {0} сыгранных матчей (до 10) и их фактических результатов. Это оценка, а не гарантия.",
-    forecastNoHistory: "Истории матчей пока нет. Прогноз появится после добавления первого результата.",
+    forecastDataNote: "Прогнозы рассчитаны по всем 10 последним матчам, каждый матч учитывается одинаково.",
+    forecastNoHistory: "Истории матчей пока нет.",
+    forecastNeedTen: "Прогноз появится после 10 матчей. Сейчас записано: {0}.",
     forecastUnavailable: "Матчей с таким распределением ролей хозяев и гостей не было — данных для прогноза недостаточно.",
     forecastDrawPick: "Наиболее вероятный исход — ничья",
     forecastWinnerPick: "Наиболее вероятная победа команды {0}",
@@ -1978,6 +1980,7 @@ function getFiveMatchForecast() {
   const fixtures = [...knownFixtures.values()];
   if (!fixtures.length) return [];
   const recentMatches = history.slice(-10);
+  if (recentMatches.length < 10) return [];
 
   const nextHomeTeam = lastMatch && (lastMatch.home === 0 || lastMatch.home === 1)
     ? 1 - lastMatch.home
@@ -2130,8 +2133,10 @@ function renderFiveMatchForecast() {
   });
   document.getElementById("forecastFiveNote").textContent =
     forecasts.length
-      ? t("forecastDataNote", forecasts[0].sampleSize)
-      : t("forecastNoHistory");
+      ? t("forecastDataNote")
+      : state.matches.length
+        ? t("forecastNeedTen", Math.min(state.matches.length, 10))
+        : t("forecastNoHistory");
 }
 
 function getRoundedForecastProbabilities(probabilities) {
