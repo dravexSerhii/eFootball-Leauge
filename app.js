@@ -24,6 +24,13 @@ const TRANSLATIONS = {
     headToHead: "Head to Head",
     teamStatsTitle: "Team statistics",
     teamStatsDescription: "Detailed performance for a season or all seasons",
+    teamStatsCompare: "Team comparison",
+    teamStatsSingleMode: "One team",
+    teamStatsCompareMode: "Compare teams",
+    teamStatsView: "Statistics view",
+    teamStatsBetter: "Leader",
+    teamStatsTie: "Equal",
+    teamStatsInsufficientData: "Not enough data to compare",
     teamStatsTeam: "Team",
     teamStatsPeriod: "Period",
     allSeasons: "All seasons",
@@ -191,6 +198,13 @@ const TRANSLATIONS = {
     headToHead: "История встреч",
     teamStatsTitle: "Статистика команды",
     teamStatsDescription: "Подробные показатели за сезон или за все сезоны",
+    teamStatsCompare: "Сравнение команд",
+    teamStatsSingleMode: "Одна команда",
+    teamStatsCompareMode: "Сравнить команды",
+    teamStatsView: "Режим статистики",
+    teamStatsBetter: "Лидер",
+    teamStatsTie: "Равенство",
+    teamStatsInsufficientData: "Недостаточно данных для сравнения",
     teamStatsTeam: "Команда",
     teamStatsPeriod: "Период",
     allSeasons: "Все сезоны",
@@ -365,6 +379,7 @@ let newsItems = [];
 let currentSeason = 1;
 let currentLang = localStorage.getItem("leagueLang") || "en";
 let showAllMatches = false;
+let teamStatsMode = "single";
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -1021,12 +1036,12 @@ function formatTeamStat(value) {
 }
 
 function renderTeamStats() {
-  const teamSelect = document.getElementById("teamStatsTeamSelect");
   const seasonSelect = document.getElementById("teamStatsSeasonSelect");
-  if (!teamSelect || !seasonSelect) return;
+  const teamSelect = document.getElementById("teamStatsTeamSelect");
+  if (!seasonSelect || !teamSelect) return;
 
-  const previousTeam = teamSelect.value || "0";
   const previousSeason = seasonSelect.value || String(currentSeason);
+  const previousTeam = teamSelect.value || "0";
   teamSelect.replaceChildren();
   state.teams.forEach((team, index) => {
     const option = document.createElement("option");
@@ -1055,36 +1070,153 @@ function renderTeamStats() {
     ? previousSeason
     : String(currentSeason);
 
-  const stats = calculateTeamSeasonStats(Number(teamSelect.value), seasonSelect.value);
-  document.getElementById("teamStatsRecord").textContent = t(
-    "statsRecord", stats.played, stats.wins, stats.draws, stats.losses
+  const allTeamStats = state.teams.map((team, index) => ({
+    team,
+    index,
+    stats: calculateTeamSeasonStats(index, seasonSelect.value)
+  }));
+  const selectedTeamIndex = Number(teamSelect.value);
+  const teamStats = teamStatsMode === "compare"
+    ? allTeamStats
+    : [allTeamStats[selectedTeamIndex]];
+  document.getElementById("teamStatsTeamFilter").hidden = teamStatsMode === "compare";
+  document.querySelector(".team-stats-compare-label").hidden = teamStatsMode !== "compare";
+  document.querySelectorAll(".team-stats-mode-button").forEach(button => {
+    const active = button.dataset.statsMode === teamStatsMode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  const clubs = document.getElementById("teamStatsClubs");
+  clubs.replaceChildren();
+  clubs.classList.toggle("single", teamStatsMode !== "compare");
+  teamStats.forEach(({ team, index, stats }) =>
+    clubs.append(createTeamStatsClub(team, index, stats))
   );
 
+  const cardsByTeam = teamStats.map(({ stats }) => createTeamStatCards(stats));
+  const cards = teamStatsMode === "compare"
+    ? cardsByTeam[0].map((card, index) => ({
+      ...card,
+      values: [card, cardsByTeam[1][index]]
+    }))
+    : cardsByTeam[0].map(card => ({ ...card, values: [card] }));
+  const grid = document.getElementById("teamStatsGrid");
+  grid.replaceChildren();
+  grid.classList.toggle("single", teamStatsMode !== "compare");
+  cards.forEach(card => {
+    const element = document.createElement("article");
+    element.className = "team-stat-card";
+    element.dataset.tone = card.tone;
+    const label = document.createElement("span");
+    label.className = "team-stat-label";
+    label.textContent = t(card.label);
+    const comparison = document.createElement("div");
+    comparison.className = "team-stat-comparison";
+    const availableValues = card.values.map(item => item.numeric).filter(Number.isFinite);
+    const max = Math.max(...availableValues, 0);
+    const winner = teamStatsMode !== "compare"
+      ? -2
+      : card.values[0].numeric === null || card.values[1].numeric === null
+        ? -2
+        : Math.abs(card.values[0].numeric - card.values[1].numeric) < 0.0001
+          ? -1
+          : card.values[0].numeric > card.values[1].numeric ? 0 : 1;
+    card.values.forEach((valueInfo, teamIndex) => {
+      const side = document.createElement("div");
+      side.className = `team-stat-side ${teamIndex === 0 ? "one" : "two"}${winner === teamIndex ? " winner" : ""}`;
+      const value = document.createElement("strong");
+      value.className = "team-stat-value";
+      value.textContent = valueInfo.value;
+      const note = document.createElement("span");
+      note.className = "team-stat-note";
+      note.textContent = valueInfo.note;
+      const track = document.createElement("span");
+      track.className = "team-stat-track";
+      const fill = document.createElement("span");
+      fill.className = "team-stat-fill";
+      fill.style.width = valueInfo.numeric === null
+        ? "0%"
+        : `${max === 0 ? 50 : valueInfo.numeric / max * 100}%`;
+      track.append(fill);
+      side.append(value, note, track);
+      comparison.append(side);
+    });
+    const verdict = document.createElement("span");
+    verdict.className = "team-stat-verdict";
+    if (teamStatsMode !== "compare") {
+      verdict.hidden = true;
+    } else if (winner === -2) {
+      verdict.textContent = "—";
+      verdict.setAttribute("aria-label", t("teamStatsInsufficientData"));
+    } else if (winner === -1) {
+      verdict.textContent = t("teamStatsTie");
+    } else {
+      const badge = document.createElement("img");
+      badge.src = TEAM_PHOTOS[winner];
+      badge.alt = "";
+      badge.className = "team-stat-winner-badge";
+      const winnerName = document.createElement("span");
+      winnerName.textContent = state.teams[winner].name;
+      const winnerLabel = document.createElement("small");
+      winnerLabel.textContent = t("teamStatsBetter");
+      verdict.append(badge, winnerName, winnerLabel);
+      verdict.classList.add(winner === 0 ? "one" : "two");
+    }
+    element.append(label, comparison, verdict);
+    grid.append(element);
+  });
+  document.getElementById("teamStatsEmpty").hidden = teamStats.some(({ stats }) => stats.played > 0);
+}
+
+function createTeamStatsClub(team, index, stats) {
+  const club = document.createElement("div");
+  club.className = `team-stats-club ${index === 0 ? "one" : "two"}`;
+  const badge = document.createElement("span");
+  badge.className = "team-stats-club-badge";
+  const image = document.createElement("img");
+  image.src = TEAM_PHOTOS[index];
+  image.alt = "";
+  image.loading = "lazy";
+  badge.append(image);
+  const name = document.createElement("strong");
+  name.textContent = team.name;
+  const record = document.createElement("span");
+  record.textContent = t("statsRecord", stats.played, stats.wins, stats.draws, stats.losses);
+  club.append(badge, name, record);
+  return club;
+}
+
+function createTeamStatCards(stats) {
   const recordedNote = count => t("statRecordedIn", count, stats.played);
-  const cards = [
-    { label: "statPlayed", value: String(stats.played), note: t("statAllMatches"), tone: "results" },
+  return [
+    { label: "statPlayed", value: String(stats.played), numeric: null, note: t("statAllMatches"), tone: "results" },
     {
       label: "statWinRate",
       value: stats.played ? `${formatTeamStat(stats.wins / stats.played * 100)}%` : "—",
+      numeric: stats.played ? stats.wins / stats.played * 100 : null,
       note: t("statWinsOutOf", stats.wins, stats.played),
       tone: "results"
     },
     {
       label: "statHomeWinRate",
       value: stats.homePlayed ? `${formatTeamStat(stats.homeWins / stats.homePlayed * 100)}%` : "—",
+      numeric: stats.homePlayed ? stats.homeWins / stats.homePlayed * 100 : null,
       note: t("statLocationWinsOutOf", stats.homeWins, stats.homePlayed),
       tone: "results"
     },
     {
       label: "statAwayWinRate",
       value: stats.awayPlayed ? `${formatTeamStat(stats.awayWins / stats.awayPlayed * 100)}%` : "—",
+      numeric: stats.awayPlayed ? stats.awayWins / stats.awayPlayed * 100 : null,
       note: t("statLocationWinsOutOf", stats.awayWins, stats.awayPlayed),
       tone: "results"
     },
-    { label: "statGoals", value: String(stats.goals), note: t("statAllMatches"), tone: "goals" },
+    { label: "statGoals", value: String(stats.goals), numeric: stats.goals, note: t("statAllMatches"), tone: "goals" },
     {
       label: "statGoalsPerMatch",
       value: stats.played ? formatTeamStat(stats.goals / stats.played) : "—",
+      numeric: stats.played ? stats.goals / stats.played : null,
       note: t("statAllMatches"),
       tone: "goals"
     },
@@ -1093,18 +1225,21 @@ function renderTeamStats() {
       value: stats.possessionMatches
         ? `${formatTeamStat(stats.possessionTotal / stats.possessionMatches)}%`
         : "—",
+      numeric: stats.possessionMatches ? stats.possessionTotal / stats.possessionMatches : null,
       note: recordedNote(stats.possessionMatches),
       tone: "possession"
     },
     {
       label: "statPasses",
       value: stats.passesMatches ? formatTeamStat(stats.passesTotal / stats.passesMatches) : "—",
+      numeric: stats.passesMatches ? stats.passesTotal / stats.passesMatches : null,
       note: recordedNote(stats.passesMatches),
       tone: "possession"
     },
     {
       label: "statShots",
       value: stats.shotsMatches ? formatTeamStat(stats.shotsTotal / stats.shotsMatches) : "—",
+      numeric: stats.shotsMatches ? stats.shotsTotal / stats.shotsMatches : null,
       note: recordedNote(stats.shotsMatches),
       tone: "shots"
     },
@@ -1113,6 +1248,7 @@ function renderTeamStats() {
       value: stats.shotsOnTargetMatches
         ? formatTeamStat(stats.shotsOnTargetTotal / stats.shotsOnTargetMatches)
         : "—",
+      numeric: stats.shotsOnTargetMatches ? stats.shotsOnTargetTotal / stats.shotsOnTargetMatches : null,
       note: recordedNote(stats.shotsOnTargetMatches),
       tone: "shots"
     },
@@ -1121,31 +1257,12 @@ function renderTeamStats() {
       value: stats.shotsTotal
         ? `${formatTeamStat(stats.goalsInShotMatches / stats.shotsTotal * 100)}%`
         : "—",
+      numeric: stats.shotsTotal ? stats.goalsInShotMatches / stats.shotsTotal * 100 : null,
       note: recordedNote(stats.shotsMatches),
       tone: "goals"
     }
   ];
-  const grid = document.getElementById("teamStatsGrid");
-  grid.replaceChildren();
-  cards.forEach(card => {
-    const element = document.createElement("article");
-    element.className = "team-stat-card";
-    element.dataset.tone = card.tone;
-    const label = document.createElement("span");
-    label.className = "team-stat-label";
-    label.textContent = t(card.label);
-    const value = document.createElement("strong");
-    value.className = "team-stat-value";
-    value.textContent = card.value;
-    const note = document.createElement("span");
-    note.className = "team-stat-note";
-    note.textContent = card.note;
-    element.append(label, value, note);
-    grid.append(element);
-  });
-  document.getElementById("teamStatsEmpty").hidden = stats.played > 0;
 }
-
 async function deleteMatch(id) {
   try {
     const { error } = await supabase.from("league_matches").delete().eq("id", id);
@@ -2025,6 +2142,12 @@ document.querySelectorAll(".lang-btn").forEach(btn => {
 
 document.getElementById("teamStatsTeamSelect").addEventListener("change", renderTeamStats);
 document.getElementById("teamStatsSeasonSelect").addEventListener("change", renderTeamStats);
+document.querySelectorAll(".team-stats-mode-button").forEach(button => {
+  button.addEventListener("click", () => {
+    teamStatsMode = button.dataset.statsMode;
+    renderTeamStats();
+  });
+});
 document.getElementById("matchHistoryToggle").addEventListener("click", () => {
   showAllMatches = !showAllMatches;
   renderMatches();

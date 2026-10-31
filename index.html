@@ -216,8 +216,12 @@
                     </span>
                 </summary>
                 <div class="team-stats-content">
+                    <div class="team-stats-mode" role="group" data-i18n-aria-label="teamStatsView">
+                        <button class="team-stats-mode-button active" type="button" data-stats-mode="single" aria-pressed="true" data-i18n="teamStatsSingleMode">One team</button>
+                        <button class="team-stats-mode-button" type="button" data-stats-mode="compare" aria-pressed="false" data-i18n="teamStatsCompareMode">Compare teams</button>
+                    </div>
                     <div class="team-stats-filters">
-                        <label class="team-stats-filter">
+                        <label class="team-stats-filter" id="teamStatsTeamFilter">
                             <span data-i18n="teamStatsTeam">Team</span>
                             <select id="teamStatsTeamSelect"></select>
                         </label>
@@ -226,7 +230,8 @@
                             <select id="teamStatsSeasonSelect"></select>
                         </label>
                     </div>
-                    <p class="team-stats-record" id="teamStatsRecord"></p>
+                    <p class="team-stats-compare-label" data-i18n="teamStatsCompare">Team comparison</p>
+                    <div class="team-stats-clubs" id="teamStatsClubs"></div>
                     <div class="team-stats-grid" id="teamStatsGrid" aria-live="polite"></div>
                     <p class="team-stats-empty" id="teamStatsEmpty" data-i18n="noTeamStats" hidden>No matches for this selection yet.</p>
                     <p class="team-stats-footnote" data-i18n="teamStatsFootnote">Averages use only matches where each statistic was recorded. Shot conversion = goals in matches with shot data divided by recorded shots.</p>
