@@ -75,8 +75,10 @@ const TRANSLATIONS = {
     upcomingMatchChartLabel: "{0} and {1} match outcome probabilities",
     versus: "VS",
     lastMatchTitle: "Last match",
+    noLastMatch: "No matches have been played yet.",
     matchHistoryShow: "Show all match history ({0})",
     matchHistoryHide: "Show latest matches",
+    noMatchStats: "No statistics were recorded for this match.",
     matchDialogTitle: "Add match result",
     matchDialogDesc: "Enter the score for a match you played",
     predictionDraw: "Draw",
@@ -234,8 +236,10 @@ const TRANSLATIONS = {
     upcomingMatchChartLabel: "Вероятности исхода матча {0} и {1}",
     versus: "ПРОТИВ",
     lastMatchTitle: "Последний матч",
+    noLastMatch: "Матчи ещё не сыграны.",
     matchHistoryShow: "Вся история матчей ({0})",
     matchHistoryHide: "Показать последние матчи",
+    noMatchStats: "Статистика этого матча не записана.",
     matchDialogTitle: "Добавить результат матча",
     matchDialogDesc: "Введите счёт сыгранного матча",
     predictionDraw: "Ничья",
@@ -1265,10 +1269,8 @@ function renderMatches() {
     ? t("matchHistoryHide")
     : t("matchHistoryShow", matches.length);
   visibleMatches.forEach(match => {
-    const hasStats = match.stats && Object.values(match.stats.home ?? {})
-      .concat(Object.values(match.stats.away ?? {})).some(value => value !== null);
-    const item = document.createElement(hasStats ? "details" : "div");
-    item.className = hasStats ? "match-item match-item-details" : "match-item";
+    const item = document.createElement("details");
+    item.className = "match-item match-item-details";
     const teams = document.createElement("div");
     teams.className = "match-teams";
     const first = createMatchTeamDisplay(match.home);
@@ -1293,14 +1295,10 @@ function renderMatches() {
     scoreAway.textContent = String(match.awayGoals);
     score.append(scoreHome, scoreSeparator, scoreAway);
     score.setAttribute("aria-label", `Score ${match.homeGoals} to ${match.awayGoals}`);
-    if (hasStats) {
-      const summary = document.createElement("summary");
-      summary.className = "match-summary";
-      summary.append(teams, score);
-      item.append(summary, renderMatchStats(match));
-    } else {
-      item.append(teams, score);
-    }
+    const summary = document.createElement("summary");
+    summary.className = "match-summary";
+    summary.append(teams, score);
+    item.append(summary, renderMatchStats(match));
     const deleteButton = document.createElement("button");
     deleteButton.className = "button button-quiet match-delete";
     deleteButton.textContent = t("deleteNews");
@@ -1339,16 +1337,23 @@ function createMatchTeamDisplay(teamIndex) {
 function renderLastMatch() {
   const panel = document.getElementById("lastMatchPanel");
   const result = document.getElementById("lastMatchResult");
+  const stats = document.getElementById("lastMatchStats");
   const dateLabel = document.getElementById("lastMatchDate");
+  panel.hidden = false;
+  panel.classList.toggle("has-match", state.matches.length > 0);
   if (!state.matches.length) {
-    panel.hidden = true;
     result.replaceChildren();
+    const empty = document.createElement("p");
+    empty.className = "last-match-empty";
+    empty.textContent = t("noLastMatch");
+    result.append(empty);
+    dateLabel.textContent = "";
+    stats.replaceChildren();
     return;
   }
   const lastMatch = state.matches.reduce((latest, match) =>
     new Date(match.date) > new Date(latest.date) ? match : latest
   );
-  panel.hidden = false;
   const parsedDate = new Date(lastMatch.date);
   dateLabel.textContent = Number.isNaN(parsedDate.getTime())
     ? ""
@@ -1366,6 +1371,7 @@ function renderLastMatch() {
   score.className = "last-match-score";
   score.textContent = `${lastMatch.homeGoals} : ${lastMatch.awayGoals}`;
   result.append(homeTeam, score, awayTeam);
+  stats.replaceChildren(renderMatchStats(lastMatch));
 }
 
 function renderMatchStats(match) {
@@ -1374,40 +1380,61 @@ function renderMatchStats(match) {
   const title = document.createElement("h3");
   title.className = "match-stats-title";
   title.innerHTML = t("matchStats");
-  const table = document.createElement("table");
-  const head = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  ["", state.teams[match.home].name, state.teams[match.away].name].forEach(label => {
-    const cell = document.createElement("th");
-    cell.scope = "col";
-    cell.textContent = label;
-    headerRow.append(cell);
-  });
-  head.append(headerRow);
-  const body = document.createElement("tbody");
   const rows = [
-    ["Shots", "shots", ""],
-    ["Shots on target", "shotsOnTarget", ""],
-    ["Possession", "possession", "%"],
-    ["Passes", "passes", ""]
+    ["shots", ""],
+    ["shotsOnTarget", ""],
+    ["possession", "%"],
+    ["passes", ""]
   ];
-  rows.forEach(([label, key, suffix]) => {
-    const row = document.createElement("tr");
-    const name = document.createElement("th");
-    name.scope = "row";
-    name.textContent = label;
-    row.append(name);
-    [match.stats.home, match.stats.away].forEach(teamStats => {
-      const value = document.createElement("td");
-      value.textContent = teamStats[key] === null || teamStats[key] === undefined
-        ? "—"
-        : `${teamStats[key]}${suffix}`;
-      row.append(value);
+  let visibleRows = 0;
+  rows.forEach(([key, suffix]) => {
+    const rawValues = [match.stats?.home?.[key], match.stats?.away?.[key]];
+    const values = rawValues.map(value => {
+      if (value === null || value === undefined || value === "") return null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
     });
-    body.append(row);
+    if (values.every(value => value === null)) return;
+    visibleRows += 1;
+    const row = document.createElement("div");
+    row.className = "match-stat-row";
+    row.setAttribute("role", "group");
+    row.setAttribute("aria-label", `${t(key)}: ${values[0] ?? "—"}${values[0] === null ? "" : suffix} – ${values[1] ?? "—"}${values[1] === null ? "" : suffix}`);
+    const valueLine = document.createElement("div");
+    valueLine.className = "match-stat-values";
+    const homeValue = document.createElement("strong");
+    homeValue.textContent = values[0] === null ? "—" : `${values[0]}${suffix}`;
+    const label = document.createElement("span");
+    label.textContent = t(key);
+    const awayValue = document.createElement("strong");
+    awayValue.textContent = values[1] === null ? "—" : `${values[1]}${suffix}`;
+    valueLine.append(homeValue, label, awayValue);
+
+    const max = Math.max(...values.filter(value => value !== null), 0);
+    const makeTrack = (value, side) => {
+      const track = document.createElement("span");
+      track.className = `match-stat-track ${side}`;
+      const fill = document.createElement("span");
+      fill.className = `match-stat-fill ${side}`;
+      fill.style.width = value === null ? "0%" : `${max === 0 ? 50 : value / max * 100}%`;
+      track.append(fill);
+      return track;
+    };
+    const bars = document.createElement("div");
+    bars.className = "match-stat-bars";
+    bars.setAttribute("aria-hidden", "true");
+    bars.append(makeTrack(values[0], "home"), makeTrack(values[1], "away"));
+    row.append(valueLine, bars);
+    section.append(row);
   });
-  table.append(head, body);
-  section.append(title, table);
+  if (visibleRows === 0) {
+    const empty = document.createElement("p");
+    empty.className = "match-stats-empty";
+    empty.textContent = t("noMatchStats");
+    section.append(title, empty);
+  } else {
+    section.prepend(title);
+  }
   return section;
 }
 

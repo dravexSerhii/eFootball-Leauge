@@ -44,6 +44,43 @@
 
             </section>
 
+            <section class="panel standings-panel" aria-labelledby="tableTitle">
+                <div class="panel-heading">
+                    <h2 id="tableTitle" data-i18n="tableTitle">Table</h2>
+                    <span class="live-label" data-i18n="updatedAfterMatch"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="colPos">#</th>
+                                <th scope="col" data-i18n="colTeam">Team</th>
+                                <th scope="col" title="Results from the last five matches" data-i18n="colForm">Form</th>
+                                <th scope="col" title="Played" data-i18n="colPlayed">Pld</th>
+                                <th scope="col" title="Wins" data-i18n="colW">W</th>
+                                <th scope="col" title="Draws" data-i18n="colD">D</th>
+                                <th scope="col" title="Losses" data-i18n="colL">L</th>
+                                <th scope="col" title="Goal difference" data-i18n="colGD">GD</th>
+                                <th scope="col" title="Points" data-i18n="colPts">Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody id="standingsBody"></tbody>
+                    </table>
+                </div>
+                <div class="table-footer" data-i18n="tableFooter">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points</div>
+            </section>
+
+            <details class="last-match-panel panel" id="lastMatchPanel" aria-labelledby="lastMatchTitle">
+                <summary class="last-match-summary">
+                    <div class="last-match-heading">
+                        <h2 id="lastMatchTitle" data-i18n="lastMatchTitle">Last match</h2>
+                        <span class="last-match-date" id="lastMatchDate"></span>
+                    </div>
+                    <div class="last-match-result" id="lastMatchResult"></div>
+                </summary>
+                <div id="lastMatchStats"></div>
+            </details>
+
             <section class="championship-race panel" aria-label="Championship race">
                 <div class="panel-heading">
                     <h2 data-i18n="championshipTitle">Championship Race</h2>
@@ -119,14 +156,6 @@
                 <p class="upcoming-match-disclaimer" data-i18n="upcomingMatchDisclaimer">Historical match statistics with simulated movement. Not live-match data.</p>
             </section>
 
-            <section class="last-match-panel panel" id="lastMatchPanel" aria-labelledby="lastMatchTitle" hidden>
-                <div class="last-match-heading">
-                    <h2 id="lastMatchTitle" data-i18n="lastMatchTitle">Last match</h2>
-                    <span class="last-match-date" id="lastMatchDate"></span>
-                </div>
-                <div class="last-match-result" id="lastMatchResult"></div>
-            </section>
-
             <section class="season-panel panel" aria-label="Season info">
                 <div class="panel-heading">
                     <div class="season-header">
@@ -169,48 +198,15 @@
                 </div>
             </section>
 
-            <div class="content-grid">
-                <section class="panel" aria-labelledby="tableTitle">
-                    <div class="panel-heading">
-                        <h2 id="tableTitle" data-i18n="tableTitle">Table</h2>
-                        <span class="live-label" data-i18n="updatedAfterMatch"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th scope="col" data-i18n="colPos">#</th>
-                                    <th scope="col" data-i18n="colTeam">Team</th>
-                                    <th scope="col" title="Results from the last five matches" data-i18n="colForm">Form</th>
-                                    <th scope="col" title="Played" data-i18n="colPlayed">Pld</th>
-                                    <th scope="col" title="Wins" data-i18n="colW">W</th>
-                                    <th scope="col" title="Draws" data-i18n="colD">D</th>
-                                    <th scope="col" title="Losses" data-i18n="colL">L</th>
-                                    <th scope="col" title="Goal difference" data-i18n="colGD">GD</th>
-                                    <th scope="col" title="Points" data-i18n="colPts">Pts</th>
-                                </tr>
-                            </thead>
-                            <tbody id="standingsBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="table-footer" data-i18n="tableFooter">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points
-                    </div>
-                </section>
-
-                <aside>
-                    <section class="panel side-panel" aria-labelledby="matchesTitle">
-                    <div class="panel-heading">
-                        <h2 id="matchesTitle" data-i18n="latestMatches">Latest matches</h2><span class="live-label" id="matchesCount">0
-                            matches</span>
-                    </div>
-                    <div class="match-list" id="matchList"></div>
-                    <button class="match-history-toggle" id="matchHistoryToggle" type="button" aria-controls="matchList" aria-expanded="false" hidden></button>
-                </section>
-                <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span data-i18n="tipText">A win earns <strong>3
-                            points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared
-                        league and keep them in sync.</span></div>
-                </aside>
-            </div>
+            <section class="panel match-history-panel" aria-labelledby="matchesTitle">
+                <div class="panel-heading">
+                    <h2 id="matchesTitle" data-i18n="latestMatches">Latest matches</h2>
+                    <span class="live-label" id="matchesCount">0 matches</span>
+                </div>
+                <div class="match-list" id="matchList"></div>
+                <button class="match-history-toggle" id="matchHistoryToggle" type="button" aria-controls="matchList" aria-expanded="false" hidden></button>
+            </section>
+            <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span data-i18n="tipText">A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.</span></div>
 
             <details class="team-stats-panel panel">
                 <summary class="team-stats-summary">
