@@ -2053,27 +2053,34 @@ function getFiveMatchForecastLegacy() {
 function getFiveMatchForecast() {
   const history = state.matches.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
   const lastMatch = history[history.length - 1];
-  let homeTeam = lastMatch && (lastMatch.home === 0 || lastMatch.home === 1)
+  const knownFixtures = new Map();
+  history.forEach(match => {
+    if ((match.home === 0 || match.home === 1) && match.away === 1 - match.home) {
+      knownFixtures.set(`${match.home}:${match.away}`, { homeTeam: match.home, awayTeam: match.away });
+    }
+  });
+  const fixtures = [...knownFixtures.values()];
+  if (!fixtures.length) return [];
+
+  const nextHomeTeam = lastMatch && (lastMatch.home === 0 || lastMatch.home === 1)
     ? 1 - lastMatch.home
-    : 0;
+    : fixtures[0].homeTeam;
+  let fixtureIndex = fixtures.findIndex(fixture => fixture.homeTeam === nextHomeTeam);
+  if (fixtureIndex < 0) fixtureIndex = 0;
 
   return Array.from({ length: 5 }, (_, index) => {
-    const awayTeam = 1 - homeTeam;
+    const fixture = fixtures[fixtureIndex];
     const venueHistory = history
-      .filter(match => match.home === homeTeam && match.away === awayTeam)
+      .filter(match => match.home === fixture.homeTeam && match.away === fixture.awayTeam)
       .slice(-12);
-    const prediction = venueHistory.length
-      ? calculateVenueSpecificForecast(venueHistory)
-      : null;
-    const fixture = {
+    const prediction = calculateVenueSpecificForecast(venueHistory);
+    fixtureIndex = (fixtureIndex + 1) % fixtures.length;
+    return {
       number: index + 1,
-      homeTeam,
-      awayTeam,
-      available: Boolean(prediction),
-      ...(prediction ?? {})
+      ...fixture,
+      available: true,
+      ...prediction
     };
-    homeTeam = awayTeam;
-    return fixture;
   });
 }
 
@@ -2246,7 +2253,7 @@ function renderFiveMatchForecast() {
     list.append(item);
   });
   document.getElementById("forecastFiveNote").textContent =
-    forecasts.some(forecast => forecast.available) ? t("forecastDataNote") : t("forecastNoHistory");
+    forecasts.length ? t("forecastDataNote") : t("forecastNoHistory");
 }
 
 function getRoundedForecastProbabilities(probabilities) {
