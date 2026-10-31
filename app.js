@@ -31,6 +31,9 @@ const TRANSLATIONS = {
     statsRecord: "{0} matches · {1} W · {2} D · {3} L",
     statPlayed: "Matches played",
     statWinRate: "Win rate",
+    statHomeWinRate: "Home win rate",
+    statAwayWinRate: "Away win rate",
+    statLocationWinsOutOf: "{0} wins from {1} matches",
     statGoals: "Goals scored",
     statGoalsPerMatch: "Goals per match",
     statPossession: "Average possession",
@@ -89,7 +92,7 @@ const TRANSLATIONS = {
     awayTeam: "Away team",
     swapTeams: "Swap home and away teams",
     goals: "Goals",
-    matchStats: "Match statistics <span>Optional</span>",
+    matchStats: "Match statistics",
     statsOptional: "Leave any statistic blank if you do not have it.",
     statistic: "Statistic",
     shots: "Shots",
@@ -195,6 +198,9 @@ const TRANSLATIONS = {
     statsRecord: "{0} матчей · {1} В · {2} Н · {3} П",
     statPlayed: "Сыграно матчей",
     statWinRate: "Процент побед",
+    statHomeWinRate: "Процент побед дома",
+    statAwayWinRate: "Процент побед в гостях",
+    statLocationWinsOutOf: "{0} побед из {1} матчей",
     statGoals: "Забито голов",
     statGoalsPerMatch: "Голов за матч",
     statPossession: "Среднее владение",
@@ -253,7 +259,7 @@ const TRANSLATIONS = {
     awayTeam: "Гости",
     swapTeams: "Поменять хозяев и гостей местами",
     goals: "Голы",
-    matchStats: "Статистика матча <span>Необязательно</span>",
+    matchStats: "Статистика матча",
     statsOptional: "Оставьте любую статистику пустой, если у вас её нет.",
     statistic: "Статистика",
     shots: "Удары",
@@ -952,6 +958,10 @@ function calculateTeamSeasonStats(teamIndex, selectedSeason) {
   const stats = {
     played: matches.length,
     wins: 0,
+    homePlayed: 0,
+    homeWins: 0,
+    awayPlayed: 0,
+    awayWins: 0,
     draws: 0,
     losses: 0,
     goals: 0,
@@ -972,8 +982,13 @@ function calculateTeamSeasonStats(teamIndex, selectedSeason) {
     const goalsAgainst = isHome ? match.awayGoals : match.homeGoals;
     const teamMatchStats = match.stats?.[isHome ? "home" : "away"] ?? {};
     stats.goals += goalsFor;
-    if (goalsFor > goalsAgainst) stats.wins++;
-    else if (goalsFor === goalsAgainst) stats.draws++;
+    if (isHome) stats.homePlayed++;
+    else stats.awayPlayed++;
+    if (goalsFor > goalsAgainst) {
+      stats.wins++;
+      if (isHome) stats.homeWins++;
+      else stats.awayWins++;
+    } else if (goalsFor === goalsAgainst) stats.draws++;
     else stats.losses++;
 
     if (Number.isFinite(teamMatchStats.possession)) {
@@ -1052,6 +1067,18 @@ function renderTeamStats() {
       label: "statWinRate",
       value: stats.played ? `${formatTeamStat(stats.wins / stats.played * 100)}%` : "—",
       note: t("statWinsOutOf", stats.wins, stats.played),
+      tone: "results"
+    },
+    {
+      label: "statHomeWinRate",
+      value: stats.homePlayed ? `${formatTeamStat(stats.homeWins / stats.homePlayed * 100)}%` : "—",
+      note: t("statLocationWinsOutOf", stats.homeWins, stats.homePlayed),
+      tone: "results"
+    },
+    {
+      label: "statAwayWinRate",
+      value: stats.awayPlayed ? `${formatTeamStat(stats.awayWins / stats.awayPlayed * 100)}%` : "—",
+      note: t("statLocationWinsOutOf", stats.awayWins, stats.awayPlayed),
       tone: "results"
     },
     { label: "statGoals", value: String(stats.goals), note: t("statAllMatches"), tone: "goals" },
