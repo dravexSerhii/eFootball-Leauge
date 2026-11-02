@@ -137,6 +137,7 @@
                         <span class="upcoming-team-badge" id="upcomingAwayBadge"></span>
                     </div>
                 </div>
+                <button class="button lineup-open-button" id="upcomingLineupsButton" type="button" data-i18n="lineupsButton">Lineups</button>
                 <div class="upcoming-odds-grid" aria-live="polite">
                     <div class="upcoming-odds-item">
                         <span id="upcomingHomeLabel">FC Promashkov</span>
@@ -242,6 +243,7 @@
                             <select id="teamStatsSeasonSelect"></select>
                         </label>
                     </div>
+                    <button class="button lineup-open-button" id="teamStatsLineupButton" type="button" data-i18n="teamLineup">Team lineup</button>
                     <p class="team-stats-compare-label" data-i18n="teamStatsCompare">Team comparison</p>
                     <div class="team-stats-clubs" id="teamStatsClubs"></div>
                     <div class="team-stats-grid" id="teamStatsGrid" aria-live="polite"></div>
@@ -355,6 +357,38 @@
                     data-close="teamsDialog" data-i18n="cancel">Cancel</button><button class="button button-primary"
                     type="submit" data-i18n="saveTeams">Save teams</button></div>
         </form>
+    </dialog>
+    <dialog id="lineupDialog" class="lineup-dialog" aria-labelledby="lineupDialogTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="lineupDialogTitle" data-i18n="lineupTitle">Team builder</h2>
+                    <p data-i18n="lineupDesc">Formation, players and substitutes</p>
+                </div>
+                <button class="close-button" type="button" data-close="lineupDialog" aria-label="Close">×</button>
+            </div>
+            <div class="lineup-tabs" id="lineupTabs" role="tablist"></div>
+            <div class="lineup-toolbar">
+                <label class="lineup-formation">
+                    <span data-i18n="lineupFormation">Formation</span>
+                    <select id="lineupFormation"></select>
+                </label>
+                <button class="button button-quiet" id="lineupAddPlayer" type="button" data-i18n="lineupAddPlayer">Add player</button>
+                <button class="button button-quiet" id="lineupReset" type="button" data-i18n="lineupReset">Reset</button>
+            </div>
+            <div class="lineup-layout">
+                <div>
+                    <div class="lineup-pitch" id="lineupPitch"></div>
+                    <p class="lineup-hint" data-i18n="lineupPitchHint">Drag players on the pitch to place them freely</p>
+                </div>
+                <div class="lineup-roster" id="lineupRoster"></div>
+            </div>
+            <p class="form-error" id="lineupError" role="alert"></p>
+            <div class="dialog-actions">
+                <button class="button button-quiet" type="button" data-close="lineupDialog" data-i18n="cancel">Cancel</button>
+                <button class="button button-primary" id="lineupSave" type="button" data-i18n="lineupSave">Save lineup</button>
+            </div>
+        </div>
     </dialog>
     <dialog id="newsDialog" aria-labelledby="newsDialogTitle">
         <form class="dialog-inner" id="newsForm">

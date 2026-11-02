@@ -3,6 +3,7 @@ create table public.league_settings (
   teams jsonb not null default '[{"name":"FC Promashkov"},{"name":"FC Lionslav"}]'::jsonb,
   season integer not null default 1,
   championships jsonb not null default '{"0":0,"1":0}'::jsonb,
+  lineups jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
 

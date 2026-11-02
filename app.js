@@ -197,6 +197,29 @@ const TRANSLATIONS = {
     seasonComplete: "Season Complete",
     addMatchBtn: "Add match",
     noMatchesPlayed: "No matches played yet. Add the first result to get your league started!",
+    lineupsButton: "Lineups",
+    lineupTitle: "Team builder",
+    lineupDesc: "Formation, players and substitutes",
+    lineupFormation: "Formation",
+    lineupCustom: "Custom",
+    lineupPitchHint: "Drag players on the pitch to place them freely",
+    lineupStarters: "Starting XI",
+    lineupSubs: "Substitutes",
+    lineupAddPlayer: "Add player",
+    lineupName: "Name",
+    lineupNumber: "No.",
+    lineupRating: "OVR",
+    lineupSub: "Sub",
+    lineupRemove: "Remove",
+    lineupSave: "Save lineup",
+    lineupSaved: "Lineup saved",
+    lineupSaveError: "Could not save the lineup: {0}. Run supabase-migration-lineups.sql.",
+    lineupReset: "Reset",
+    lineupMax: "A squad can have up to 30 players",
+    lineupNeedSignIn: "Sign in to open lineups",
+    lineupEmpty: "No players",
+    teamLineup: "Team lineup",
+    lineupPlayerDefault: "Player {0}",
     noNews: "No news yet. Check back soon for league updates."
   },
   ru: {
@@ -387,6 +410,29 @@ const TRANSLATIONS = {
     seasonComplete: "Сезон завершён",
     addMatchBtn: "Добавить матч",
     noMatchesPlayed: "Ещё нет матчей. Добавьте первый результат, чтобы начать лигу!",
+    lineupsButton: "Составы",
+    lineupTitle: "Конструктор команды",
+    lineupDesc: "Схема, игроки и запасные",
+    lineupFormation: "Схема",
+    lineupCustom: "Своя",
+    lineupPitchHint: "Перетаскивайте игроков по полю, чтобы расставить их свободно",
+    lineupStarters: "Основной состав",
+    lineupSubs: "Запасные",
+    lineupAddPlayer: "Добавить игрока",
+    lineupName: "Имя",
+    lineupNumber: "№",
+    lineupRating: "Рейт.",
+    lineupSub: "Запас",
+    lineupRemove: "Удалить",
+    lineupSave: "Сохранить состав",
+    lineupSaved: "Состав сохранён",
+    lineupSaveError: "Не удалось сохранить состав: {0}. Выполните supabase-migration-lineups.sql.",
+    lineupReset: "Сбросить",
+    lineupMax: "В составе может быть до 30 игроков",
+    lineupNeedSignIn: "Войдите, чтобы открыть составы",
+    lineupEmpty: "Нет игроков",
+    teamLineup: "Состав команды",
+    lineupPlayerDefault: "Игрок {0}",
     noNews: "Пока новостей нет. Заглядывайте позже за обновлениями лиги."
   }
 };
@@ -1388,7 +1434,18 @@ function renderStandings() {
         }
         const name = document.createElement("span");
         name.textContent = team.name;
+        teamCell.classList.add("team-cell-link");
+        teamCell.tabIndex = 0;
+        teamCell.setAttribute("role", "button");
+        teamCell.title = t("teamLineup");
+        teamCell.addEventListener("click", () => openLineup(team.index));
         teamCell.append(badge, name);
+        teamCell.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openLineup(team.index);
+          }
+        });
         cell.append(teamCell);
       } else if (value.form !== undefined) {
         cell.className = "form-cell";
@@ -1775,7 +1832,8 @@ async function fetchServerState() {
   state = {
     teams: settings.teams,
     matches: matchesResponse.data.map(mapMatch),
-    championships: settings.championships || { "0": 0, "1": 0 }
+    championships: settings.championships || { "0": 0, "1": 0 },
+    lineups: settings.lineups && typeof settings.lineups === "object" ? settings.lineups : {}
   };
   dataReady = true;
   render();
@@ -2615,11 +2673,308 @@ document.getElementById("teamsForm").addEventListener("submit", async event => {
   showToast(t("teamsSaved"));
 });
 
+const LINEUP_FORMATIONS = ["4-3-3", "4-4-2", "4-2-3-1", "3-5-2", "3-4-3", "4-1-4-1", "4-5-1", "5-3-2", "5-4-1"];
+const LINEUP_POSITIONS = ["GK", "CB", "LB", "RB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST"];
+const LINEUP_MAX_PLAYERS = 30;
+const lineupDialog = document.getElementById("lineupDialog");
+let lineupTeam = 0;
+let lineupDraft = null;
+
+function getFormationSlots(formation) {
+  const lines = formation.split("-").map(Number);
+  const slots = [{ x: 50, y: 90, pos: "GK" }];
+  lines.forEach((count, lineIndex) => {
+    const y = lines.length === 1 ? 45 : 72 - lineIndex * (56 / (lines.length - 1));
+    for (let i = 0; i < count; i += 1) {
+      const isEdge = count >= 4 && (i === 0 || i === count - 1);
+      const isLast = lineIndex === lines.length - 1;
+      let pos = "CM";
+      if (lineIndex === 0 && lines.length > 1) pos = isEdge ? (i === 0 ? "LB" : "RB") : "CB";
+      else if (isLast) pos = count === 3 ? ["LW", "ST", "RW"][i] : "ST";
+      slots.push({ x: Math.round((i + 1) / (count + 1) * 100), y: Math.round(y), pos });
+    }
+  });
+  return slots;
+}
+
+function createDefaultLineup() {
+  const slots = getFormationSlots("4-3-3");
+  return {
+    formation: "4-3-3",
+    players: slots.map((slot, index) => ({
+      id: `p${index + 1}`,
+      name: t("lineupPlayerDefault", index + 1),
+      number: index + 1,
+      pos: slot.pos,
+      rating: 75,
+      sub: false,
+      x: slot.x,
+      y: slot.y
+    }))
+  };
+}
+
+function sanitizeLineup(raw) {
+  if (!raw || !Array.isArray(raw.players)) return createDefaultLineup();
+  const clamp = (value, min, max, fallback) =>
+    Number.isFinite(Number(value)) ? Math.min(max, Math.max(min, Number(value))) : fallback;
+  return {
+    formation: raw.formation === "custom" || LINEUP_FORMATIONS.includes(raw.formation) ? raw.formation : "custom",
+    players: raw.players.slice(0, LINEUP_MAX_PLAYERS).map((player, index) => ({
+      id: String(player.id || `p${index + 1}`),
+      name: String(player.name || "").slice(0, 24),
+      number: Math.round(clamp(player.number, 0, 99, 0)),
+      pos: LINEUP_POSITIONS.includes(player.pos) ? player.pos : "CM",
+      rating: Math.round(clamp(player.rating, 0, 99, 75)),
+      sub: Boolean(player.sub),
+      x: clamp(player.x, 4, 96, 50),
+      y: clamp(player.y, 4, 96, 50)
+    }))
+  };
+}
+
+function applyFormationToDraft() {
+  if (!lineupDraft || lineupDraft.formation === "custom") return;
+  const slots = getFormationSlots(lineupDraft.formation);
+  lineupDraft.players.filter(player => !player.sub).slice(0, slots.length).forEach((player, index) => {
+    player.x = slots[index].x;
+    player.y = slots[index].y;
+  });
+}
+
+function openLineup(teamIndex) {
+  if (!dataReady) {
+    showToast(t("lineupNeedSignIn"));
+    return;
+  }
+  lineupTeam = teamIndex;
+  lineupDraft = sanitizeLineup(state.lineups?.[teamIndex]);
+  document.getElementById("lineupError").textContent = "";
+  renderLineupEditor();
+  if (!lineupDialog.open) lineupDialog.showModal();
+}
+
+function renderLineupEditor() {
+  const tabs = document.getElementById("lineupTabs");
+  tabs.replaceChildren();
+  state.teams.forEach((team, index) => {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = `lineup-tab${index === lineupTeam ? " active" : ""}`;
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", String(index === lineupTeam));
+    if (TEAM_PHOTOS[index]) {
+      const logo = document.createElement("img");
+      logo.src = TEAM_PHOTOS[index];
+      logo.alt = "";
+      tab.append(logo);
+    }
+    tab.append(team.name);
+    tab.addEventListener("click", () => openLineup(index));
+    tabs.append(tab);
+  });
+  const select = document.getElementById("lineupFormation");
+  select.replaceChildren();
+  [...LINEUP_FORMATIONS, "custom"].forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value === "custom" ? t("lineupCustom") : value;
+    select.append(option);
+  });
+  select.value = lineupDraft.formation;
+  renderLineupPitch();
+  renderLineupRoster();
+}
+
+function renderLineupPitch() {
+  const pitch = document.getElementById("lineupPitch");
+  pitch.replaceChildren();
+  const markings = document.createElement("div");
+  markings.className = "lineup-pitch-lines";
+  pitch.append(markings);
+  lineupDraft.players.filter(player => !player.sub).forEach(player => {
+    const marker = document.createElement("div");
+    marker.className = "lineup-player";
+    marker.dataset.id = player.id;
+    marker.style.left = `${player.x}%`;
+    marker.style.top = `${player.y}%`;
+    const shirt = document.createElement("span");
+    shirt.className = "lineup-shirt";
+    shirt.textContent = String(player.number);
+    const name = document.createElement("span");
+    name.className = "lineup-player-name";
+    name.textContent = player.name || player.pos;
+    marker.append(shirt, name);
+    marker.addEventListener("pointerdown", event => startLineupDrag(event, marker, player));
+    pitch.append(marker);
+  });
+}
+
+function startLineupDrag(event, marker, player) {
+  event.preventDefault();
+  const pitch = document.getElementById("lineupPitch");
+  marker.setPointerCapture(event.pointerId);
+  marker.classList.add("dragging");
+  const move = moveEvent => {
+    const rect = pitch.getBoundingClientRect();
+    player.x = Math.min(96, Math.max(4, Math.round((moveEvent.clientX - rect.left) / rect.width * 100)));
+    player.y = Math.min(96, Math.max(4, Math.round((moveEvent.clientY - rect.top) / rect.height * 100)));
+    marker.style.left = `${player.x}%`;
+    marker.style.top = `${player.y}%`;
+  };
+  const end = () => {
+    marker.classList.remove("dragging");
+    marker.removeEventListener("pointermove", move);
+    marker.removeEventListener("pointerup", end);
+    marker.removeEventListener("pointercancel", end);
+    lineupDraft.formation = "custom";
+    document.getElementById("lineupFormation").value = "custom";
+  };
+  marker.addEventListener("pointermove", move);
+  marker.addEventListener("pointerup", end);
+  marker.addEventListener("pointercancel", end);
+}
+
+function renderLineupRoster() {
+  const roster = document.getElementById("lineupRoster");
+  roster.replaceChildren();
+  [[false, "lineupStarters"], [true, "lineupSubs"]].forEach(([isSub, titleKey]) => {
+    const players = lineupDraft.players.filter(player => player.sub === isSub);
+    const heading = document.createElement("h3");
+    heading.textContent = `${t(titleKey)} (${players.length})`;
+    roster.append(heading);
+    if (!players.length) {
+      const empty = document.createElement("p");
+      empty.className = "lineup-empty";
+      empty.textContent = t("lineupEmpty");
+      roster.append(empty);
+    }
+    players.forEach(player => roster.append(createLineupRow(player)));
+  });
+}
+
+function createLineupRow(player) {
+  const row = document.createElement("div");
+  row.className = "lineup-row";
+  const field = (type, value, label, onInput, attrs = {}) => {
+    const input = document.createElement("input");
+    input.type = type;
+    input.value = value;
+    input.setAttribute("aria-label", label);
+    Object.entries(attrs).forEach(([key, attr]) => input.setAttribute(key, attr));
+    input.addEventListener("input", () => onInput(input.value));
+    return input;
+  };
+  const number = field("number", player.number, t("lineupNumber"), value => {
+    player.number = Math.min(99, Math.max(0, Math.round(Number(value) || 0)));
+    renderLineupPitch();
+  }, { min: 0, max: 99, class: "lineup-number" });
+  const name = field("text", player.name, t("lineupName"), value => {
+    player.name = value.slice(0, 24);
+    renderLineupPitch();
+  }, { maxlength: 24, class: "lineup-name" });
+  const position = document.createElement("select");
+  position.setAttribute("aria-label", "Position");
+  LINEUP_POSITIONS.forEach(pos => {
+    const option = document.createElement("option");
+    option.value = pos;
+    option.textContent = pos;
+    position.append(option);
+  });
+  position.value = player.pos;
+  position.addEventListener("change", () => { player.pos = position.value; });
+  const rating = field("number", player.rating, t("lineupRating"), value => {
+    player.rating = Math.min(99, Math.max(0, Math.round(Number(value) || 0)));
+  }, { min: 0, max: 99, class: "lineup-rating", title: t("lineupRating") });
+  const subLabel = document.createElement("label");
+  subLabel.className = "lineup-sub-toggle";
+  const subBox = document.createElement("input");
+  subBox.type = "checkbox";
+  subBox.checked = player.sub;
+  subBox.addEventListener("change", () => {
+    player.sub = subBox.checked;
+    applyFormationToDraft();
+    renderLineupPitch();
+    renderLineupRoster();
+  });
+  subLabel.append(subBox, t("lineupSub"));
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "lineup-remove";
+  remove.title = t("lineupRemove");
+  remove.setAttribute("aria-label", t("lineupRemove"));
+  remove.textContent = "×";
+  remove.addEventListener("click", () => {
+    lineupDraft.players = lineupDraft.players.filter(item => item !== player);
+    applyFormationToDraft();
+    renderLineupPitch();
+    renderLineupRoster();
+  });
+  row.append(number, name, position, rating, subLabel, remove);
+  return row;
+}
+
+document.getElementById("lineupFormation").addEventListener("change", event => {
+  lineupDraft.formation = event.target.value;
+  applyFormationToDraft();
+  renderLineupPitch();
+});
+
+document.getElementById("lineupAddPlayer").addEventListener("click", () => {
+  if (lineupDraft.players.length >= LINEUP_MAX_PLAYERS) {
+    document.getElementById("lineupError").textContent = t("lineupMax");
+    return;
+  }
+  document.getElementById("lineupError").textContent = "";
+  const used = new Set(lineupDraft.players.map(player => player.number));
+  let number = 1;
+  while (used.has(number) && number < 99) number += 1;
+  const starters = lineupDraft.players.filter(player => !player.sub).length;
+  lineupDraft.players.push({
+    id: `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
+    name: t("lineupPlayerDefault", lineupDraft.players.length + 1),
+    number,
+    pos: "CM",
+    rating: 75,
+    sub: starters >= 11,
+    x: 50,
+    y: 50
+  });
+  applyFormationToDraft();
+  renderLineupPitch();
+  renderLineupRoster();
+});
+
+document.getElementById("lineupReset").addEventListener("click", () => {
+  lineupDraft = createDefaultLineup();
+  renderLineupEditor();
+});
+
+document.getElementById("lineupSave").addEventListener("click", async () => {
+  const errorElement = document.getElementById("lineupError");
+  const lineups = { ...(state.lineups || {}), [lineupTeam]: lineupDraft };
+  const { error } = await supabase.from("league_settings")
+    .update({ lineups }).eq("id", true).select("lineups").single();
+  if (error) {
+    console.error("Failed to save the lineup:", error);
+    errorElement.textContent = t("lineupSaveError", error.message);
+    return;
+  }
+  state.lineups = lineups;
+  lineupDialog.close();
+  showToast(t("lineupSaved"));
+});
+
+document.getElementById("upcomingLineupsButton").addEventListener("click", () => openLineup(0));
+document.getElementById("teamStatsLineupButton").addEventListener("click", () => {
+  openLineup(Number(document.getElementById("teamStatsTeamSelect").value) || 0);
+});
+
 document.querySelectorAll("[data-close]").forEach(button => {
   button.addEventListener("click", () => document.getElementById(button.dataset.close).close());
 });
 
-[matchDialog, teamsDialog, authDialog, newsDialog, newsViewDialog].forEach(dialog => {
+[matchDialog, teamsDialog, authDialog, newsDialog, newsViewDialog, lineupDialog].forEach(dialog => {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
