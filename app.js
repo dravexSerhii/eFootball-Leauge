@@ -211,9 +211,6 @@ const TRANSLATIONS = {
     lineupOpen: "Open lineup",
     lineupStartersCount: "{0}/11 starters",
     lineupAvg: "Avg OVR",
-    linkStrong: "Strong link",
-    linkMedium: "Medium",
-    linkWeak: "Weak",
     lineupViewDesc: "Current formation and squad",
     lineupAsOf: "Current lineup as of {0}",
     lineupClose: "Close",
@@ -444,9 +441,6 @@ const TRANSLATIONS = {
     lineupOpen: "Открыть состав",
     lineupStartersCount: "{0}/11 в старте",
     lineupAvg: "Средний рейт.",
-    linkStrong: "Сильная связь",
-    linkMedium: "Средняя",
-    linkWeak: "Слабая",
     lineupViewDesc: "Актуальная схема и состав",
     lineupAsOf: "Актуальный состав на {0}",
     lineupClose: "Закрыть",
@@ -2728,7 +2722,6 @@ const LINEUP_FORMATIONS = ["4-3-3", "4-4-2", "4-2-3-1", "3-5-2", "3-4-3", "4-1-4
 const LINEUP_POSITIONS = ["GK", "CB", "LB", "RB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST"];
 const LINEUP_MAX_PLAYERS = 30;
 const LINEUP_MAX_RATING = 112;
-const LINEUP_GROUP_ORDER = ["gk", "def", "mid", "att"];
 const lineupDialog = document.getElementById("lineupDialog");
 let lineupTeam = 0;
 let lineupDraft = null;
@@ -2830,47 +2823,6 @@ function createMatchLineupButton(match) {
   return button;
 }
 
-function getLineupLinks(players) {
-  const links = new Map();
-  players.forEach((player, index) => {
-    players
-      .map((other, otherIndex) => ({
-        otherIndex,
-        distance: Math.hypot(other.x - player.x, (other.y - player.y) * 1.5)
-      }))
-      .filter(entry => entry.otherIndex !== index)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 2)
-      .forEach(({ otherIndex }) => {
-        links.set(index < otherIndex ? `${index}-${otherIndex}` : `${otherIndex}-${index}`,
-          [Math.min(index, otherIndex), Math.max(index, otherIndex)]);
-      });
-  });
-  return [...links.values()];
-}
-
-function getLinkStrength(first, second) {
-  const gap = Math.abs(LINEUP_GROUP_ORDER.indexOf(lineupGroup(first.pos)) -
-    LINEUP_GROUP_ORDER.indexOf(lineupGroup(second.pos)));
-  return gap === 0 ? "strong" : gap === 1 ? "medium" : "weak";
-}
-
-function updateLineupLinks() {
-  const svg = document.querySelector("#lineupPitch .lineup-links");
-  if (!svg) return;
-  svg.replaceChildren();
-  const starters = lineupDraft.players.filter(player => !player.sub);
-  getLineupLinks(starters).forEach(([a, b]) => {
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", starters[a].x);
-    line.setAttribute("y1", starters[a].y);
-    line.setAttribute("x2", starters[b].x);
-    line.setAttribute("y2", starters[b].y);
-    line.setAttribute("class", `lineup-link ${getLinkStrength(starters[a], starters[b])}`);
-    svg.append(line);
-  });
-}
-
 function renderLineupTicker() {
   const date = new Date(lineupSnapshot ? lineupSnapshot.date : Date.now());
   const formatted = date.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB",
@@ -2935,12 +2887,6 @@ function renderLineupPitch() {
   markings.className = "lineup-pitch-lines";
   markings.innerHTML = '<i class="lp-center"></i><i class="lp-circle"></i><i class="lp-box lp-box-top"></i><i class="lp-box lp-box-bottom"></i>';
   pitch.append(markings);
-  const links = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  links.setAttribute("class", "lineup-links");
-  links.setAttribute("viewBox", "0 0 100 100");
-  links.setAttribute("preserveAspectRatio", "none");
-  pitch.append(links);
-  updateLineupLinks();
   lineupDraft.players.filter(player => !player.sub).forEach(player => {
     const marker = document.createElement("div");
     marker.className = "lineup-player";
@@ -2979,7 +2925,6 @@ function startLineupDrag(event, marker, player) {
     player.y = Math.min(96, Math.max(4, Math.round((moveEvent.clientY - rect.top) / rect.height * 100)));
     marker.style.left = `${player.x}%`;
     marker.style.top = `${player.y}%`;
-    updateLineupLinks();
   };
   const end = () => {
     marker.classList.remove("dragging");
