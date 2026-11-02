@@ -279,6 +279,11 @@
                 </div>
                 <button class="close-button" type="button" data-close="matchDialog" aria-label="Close">×</button>
             </div>
+            <div class="match-tabs" role="tablist">
+                <button class="match-tab active" id="matchTabResult" type="button" role="tab" aria-selected="true" data-i18n="matchTabResult">Result</button>
+                <button class="match-tab" id="matchTabLineups" type="button" role="tab" aria-selected="false"><span data-i18n="matchTabLineups">Confirm lineups</span> <span class="match-tab-status" id="matchTabStatus" aria-hidden="true"></span></button>
+            </div>
+            <div id="matchPanelResult">
             <div class="match-team-pickers">
                 <div class="match-team-picker">
                     <span class="match-team-picker-badge" id="homeTeamBadge" aria-hidden="true"></span>
@@ -332,6 +337,13 @@
                     <input id="awayPasses" type="number" min="0" max="9999" inputmode="numeric" aria-label="Away team passes">
                 </div>
             </section>
+            </div>
+            <div id="matchPanelLineups" hidden>
+                <h3 class="lineup-confirm-title" data-i18n="lineupConfirmTitle">Confirm lineups</h3>
+                <p class="lineup-confirm-desc" data-i18n="lineupConfirmDesc">The current lineups will be saved with this match so you can look back at them later.</p>
+                <div class="lineup-confirm-cards" id="lineupConfirmCards"></div>
+                <label class="lineup-confirm-check"><input type="checkbox" id="lineupConfirmCheck"><span data-i18n="lineupConfirmCheck">I confirm both lineups for this match</span></label>
+            </div>
             <p class="form-error" id="matchError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-quiet" type="button"
                     data-close="matchDialog" data-i18n="cancel">Cancel</button><button class="button button-primary"
@@ -384,6 +396,7 @@
                 <div>
                     <div class="lineup-pitch" id="lineupPitch"></div>
                     <p class="lineup-hint lineup-edit-only" data-i18n="lineupPitchHint">Drag players on the pitch to place them freely</p>
+                    <p class="lineup-legend"><span class="lg-strong" data-i18n="linkStrong">Strong link</span><span class="lg-medium" data-i18n="linkMedium">Medium</span><span class="lg-weak" data-i18n="linkWeak">Weak</span></p>
                     <p class="lineup-formation-badge lineup-view-only" id="lineupFormationBadge"></p>
                 </div>
                 <div class="lineup-roster" id="lineupRoster"></div>
