@@ -2786,21 +2786,30 @@ function renderLineupEditor() {
   renderLineupRoster();
 }
 
+const LINEUP_GROUPS = { GK: "gk", CB: "def", LB: "def", RB: "def", CDM: "mid", CM: "mid", CAM: "mid", LM: "mid", RM: "mid", LW: "att", RW: "att", CF: "att", ST: "att" };
+const lineupGroup = pos => LINEUP_GROUPS[pos] || "mid";
+
 function renderLineupPitch() {
   const pitch = document.getElementById("lineupPitch");
   pitch.replaceChildren();
   const markings = document.createElement("div");
   markings.className = "lineup-pitch-lines";
+  markings.innerHTML = '<i class="lp-center"></i><i class="lp-circle"></i><i class="lp-box lp-box-top"></i><i class="lp-box lp-box-bottom"></i>';
   pitch.append(markings);
   lineupDraft.players.filter(player => !player.sub).forEach(player => {
     const marker = document.createElement("div");
     marker.className = "lineup-player";
     marker.dataset.id = player.id;
+    marker.dataset.group = lineupGroup(player.pos);
     marker.style.left = `${player.x}%`;
     marker.style.top = `${player.y}%`;
     const shirt = document.createElement("span");
     shirt.className = "lineup-shirt";
     shirt.textContent = String(player.number);
+    const rating = document.createElement("span");
+    rating.className = "lineup-shirt-rating";
+    rating.textContent = String(player.rating);
+    shirt.append(rating);
     const name = document.createElement("span");
     name.className = "lineup-player-name";
     name.textContent = player.name || player.pos;
@@ -2856,6 +2865,7 @@ function renderLineupRoster() {
 function createLineupRow(player) {
   const row = document.createElement("div");
   row.className = "lineup-row";
+  row.dataset.group = lineupGroup(player.pos);
   const field = (type, value, label, onInput, attrs = {}) => {
     const input = document.createElement("input");
     input.type = type;
@@ -2882,9 +2892,14 @@ function createLineupRow(player) {
     position.append(option);
   });
   position.value = player.pos;
-  position.addEventListener("change", () => { player.pos = position.value; });
+  position.addEventListener("change", () => {
+    player.pos = position.value;
+    row.dataset.group = lineupGroup(player.pos);
+    renderLineupPitch();
+  });
   const rating = field("number", player.rating, t("lineupRating"), value => {
     player.rating = Math.min(99, Math.max(0, Math.round(Number(value) || 0)));
+    renderLineupPitch();
   }, { min: 0, max: 99, class: "lineup-rating", title: t("lineupRating") });
   const subLabel = document.createElement("label");
   subLabel.className = "lineup-sub-toggle";
