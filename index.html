@@ -358,17 +358,21 @@
                     type="submit" data-i18n="saveTeams">Save teams</button></div>
         </form>
     </dialog>
-    <dialog id="lineupDialog" class="lineup-dialog" aria-labelledby="lineupDialogTitle">
+    <dialog id="lineupDialog" class="lineup-dialog" data-mode="view" aria-labelledby="lineupDialogTitle">
         <div class="dialog-inner">
             <div class="dialog-header">
                 <div>
-                    <h2 id="lineupDialogTitle" data-i18n="lineupTitle">Team builder</h2>
-                    <p data-i18n="lineupDesc">Formation, players and substitutes</p>
+                    <h2 id="lineupDialogTitle">Team lineup</h2>
+                    <p id="lineupDialogDesc"></p>
                 </div>
                 <button class="close-button" type="button" data-close="lineupDialog" aria-label="Close">×</button>
             </div>
             <div class="lineup-tabs" id="lineupTabs" role="tablist"></div>
-            <div class="lineup-toolbar">
+            <div class="lineup-ticker lineup-view-only" aria-live="off">
+                <span class="lineup-ticker-live"></span>
+                <div class="lineup-ticker-window"><div class="lineup-ticker-track" id="lineupTicker"></div></div>
+            </div>
+            <div class="lineup-toolbar lineup-edit-only">
                 <label class="lineup-formation">
                     <span data-i18n="lineupFormation">Formation</span>
                     <select id="lineupFormation"></select>
@@ -379,14 +383,17 @@
             <div class="lineup-layout">
                 <div>
                     <div class="lineup-pitch" id="lineupPitch"></div>
-                    <p class="lineup-hint" data-i18n="lineupPitchHint">Drag players on the pitch to place them freely</p>
+                    <p class="lineup-hint lineup-edit-only" data-i18n="lineupPitchHint">Drag players on the pitch to place them freely</p>
+                    <p class="lineup-formation-badge lineup-view-only" id="lineupFormationBadge"></p>
                 </div>
                 <div class="lineup-roster" id="lineupRoster"></div>
             </div>
             <p class="form-error" id="lineupError" role="alert"></p>
             <div class="dialog-actions">
-                <button class="button button-quiet" type="button" data-close="lineupDialog" data-i18n="cancel">Cancel</button>
-                <button class="button button-primary" id="lineupSave" type="button" data-i18n="lineupSave">Save lineup</button>
+                <button class="button button-quiet lineup-view-only" type="button" data-close="lineupDialog" data-i18n="lineupClose">Close</button>
+                <button class="button button-primary lineup-view-only" id="lineupEdit" type="button" data-i18n="lineupEditMode">⚙ Edit lineup</button>
+                <button class="button button-quiet lineup-edit-only" id="lineupBack" type="button" data-i18n="lineupBack">Back to lineup</button>
+                <button class="button button-primary lineup-edit-only" id="lineupSave" type="button" data-i18n="lineupSave">Save lineup</button>
             </div>
         </div>
     </dialog>
