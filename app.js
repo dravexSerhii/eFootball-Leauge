@@ -127,6 +127,15 @@ const TRANSLATIONS = {
     saveResult: "Save result",
     teamsDialogTitle: "Your teams",
     teamsDialogDesc: "Choose names for your league",
+    addTeam: "+ Add team",
+    cardUpload: "Upload player card",
+    cardRemove: "Remove card",
+    cardInvalid: "Choose an image up to 8 MB.",
+    cardUploadError: "Could not upload the card: {0}",
+    removeTeam: "Remove team",
+    teamNamePlaceholder: "Team name",
+    teamLogoPlaceholder: "Logo URL (https, optional)",
+    teamStatsVersus: "Compare with",
     newsDialogTitle: "Publish league news",
     newsDialogDesc: "Add a photo and a story for everyone to see",
     headline: "Headline",
@@ -179,7 +188,7 @@ const TRANSLATIONS = {
     teamsInvalid: "The database has invalid team names. Check the league_settings table.",
     matchesInvalid: "The database contains a match with invalid data.",
     teamsSame: "Team names must be different.",
-    teamsRequired: "Enter names for both teams.",
+    teamsRequired: "Enter a name for every team.",
     teamsDiff: "Select two different teams.",
     scoreRange: "Enter a score between 0 and 99 goals.",
     statsWhole: "Enter whole numbers for match statistics.",
@@ -359,6 +368,15 @@ const TRANSLATIONS = {
     saveResult: "Сохранить результат",
     teamsDialogTitle: "Ваши команды",
     teamsDialogDesc: "Выберите названия для вашей лиги",
+    addTeam: "+ Добавить команду",
+    cardUpload: "Загрузить карту игрока",
+    cardRemove: "Убрать карту",
+    cardInvalid: "Выберите изображение до 8 МБ.",
+    cardUploadError: "Не удалось загрузить карту: {0}",
+    removeTeam: "Удалить команду",
+    teamNamePlaceholder: "Название команды",
+    teamLogoPlaceholder: "URL логотипа (https, необязательно)",
+    teamStatsVersus: "Сравнить с",
     newsDialogTitle: "Опубликовать новость лиги",
     newsDialogDesc: "Добавьте фото и историю для всех",
     headline: "Заголовок",
@@ -410,7 +428,7 @@ const TRANSLATIONS = {
     teamsInvalid: "В базе данных неверные названия команд. Проверьте таблицу league_settings.",
     matchesInvalid: "В базе данных содержится матч с неверными данными.",
     teamsSame: "Названия команд должны быть разными.",
-    teamsRequired: "Введите названия обеих команд.",
+    teamsRequired: "Введите название для каждой команды.",
     teamsDiff: "Выберите две разные команды.",
     scoreRange: "Введите счёт от 0 до 99 голов.",
     statsWhole: "Введите целые числа для статистики матча.",
@@ -476,6 +494,11 @@ const TEAM_PHOTOS = [
   "img/logo-promashkov.webp",
   "img/logo-lionslav.webp"
 ];
+const MAX_TEAMS = 20;
+const getTeamPhoto = index => TEAM_PHOTOS[index] || state.teams[index]?.logo || null;
+const teamTone = index => index === 0 ? "one" : index === 1 ? "two" : "other";
+const getTeamInitials = name => String(name || "?").trim().split(/\s+/)
+  .map(word => word[0]).join("").slice(0, 2).toUpperCase() || "?";
 const configReady = SUPABASE_URL.startsWith("https://") &&
   SUPABASE_ANON_KEY.length > 20 &&
   !SUPABASE_URL.includes("YOUR-PROJECT") &&
@@ -656,7 +679,8 @@ function openNewsView(item) {
 
 function calculateChampionshipOdds() {
   const matches = state.matches;
-  const teams = [0, 1].map(idx => {
+  const leaders = getStandings().slice(0, 2).map(team => team.index);
+  const teams = leaders.map(idx => {
     const name = state.teams[idx].name;
     let points = 0;
     let goalsFor = 0;
@@ -671,8 +695,8 @@ function calculateChampionshipOdds() {
     let passesAgainst = 0;
     let games = 0;
     matches.forEach(m => {
+      if (m.home !== idx && m.away !== idx) return;
       const isHome = m.home === idx;
-      const opponent = isHome ? m.away : m.home;
       const myGoals = isHome ? m.homeGoals : m.awayGoals;
       const oppGoals = isHome ? m.awayGoals : m.homeGoals;
       games++;
@@ -782,8 +806,8 @@ function renderChampionshipRace() {
   document.getElementById("raceTeamTwoName").textContent = race.two.name;
   document.getElementById("raceTeamOnePts").textContent = `${race.one.points} pts`;
   document.getElementById("raceTeamTwoPts").textContent = `${race.two.points} pts`;
-  const photoOne = TEAM_PHOTOS[race.one.index];
-  const photoTwo = TEAM_PHOTOS[race.two.index];
+  const photoOne = getTeamPhoto(race.one.index);
+  const photoTwo = getTeamPhoto(race.two.index);
   setRaceBadge(badgeOne, race.one.index, photoOne);
   setRaceBadge(badgeTwo, race.two.index, photoTwo);
   updateRaceOddsDisplay();
@@ -863,12 +887,12 @@ function animateChampionshipRace(now) {
 }
 
 function setRaceBadge(badge, teamIndex, photo) {
-  const currentPhoto = badge.dataset.photo ?? "";
-  if (currentPhoto === photo) return;
-  badge.dataset.photo = photo;
+  const signature = `${photo ?? ""}|${teamIndex}|${state.teams[teamIndex]?.name ?? ""}`;
+  if (badge.dataset.photo === signature) return;
+  badge.dataset.photo = signature;
   badge.replaceChildren();
   if (!photo) {
-    badge.textContent = teamIndex === 0 ? "01" : "02";
+    badge.textContent = getTeamInitials(state.teams[teamIndex]?.name);
     return;
   }
   const image = document.createElement("img");
@@ -1002,8 +1026,8 @@ async function startNewSeason() {
     showToast(t("seasonStartBlocked"));
     return;
   }
-  const standings = getStandings().filter(t => t.index === 0 || t.index === 1);
-  const winnerIdx = standings[0].points > standings[1].points ? 0 : 1;
+  const standings = getStandings();
+  const winnerIdx = standings[0].index;
   const championships = { ...getChampionships() };
   championships[String(winnerIdx)] = (championships[String(winnerIdx)] || 0) + 1;
   try {
@@ -1047,14 +1071,25 @@ function renderSeasonInfo() {
     }
   }
 
-  const champTeam0 = document.getElementById("champTeam0");
-  const champCount0 = document.getElementById("champCount0");
-  const champTeam1 = document.getElementById("champTeam1");
-  const champCount1 = document.getElementById("champCount1");
-  if (champTeam0) champTeam0.textContent = state.teams[0]?.name || "Team 1";
-  if (champCount0) champCount0.textContent = champs["0"] || 0;
-  if (champTeam1) champTeam1.textContent = state.teams[1]?.name || "Team 2";
-  if (champCount1) champCount1.textContent = champs["1"] || 0;
+  const champList = document.getElementById("champList");
+  if (champList) {
+    const ranked = state.teams
+      .map((team, index) => ({ name: team.name, count: champs[String(index)] || 0 }))
+      .sort((a, b) => b.count - a.count);
+    const shown = ranked.filter(item => item.count > 0);
+    champList.replaceChildren(...(shown.length ? shown : ranked.slice(0, 2)).map(item => {
+      const row = document.createElement("div");
+      row.className = "champ-row";
+      const name = document.createElement("span");
+      name.className = "champ-name";
+      name.textContent = item.name;
+      const count = document.createElement("span");
+      count.className = "champ-count";
+      count.textContent = String(item.count);
+      row.append(name, count);
+      return row;
+    }));
+  }
 
   const h2hTeam0Wins = document.getElementById("h2hTeam0Wins");
   const h2hTeam0Draws = document.getElementById("h2hTeam0Draws");
@@ -1158,15 +1193,23 @@ function renderTeamStats() {
   if (!seasonSelect || !teamSelect) return;
 
   const previousSeason = seasonSelect.value || String(currentSeason);
+  const teamSelect2 = document.getElementById("teamStatsTeamSelect2");
   const previousTeam = teamSelect.value || "0";
-  teamSelect.replaceChildren();
-  state.teams.forEach((team, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = team.name;
-    teamSelect.append(option);
+  const previousTeam2 = teamSelect2.value || "1";
+  [teamSelect, teamSelect2].forEach(select => {
+    select.replaceChildren();
+    state.teams.forEach((team, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = team.name;
+      select.append(option);
+    });
   });
   teamSelect.value = state.teams[Number(previousTeam)] ? previousTeam : "0";
+  teamSelect2.value = state.teams[Number(previousTeam2)] ? previousTeam2 : "1";
+  if (teamSelect2.value === teamSelect.value) {
+    teamSelect2.value = teamSelect.value === "0" ? "1" : "0";
+  }
 
   const seasons = [...new Set([
     Number.isInteger(currentSeason) && currentSeason >= 1 ? currentSeason : 1,
@@ -1193,10 +1236,12 @@ function renderTeamStats() {
     stats: calculateTeamSeasonStats(index, seasonSelect.value)
   }));
   const selectedTeamIndex = Number(teamSelect.value);
+  const comparedTeamIndex = Number(teamSelect2.value);
   const teamStats = teamStatsMode === "compare"
-    ? allTeamStats
+    ? [allTeamStats[selectedTeamIndex], allTeamStats[comparedTeamIndex]]
     : [allTeamStats[selectedTeamIndex]];
-  document.getElementById("teamStatsTeamFilter").hidden = teamStatsMode === "compare";
+  document.getElementById("teamStatsTeamFilter").hidden = false;
+  document.getElementById("teamStatsTeamFilter2").hidden = teamStatsMode !== "compare";
   document.querySelector(".team-stats-compare-label").hidden = teamStatsMode !== "compare";
   document.querySelectorAll(".team-stats-mode-button").forEach(button => {
     const active = button.dataset.statsMode === teamStatsMode;
@@ -1207,8 +1252,8 @@ function renderTeamStats() {
   const clubs = document.getElementById("teamStatsClubs");
   clubs.replaceChildren();
   clubs.classList.toggle("single", teamStatsMode !== "compare");
-  teamStats.forEach(({ team, index, stats }) =>
-    clubs.append(createTeamStatsClub(team, index, stats))
+  teamStats.forEach(({ team, index, stats }, slot) =>
+    clubs.append(createTeamStatsClub(team, index, stats, slot))
   );
 
   const cardsByTeam = teamStats.map(({ stats }) => createTeamStatCards(stats));
@@ -1269,12 +1314,14 @@ function renderTeamStats() {
     } else if (winner === -1) {
       verdict.textContent = t("teamStatsTie");
     } else {
+      const winnerIndex = teamStats[winner].index;
       const badge = document.createElement("img");
-      badge.src = TEAM_PHOTOS[winner];
+      badge.src = getTeamPhoto(winnerIndex) || "";
       badge.alt = "";
       badge.className = "team-stat-winner-badge";
+      badge.hidden = !getTeamPhoto(winnerIndex);
       const winnerName = document.createElement("span");
-      winnerName.textContent = state.teams[winner].name;
+      winnerName.textContent = state.teams[winnerIndex].name;
       const winnerLabel = document.createElement("small");
       winnerLabel.textContent = t("teamStatsBetter");
       verdict.append(badge, winnerName, winnerLabel);
@@ -1286,16 +1333,21 @@ function renderTeamStats() {
   document.getElementById("teamStatsEmpty").hidden = teamStats.some(({ stats }) => stats.played > 0);
 }
 
-function createTeamStatsClub(team, index, stats) {
+function createTeamStatsClub(team, index, stats, slot = index) {
   const club = document.createElement("div");
-  club.className = `team-stats-club ${index === 0 ? "one" : "two"}`;
+  club.className = `team-stats-club ${slot === 0 ? "one" : "two"}`;
   const badge = document.createElement("span");
   badge.className = "team-stats-club-badge";
-  const image = document.createElement("img");
-  image.src = TEAM_PHOTOS[index];
-  image.alt = "";
-  image.loading = "lazy";
-  badge.append(image);
+  const photo = getTeamPhoto(index);
+  if (photo) {
+    const image = document.createElement("img");
+    image.src = photo;
+    image.alt = "";
+    image.loading = "lazy";
+    badge.append(image);
+  } else {
+    badge.textContent = getTeamInitials(team.name);
+  }
   const name = document.createElement("strong");
   name.textContent = team.name;
   const record = document.createElement("span");
@@ -1455,8 +1507,8 @@ function renderStandings() {
         const teamCell = document.createElement("div");
         teamCell.className = "team-cell";
         const badge = document.createElement("span");
-        badge.className = `team-badge ${team.index === 0 ? "one" : "two"}`;
-        const photo = TEAM_PHOTOS[team.index];
+        badge.className = `team-badge ${teamTone(team.index)}`;
+        const photo = getTeamPhoto(team.index);
         if (photo) {
           const image = document.createElement("img");
           image.className = "team-badge-image";
@@ -1466,7 +1518,7 @@ function renderStandings() {
           image.height = 35;
           badge.append(image);
         } else {
-          badge.textContent = team.index === 0 ? "FP" : "FL";
+          badge.textContent = getTeamInitials(team.name);
         }
         const name = document.createElement("span");
         name.textContent = team.name;
@@ -1594,8 +1646,8 @@ function createMatchTeamDisplay(teamIndex) {
   const team = document.createElement("span");
   team.className = "match-team";
   const badge = document.createElement("span");
-  badge.className = `match-team-badge ${teamIndex === 0 ? "one" : "two"}`;
-  const photo = TEAM_PHOTOS[teamIndex];
+  badge.className = `match-team-badge ${teamTone(teamIndex)}`;
+  const photo = getTeamPhoto(teamIndex);
   if (photo) {
     const image = document.createElement("img");
     image.src = photo;
@@ -1603,7 +1655,7 @@ function createMatchTeamDisplay(teamIndex) {
     image.loading = "lazy";
     badge.append(image);
   } else {
-    badge.textContent = teamIndex === 0 ? "01" : "02";
+    badge.textContent = getTeamInitials(state.teams[teamIndex]?.name);
   }
   const name = document.createElement("span");
   name.className = "match-team-name";
@@ -1791,6 +1843,7 @@ function updateAuthUi() {
   matchButton.disabled = !enabled;
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
+  document.body.classList.toggle("read-only", !session);
   if (!configReady) {
     authStatus.textContent = t("setupRequired");
     authButton.textContent = t("setup");
@@ -1846,12 +1899,15 @@ function isValidMatchStats(stats) {
 }
 
 function validateServerState(settings, matchRows) {
-  if (!settings || !Array.isArray(settings.teams) || settings.teams.length !== 2 ||
-    !settings.teams.every(team => team && typeof team.name === "string")) {
-    throw new Error("The database has invalid team names. Check the league_settings table.");
-  }
-  if (!Array.isArray(matchRows) || !matchRows.every(match =>
-    [0, 1].includes(match.home_team) && [0, 1].includes(match.away_team) &&
+  if (!settings || !Array.isArray(settings.teams) ||   settings.teams.length < 2 ||
+      settings.teams.length > MAX_TEAMS ||
+      !settings.teams.every(team => team && typeof team.name === "string")) {
+      throw new Error("The database has invalid team names. Check the league_settings table.");
+    }
+    const teamCount = settings.teams.length;
+    if (!Array.isArray(matchRows) || !matchRows.every(match =>
+      Number.isInteger(match.home_team) && match.home_team >= 0 && match.home_team < teamCount &&
+      Number.isInteger(match.away_team) && match.away_team >= 0 && match.away_team < teamCount &&
     match.home_team !== match.away_team &&
     Number.isInteger(match.home_goals) && match.home_goals >= 0 &&
     Number.isInteger(match.away_goals) && match.away_goals >= 0 &&
@@ -1888,7 +1944,7 @@ async function fetchServerState() {
 }
 
 async function refreshFromServer() {
-  if (!session) return;
+  if (!configReady) return;
   try {
     await fetchServerState();
     await refreshNews();
@@ -1926,7 +1982,7 @@ async function handleSession(nextSession) {
     realtimeChannel = null;
   }
   updateAuthUi();
-  if (!session) {
+  if (!configReady) {
     state = structuredClone(initialState);
     render();
     return;
@@ -1978,15 +2034,15 @@ function updateMatchTeamBadges() {
     const teamIndex = Number(document.getElementById(selectId).value);
     const badge = document.getElementById(badgeId);
     badge.replaceChildren();
-    badge.className = `match-team-picker-badge ${teamIndex === 0 ? "one" : "two"}`;
-    const photo = TEAM_PHOTOS[teamIndex];
+    badge.className = `match-team-picker-badge ${teamTone(teamIndex)}`;
+    const photo = getTeamPhoto(teamIndex);
     if (photo) {
       const image = document.createElement("img");
       image.src = photo;
       image.alt = "";
       badge.append(image);
     } else {
-      badge.textContent = String(teamIndex + 1).padStart(2, "0");
+      badge.textContent = getTeamInitials(state.teams[teamIndex]?.name);
     }
   });
 }
@@ -2483,6 +2539,7 @@ document.querySelectorAll(".lang-btn").forEach(btn => {
 });
 
 document.getElementById("teamStatsTeamSelect").addEventListener("change", renderTeamStats);
+document.getElementById("teamStatsTeamSelect2").addEventListener("change", renderTeamStats);
 document.getElementById("teamStatsSeasonSelect").addEventListener("change", renderTeamStats);
 document.querySelectorAll(".team-stats-mode-button").forEach(button => {
   button.addEventListener("click", () => {
@@ -2610,9 +2667,9 @@ document.getElementById("swapMatchTeams").addEventListener("click", () => {
 });
 
 editTeamsButton.addEventListener("click", () => {
-  if (!dataReady) return;
-  document.getElementById("teamNameOne").value = state.teams[0].name;
-  document.getElementById("teamNameTwo").value = state.teams[1].name;
+  if (!dataReady || !session) return;
+  teamsDraft = state.teams.map(team => ({ ...team }));
+  renderTeamsEditor();
   document.getElementById("teamsError").textContent = "";
   teamsDialog.showModal();
 });
@@ -2704,20 +2761,78 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
   showToast(t("matchSaved"));
 });
 
+let teamsDraft = [];
+
+function renderTeamsEditor() {
+  const list = document.getElementById("teamsList");
+  list.replaceChildren();
+  teamsDraft.forEach((team, index) => {
+    const row = document.createElement("div");
+    row.className = "team-edit-row";
+    const badge = document.createElement("span");
+    badge.className = `team-badge ${teamTone(index)}`;
+    badge.textContent = String(index + 1).padStart(2, "0");
+    const name = document.createElement("input");
+    name.maxLength = 24;
+    name.value = team.name;
+    name.placeholder = t("teamNamePlaceholder");
+    name.setAttribute("aria-label", t("teamNamePlaceholder"));
+    name.addEventListener("input", () => { team.name = name.value; });
+    row.append(badge, name);
+    if (index >= 2) {
+      const logo = document.createElement("input");
+      logo.type = "url";
+      logo.maxLength = 300;
+      logo.value = team.logo || "";
+      logo.placeholder = t("teamLogoPlaceholder");
+      logo.className = "team-logo-input";
+      logo.addEventListener("input", () => { team.logo = logo.value.trim(); });
+      row.append(logo);
+    }
+    const used = state.matches.some(match => match.home === index || match.away === index);
+    if (index >= 2 && index === teamsDraft.length - 1 && !used) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "button button-quiet";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", t("removeTeam"));
+      remove.addEventListener("click", () => {
+        teamsDraft.pop();
+        renderTeamsEditor();
+      });
+      row.append(remove);
+    }
+    list.append(row);
+  });
+  document.getElementById("addTeamButton").disabled = teamsDraft.length >= MAX_TEAMS;
+}
+
+document.getElementById("addTeamButton").addEventListener("click", () => {
+  if (teamsDraft.length >= MAX_TEAMS) return;
+  teamsDraft.push({ name: "" });
+  renderTeamsEditor();
+  const inputs = document.querySelectorAll("#teamsList .team-edit-row > input:first-of-type");
+  inputs[inputs.length - 1]?.focus();
+});
+
 document.getElementById("teamsForm").addEventListener("submit", async event => {
   event.preventDefault();
-  const first = document.getElementById("teamNameOne").value.trim();
-  const second = document.getElementById("teamNameTwo").value.trim();
   const errorElement = document.getElementById("teamsError");
-  if (!first || !second) {
+  const names = teamsDraft.map(team => team.name.trim());
+  if (names.some(name => !name)) {
     errorElement.textContent = t("teamsRequired");
     return;
   }
-  if (first.localeCompare(second, "en", { sensitivity: "base" }) === 0) {
+  const unique = new Set(names.map(name => name.toLowerCase()));
+  if (unique.size !== names.length) {
     errorElement.textContent = t("teamsSame");
     return;
   }
-  const teams = [{ name: first }, { name: second }];
+  const teams = teamsDraft.map((team, index) => {
+    const saved = { name: names[index] };
+    if (index >= 2 && /^https:\/\//i.test(team.logo || "")) saved.logo = team.logo;
+    return saved;
+  });
   const { error } = await supabase.from("league_settings")
     .update({ teams }).eq("id", true).select("teams").single();
   if (error) {
@@ -2786,6 +2901,8 @@ function sanitizeLineup(raw) {
       pos: LINEUP_POSITIONS.includes(player.pos) ? player.pos : "CM",
       rating: Math.round(clamp(player.rating, 0, LINEUP_MAX_RATING, 75)),
       sub: Boolean(player.sub),
+      card: typeof player.card === "string" && /^https:\/\//i.test(player.card) && player.card.length <= 400
+        ? player.card : "",
       x: clamp(player.x, 4, 96, 50),
       y: clamp(player.y, 4, 96, 50)
     }))
@@ -2802,6 +2919,76 @@ function applyFormationToDraft() {
 }
 
 let lineupMode = "view";
+
+const CARD_WIDTH = 240;
+const CARD_HEIGHT = 336;
+
+function createPlayerVisual(player) {
+  const shirt = document.createElement("span");
+  if (player.card) {
+    shirt.className = "lineup-card";
+    const image = document.createElement("img");
+    image.src = player.card;
+    image.alt = player.name || "";
+    image.loading = "lazy";
+    image.draggable = false;
+    shirt.append(image);
+    return shirt;
+  }
+  shirt.className = "lineup-shirt";
+  shirt.textContent = String(player.number);
+  const rating = document.createElement("span");
+  rating.className = "lineup-shirt-rating";
+  rating.textContent = String(player.rating);
+  shirt.append(rating);
+  return shirt;
+}
+
+function resizeCardImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      canvas.width = CARD_WIDTH;
+      canvas.height = CARD_HEIGHT;
+      const ctx = canvas.getContext("2d");
+      const scale = Math.max(CARD_WIDTH / image.width, CARD_HEIGHT / image.height);
+      const width = image.width * scale;
+      const height = image.height * scale;
+      ctx.drawImage(image, (CARD_WIDTH - width) / 2, (CARD_HEIGHT - height) / 2, width, height);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Could not process image")), "image/webp", 0.88);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Not a valid image"));
+    };
+    image.src = url;
+  });
+}
+
+async function uploadPlayerCard(player, file) {
+  const errorElement = document.getElementById("lineupError");
+  errorElement.textContent = "";
+  if (!file || !file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) {
+    errorElement.textContent = t("cardInvalid");
+    return;
+  }
+  try {
+    const blob = await resizeCardImage(file);
+    const path = `cards/${crypto.randomUUID()}.webp`;
+    const { error } = await supabase.storage.from("player-cards")
+      .upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
+    if (error) throw error;
+    player.card = supabase.storage.from("player-cards").getPublicUrl(path).data.publicUrl;
+    renderLineupPitch();
+    renderLineupRoster();
+  } catch (error) {
+    console.error("Failed to upload the player card:", error);
+    errorElement.textContent = t("cardUploadError", error.message);
+  }
+}
 
 function openLineup(teamIndex, mode = "view") {
   if (!dataReady) {
@@ -2829,13 +3016,7 @@ function createStaticPitch(lineup) {
     marker.dataset.group = lineupGroup(player.pos);
     marker.style.left = `${player.x}%`;
     marker.style.top = `${player.y}%`;
-    const shirt = document.createElement("span");
-    shirt.className = "lineup-shirt";
-    shirt.textContent = String(player.number);
-    const rating = document.createElement("span");
-    rating.className = "lineup-shirt-rating";
-    rating.textContent = String(player.rating);
-    shirt.append(rating);
+    const shirt = createPlayerVisual(player);
     const name = document.createElement("span");
     name.className = "lineup-player-name";
     name.textContent = player.name || player.pos;
@@ -2951,9 +3132,9 @@ function renderLineupEditor() {
     tab.className = `lineup-tab${index === lineupTeam ? " active" : ""}`;
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-selected", String(index === lineupTeam));
-    if (TEAM_PHOTOS[index]) {
+    if (getTeamPhoto(index)) {
       const logo = document.createElement("img");
-      logo.src = TEAM_PHOTOS[index];
+      logo.src = getTeamPhoto(index);
       logo.alt = "";
       tab.append(logo);
     }
@@ -2991,13 +3172,7 @@ function renderLineupPitch() {
     marker.dataset.group = lineupGroup(player.pos);
     marker.style.left = `${player.x}%`;
     marker.style.top = `${player.y}%`;
-    const shirt = document.createElement("span");
-    shirt.className = "lineup-shirt";
-    shirt.textContent = String(player.number);
-    const rating = document.createElement("span");
-    rating.className = "lineup-shirt-rating";
-    rating.textContent = String(player.rating);
-    shirt.append(rating);
+    const shirt = createPlayerVisual(player);
     const name = document.createElement("span");
     name.className = "lineup-player-name";
     name.textContent = player.name || player.pos;
@@ -3136,7 +3311,31 @@ function createLineupRow(player) {
     renderLineupPitch();
     renderLineupRoster();
   });
-  row.append(number, name, position, rating, subLabel, remove);
+  const cardLabel = document.createElement("label");
+  cardLabel.className = "lineup-card-upload";
+  cardLabel.title = t("cardUpload");
+  cardLabel.textContent = player.card ? "🃏✓" : "🃏";
+  const cardInput = document.createElement("input");
+  cardInput.type = "file";
+  cardInput.accept = "image/*";
+  cardInput.hidden = true;
+  cardInput.addEventListener("change", () => {
+    void uploadPlayerCard(player, cardInput.files[0]);
+  });
+  cardLabel.append(cardInput);
+  const cardClear = document.createElement("button");
+  cardClear.type = "button";
+  cardClear.className = "lineup-remove";
+  cardClear.title = t("cardRemove");
+  cardClear.setAttribute("aria-label", t("cardRemove"));
+  cardClear.textContent = "⌫";
+  cardClear.hidden = !player.card;
+  cardClear.addEventListener("click", () => {
+    player.card = "";
+    renderLineupPitch();
+    renderLineupRoster();
+  });
+  row.append(number, name, position, rating, subLabel, cardLabel, cardClear, remove);
   return row;
 }
 

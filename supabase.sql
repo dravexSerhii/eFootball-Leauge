@@ -13,8 +13,8 @@ on conflict (id) do nothing;
 
 create table public.league_matches (
   id uuid primary key default gen_random_uuid(),
-  home_team smallint not null check (home_team in (0, 1)),
-  away_team smallint not null check (away_team in (0, 1) and away_team <> home_team),
+  home_team smallint not null check (home_team >= 0),
+  away_team smallint not null check (away_team >= 0 and away_team <> home_team),
   home_goals smallint not null check (home_goals between 0 and 99),
   away_goals smallint not null check (away_goals between 0 and 99),
   stats jsonb not null default '{}'::jsonb,
@@ -41,14 +41,17 @@ grant select, insert on public.league_matches to authenticated;
 grant select on public.league_news to anon, authenticated;
 grant insert on public.league_news to authenticated;
 
-create policy "League members can read settings"
-  on public.league_settings for select to authenticated using (true);
+grant select on public.league_settings to anon;
+grant select on public.league_matches to anon;
+
+create policy "Anyone can read settings"
+  on public.league_settings for select to anon, authenticated using (true);
 
 create policy "League members can update settings"
   on public.league_settings for update to authenticated using (true) with check (true);
 
-create policy "League members can read matches"
-  on public.league_matches for select to authenticated using (true);
+create policy "Anyone can read matches"
+  on public.league_matches for select to anon, authenticated using (true);
 
 create policy "League members can add matches"
   on public.league_matches for insert to authenticated with check (true);
@@ -85,6 +88,21 @@ create policy "League members can upload news photos"
 create policy "Users can remove their own news photos"
   on storage.objects for delete to authenticated
   using (bucket_id = 'news-images' and owner_id = (select auth.uid()::text));
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('player-cards', 'player-cards', true, 2097152, array['image/webp', 'image/png', 'image/jpeg'])
+on conflict (id) do update
+set public = excluded.public,
+    file_size_limit = excluded.file_size_limit,
+    allowed_mime_types = excluded.allowed_mime_types;
+
+create policy "Anyone can view player cards"
+  on storage.objects for select to anon, authenticated
+  using (bucket_id = 'player-cards');
+
+create policy "League members can upload player cards"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'player-cards');
 
 alter publication supabase_realtime add table public.league_settings;
 alter publication supabase_realtime add table public.league_matches;

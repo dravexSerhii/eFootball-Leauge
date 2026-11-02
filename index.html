@@ -183,14 +183,7 @@
                 <div class="season-grid">
                     <div class="season-card championships">
                         <h3 data-i18n="championships">Championships</h3>
-                        <div class="champ-row">
-                            <span id="champTeam0" class="champ-name">Team 1</span>
-                            <span id="champCount0" class="champ-count">0</span>
-                        </div>
-                        <div class="champ-row">
-                            <span id="champTeam1" class="champ-name">Team 2</span>
-                            <span id="champCount1" class="champ-count">0</span>
-                        </div>
+                        <div id="champList"></div>
                     </div>
                     <div class="season-card head2head">
                         <h3 data-i18n="headToHead">Head to Head</h3>
@@ -240,6 +233,10 @@
                         <label class="team-stats-filter" id="teamStatsTeamFilter">
                             <span data-i18n="teamStatsTeam">Team</span>
                             <select id="teamStatsTeamSelect"></select>
+                        </label>
+                        <label class="team-stats-filter" id="teamStatsTeamFilter2" hidden>
+                            <span data-i18n="teamStatsVersus">Compare with</span>
+                            <select id="teamStatsTeamSelect2"></select>
                         </label>
                         <label class="team-stats-filter">
                             <span data-i18n="teamStatsPeriod">Period</span>
@@ -363,10 +360,8 @@
                 </div>
                 <button class="close-button" type="button" data-close="teamsDialog" aria-label="Close">×</button>
             </div>
-            <div class="team-edit-row"><span class="team-badge one" aria-hidden="true">01</span><input id="teamNameOne"
-                    maxlength="24" aria-label="First team name" required></div>
-            <div class="team-edit-row"><span class="team-badge two" aria-hidden="true">02</span><input id="teamNameTwo"
-                    maxlength="24" aria-label="Second team name" required></div>
+            <div id="teamsList" class="teams-list"></div>
+            <button class="button button-quiet" type="button" id="addTeamButton" data-i18n="addTeam">+ Add team</button>
             <p class="form-error" id="teamsError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-quiet" type="button"
                     data-close="teamsDialog" data-i18n="cancel">Cancel</button><button class="button button-primary"
