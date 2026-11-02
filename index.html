@@ -10,6 +10,9 @@
 </head>
 
 <body>
+    <div class="promo-ticker" role="note" aria-label="Pack opening coming soon">
+        <div class="promo-ticker-track" id="promoTickerTrack"></div>
+    </div>
     <div class="page-shell">
         <header class="topbar">
             <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
@@ -406,6 +409,22 @@
                 <button class="button button-primary lineup-view-only" id="lineupEdit" type="button" data-i18n="lineupEditMode">⚙ Edit lineup</button>
                 <button class="button button-quiet lineup-edit-only" id="lineupBack" type="button" data-i18n="lineupBack">Back to lineup</button>
                 <button class="button button-primary lineup-edit-only" id="lineupSave" type="button" data-i18n="lineupSave">Save lineup</button>
+            </div>
+        </div>
+    </dialog>
+    <dialog id="matchLineupDialog" class="lineup-dialog match-lineup-dialog" aria-labelledby="matchLineupTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="matchLineupTitle" data-i18n="matchLineupTitle">Match lineups</h2>
+                    <p id="matchLineupDate"></p>
+                </div>
+                <button class="close-button" type="button" data-close="matchLineupDialog" aria-label="Close">×</button>
+            </div>
+            <div class="match-lineup-scoreboard" id="matchLineupScoreboard"></div>
+            <div class="match-lineup-body" id="matchLineupBody"></div>
+            <div class="dialog-actions">
+                <button class="button button-quiet" type="button" data-close="matchLineupDialog" data-i18n="lineupClose">Close</button>
             </div>
         </div>
     </dialog>

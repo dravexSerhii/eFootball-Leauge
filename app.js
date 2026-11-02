@@ -200,7 +200,8 @@ const TRANSLATIONS = {
     lineupsButton: "Lineups",
     lineupTitle: "Lineup settings",
     lineupNoSnapshot: "No lineup was saved with this match",
-    lineupMatchDate: "Lineup for the match on {0}",
+    packsSoon: "Pack opening coming soon…",
+    matchLineupTitle: "Match lineups",
     lineupMatchBtn: "Lineups",
     matchTabResult: "Result",
     matchTabLineups: "Confirm lineups",
@@ -430,7 +431,8 @@ const TRANSLATIONS = {
     lineupsButton: "Составы",
     lineupTitle: "Настройки состава",
     lineupNoSnapshot: "Для этого матча состав не сохранялся",
-    lineupMatchDate: "Состав на матч {0}",
+    packsSoon: "Открытие паков скоро…",
+    matchLineupTitle: "Составы на матч",
     lineupMatchBtn: "Составы",
     matchTabResult: "Результат",
     matchTabLineups: "Подтвердить состав",
@@ -1741,6 +1743,16 @@ function t(key, ...args) {
   return text;
 }
 
+function renderPromoTicker() {
+  const track = document.getElementById("promoTickerTrack");
+  track.replaceChildren();
+  for (let i = 0; i < 12; i += 1) {
+    const item = document.createElement("span");
+    item.textContent = t("packsSoon");
+    track.append(item);
+  }
+}
+
 function applyLang() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -1762,6 +1774,7 @@ function applyLang() {
     btn.classList.toggle("lang-active", btn.getAttribute("data-lang") === currentLang);
   });
   document.documentElement.lang = currentLang;
+  renderPromoTicker();
   render();
 }
 
@@ -2789,29 +2802,114 @@ function applyFormationToDraft() {
 }
 
 let lineupMode = "view";
-let lineupSnapshot = null;
 
-function openLineup(teamIndex, mode = "view", snapshot = null) {
+function openLineup(teamIndex, mode = "view") {
   if (!dataReady) {
     showToast(t("lineupNeedSignIn"));
     return;
   }
-  const source = snapshot ? snapshot.lineups?.[teamIndex] : state.lineups?.[teamIndex];
-  if (snapshot && !source) {
-    showToast(t("lineupNoSnapshot"));
-    return;
-  }
   lineupTeam = teamIndex;
-  lineupMode = snapshot ? "view" : mode;
-  lineupSnapshot = snapshot;
-  lineupDraft = sanitizeLineup(source);
+  lineupMode = mode;
+  lineupDraft = sanitizeLineup(state.lineups?.[teamIndex]);
   document.getElementById("lineupError").textContent = "";
   renderLineupEditor();
   if (!lineupDialog.open) lineupDialog.showModal();
 }
 
-function openMatchLineup(match, teamIndex = match.home) {
-  openLineup(teamIndex, "view", { date: match.date, lineups: match.stats?.lineups });
+function createStaticPitch(lineup) {
+  const pitch = document.createElement("div");
+  pitch.className = "lineup-pitch";
+  const markings = document.createElement("div");
+  markings.className = "lineup-pitch-lines";
+  markings.innerHTML = '<i class="lp-center"></i><i class="lp-circle"></i><i class="lp-box lp-box-top"></i><i class="lp-box lp-box-bottom"></i>';
+  pitch.append(markings);
+  lineup.players.filter(player => !player.sub).forEach(player => {
+    const marker = document.createElement("div");
+    marker.className = "lineup-player static";
+    marker.dataset.group = lineupGroup(player.pos);
+    marker.style.left = `${player.x}%`;
+    marker.style.top = `${player.y}%`;
+    const shirt = document.createElement("span");
+    shirt.className = "lineup-shirt";
+    shirt.textContent = String(player.number);
+    const rating = document.createElement("span");
+    rating.className = "lineup-shirt-rating";
+    rating.textContent = String(player.rating);
+    shirt.append(rating);
+    const name = document.createElement("span");
+    name.className = "lineup-player-name";
+    name.textContent = player.name || player.pos;
+    marker.append(shirt, name);
+    pitch.append(marker);
+  });
+  return pitch;
+}
+
+function openMatchLineup(match) {
+  const saved = match.stats?.lineups;
+  if (!saved?.[match.home] || !saved?.[match.away]) {
+    showToast(t("lineupNoSnapshot"));
+    return;
+  }
+  const dialog = document.getElementById("matchLineupDialog");
+  const parsedDate = new Date(match.date);
+  document.getElementById("matchLineupDate").textContent = Number.isNaN(parsedDate.getTime()) ? "" :
+    parsedDate.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB",
+      { day: "numeric", month: "long", year: "numeric" });
+  const scoreboard = document.getElementById("matchLineupScoreboard");
+  const home = createMatchTeamDisplay(match.home);
+  const away = createMatchTeamDisplay(match.away);
+  const score = document.createElement("strong");
+  score.className = "match-lineup-score";
+  score.textContent = `${match.homeGoals} : ${match.awayGoals}`;
+  scoreboard.replaceChildren(home, score, away);
+
+  const body = document.getElementById("matchLineupBody");
+  body.replaceChildren();
+  [match.home, match.away].forEach((teamIndex, slot) => {
+    const lineup = sanitizeLineup(saved[teamIndex]);
+    const starters = lineup.players.filter(player => !player.sub);
+    const subs = lineup.players.filter(player => player.sub);
+    const average = starters.length
+      ? Math.round(starters.reduce((sum, player) => sum + player.rating, 0) / starters.length)
+      : 0;
+    const column = document.createElement("section");
+    column.className = "match-lineup-team";
+    const head = document.createElement("header");
+    head.className = "match-lineup-team-head";
+    const title = document.createElement("div");
+    title.className = "match-lineup-team-title";
+    const name = document.createElement("strong");
+    name.textContent = state.teams[teamIndex]?.name ?? `Team ${teamIndex + 1}`;
+    const side = document.createElement("span");
+    side.textContent = slot === 0 ? t("homeTeam") : t("awayTeam");
+    title.append(name, side);
+    const meta = document.createElement("div");
+    meta.className = "match-lineup-meta";
+    [[t("lineupFormation"), lineup.formation === "custom" ? t("lineupCustom") : lineup.formation],
+      [t("lineupAvg"), String(average)]].forEach(([label, value]) => {
+      const item = document.createElement("span");
+      const small = document.createElement("small");
+      small.textContent = label;
+      const strong = document.createElement("b");
+      strong.textContent = value;
+      item.append(small, strong);
+      meta.append(item);
+    });
+    head.append(title, meta);
+    column.append(head, createStaticPitch(lineup));
+    [[starters, "lineupStarters"], [subs, "lineupSubs"]].forEach(([players, key]) => {
+      if (!players.length) return;
+      const heading = document.createElement("h3");
+      heading.textContent = `${t(key)} (${players.length})`;
+      const list = document.createElement("div");
+      list.className = "match-lineup-list";
+      players.forEach(player => list.append(createLineupViewRow(player)));
+      column.append(heading, list);
+    });
+    body.append(column);
+  });
+  if (!dialog.open) dialog.showModal();
 }
 
 function createMatchLineupButton(match) {
@@ -2824,10 +2922,10 @@ function createMatchLineupButton(match) {
 }
 
 function renderLineupTicker() {
-  const date = new Date(lineupSnapshot ? lineupSnapshot.date : Date.now());
+  const date = new Date();
   const formatted = date.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB",
     { day: "numeric", month: "long", year: "numeric" });
-  const message = `${t(lineupSnapshot ? "lineupMatchDate" : "lineupAsOf", formatted)} · ${state.teams[lineupTeam].name}`;
+  const message = `${t("lineupAsOf", formatted)} · ${state.teams[lineupTeam].name}`;
   const track = document.getElementById("lineupTicker");
   track.replaceChildren();
   for (let i = 0; i < 8; i += 1) {
@@ -2839,7 +2937,6 @@ function renderLineupTicker() {
 
 function renderLineupEditor() {
   lineupDialog.dataset.mode = lineupMode;
-  lineupDialog.dataset.snapshot = lineupSnapshot ? "1" : "0";
   const isEdit = lineupMode === "edit";
   document.getElementById("lineupDialogTitle").textContent = t(isEdit ? "lineupTitle" : "teamLineup");
   document.getElementById("lineupDialogDesc").textContent = t(isEdit ? "lineupDesc" : "lineupViewDesc");
@@ -2861,7 +2958,7 @@ function renderLineupEditor() {
       tab.append(logo);
     }
     tab.append(team.name);
-    tab.addEventListener("click", () => openLineup(index, lineupMode, lineupSnapshot));
+    tab.addEventListener("click", () => openLineup(index, lineupMode));
     tabs.append(tab);
   });
   const select = document.getElementById("lineupFormation");
@@ -3187,7 +3284,7 @@ document.querySelectorAll("[data-close]").forEach(button => {
   button.addEventListener("click", () => document.getElementById(button.dataset.close).close());
 });
 
-[matchDialog, teamsDialog, authDialog, newsDialog, newsViewDialog, lineupDialog].forEach(dialog => {
+[matchDialog, teamsDialog, authDialog, newsDialog, newsViewDialog, lineupDialog, document.getElementById("matchLineupDialog")].forEach(dialog => {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
