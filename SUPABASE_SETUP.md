@@ -4,10 +4,10 @@ Match results are stored in Supabase, separately from the website files, so rede
 
 1. Create a Supabase project and open the **SQL Editor**.
 2. Copy the contents of `sql/supabase.sql` and run it once.
-3. In **Project Settings → API**, copy the Project URL and the public `anon` or `publishable` key. Add them to `supabase-config.js`. Never put your `service_role` key in this file.
+3. In **Project Settings → API**, copy the Project URL and the public `anon` or `publishable` key. Add them to `js/supabase-config.js`. Never put your `service_role` key in this file.
 4. In **Authentication → Users**, create two accounts, one for you and one for your friend. Disable public sign-ups; the website has no sign-up form, so only accounts you create can sign in.
 5. In **Authentication → URL Configuration**, set the Site URL to `https://dravexserhii.github.io/eFootball-Leauge/` and add the same address under **Redirect URLs**. The production URL must be allow-listed so confirmation and authentication links return to GitHub Pages.
-6. Publish `index.html`, `packs.html`, `cards.html` and the `css/`, `js/` and `assets/` folders to GitHub Pages. Keep all files in the same folder.
+6. Publish `index.html`, `packs.html`, `cards.html` and the `css/`, `js/` and `assets/` folders to GitHub Pages, preserving the folder structure.
 
 After signing in, both users will see the same matches and team names. Updates sync through Supabase Realtime. If Realtime is unavailable, the website refreshes the data approximately every 15 seconds.
 
@@ -33,9 +33,12 @@ Team logo files are stored in `assets/img/` and their relative paths are set in 
 
 ```js
 const TEAM_PHOTOS = [
-  "img/logo-promashkov.webp",
-  "img/logo-lionslav.webp"
+  "assets/img/logo-promashkov.webp",
+  "assets/img/logo-lionslav.webp"
 ];
 ```
 
 Keep both image files in the repository when publishing the site.
+
+
+After running the base schema and `sql/supabase-migration-coins.sql` (which creates `public.team_owners`), run `sql/supabase-migration-cards.sql` once for every project in the Supabase SQL Editor. The cards migration creates the `efootball_cards` table and the public `card-images` bucket. Only authenticated e-mails listed in `team_owners` can add, edit or delete cards; everyone can read them. Built-in cards live in `js/cards-data.js`; changes made in the editor are stored in Supabase and override them by `id`. Updates synchronize to other open Card Database pages through Supabase Realtime, with a 15-second polling fallback if Realtime is unavailable.

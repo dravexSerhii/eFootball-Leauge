@@ -31,7 +31,10 @@
                 <button type="button" data-view="table" id="viewTable">Table</button>
             </div>
             <span class="db-count" id="dbCount"></span>
+            <button class="db-add" id="dbAdd" type="button" hidden>＋ Add card</button>
         </section>
+        <p class="db-hint" id="dbHint" hidden></p>
+        <div class="db-cats" id="dbCats"></div>
 
         <section id="dbGrid" class="db-grid"></section>
         <section id="dbTable" class="db-table-wrap" hidden></section>
@@ -42,6 +45,13 @@
         <div class="db-modal-box" role="dialog" aria-modal="true">
             <button class="db-modal-close" id="dbClose" type="button" aria-label="Close">×</button>
             <div id="dbDetail"></div>
+        </div>
+    </div>
+
+    <div class="db-modal" id="dbEditModal" hidden>
+        <div class="db-modal-box db-edit-box" role="dialog" aria-modal="true">
+            <button class="db-modal-close" id="dbEditClose" type="button" aria-label="Close">×</button>
+            <div id="dbEditor"></div>
         </div>
     </div>
 
