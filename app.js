@@ -582,6 +582,76 @@ function render() {
 
 const RELEASE_NEWS = [
   {
+    id: "release-squads",
+    created_at: "2026-11-03T15:00:00+02:00",
+    image: "img/squad.jpeg",
+    en: {
+      title: "Team lineups are now on the home page",
+      summary: "You can now **view the squad of every team** right from the home page: formation, starting XI and substitutes.",
+      body: [
+        "**What's new**",
+        "• **Open any team's lineup** — click the **team name in the standings table** on the home page and its current **formation, starting XI and substitutes** open in one window.",
+        "• **Pitch view** — all starters are shown on the pitch in their positions, colour-coded by line: **goalkeeper, defenders, midfielders, attackers**.",
+        "• **Player details** — every player has a **number, position and OVR rating**, and you can see the **average OVR** of the team.",
+        "• **Lineups for every match** — when a match is saved, **both lineups are saved with it**. Open the **Lineups** button in the match history to look back at who played.",
+        "• **Edit mode** — signed-in players can change the formation, drag players around the pitch, add players and move them between the starting XI and the bench."
+      ].join("\n")
+    },
+    ru: {
+      title: "Составы команд теперь на главной странице",
+      summary: "Теперь можно **смотреть составы всех команд** прямо на главной странице: схема, стартовая одиннадцать и запасные.",
+      body: [
+        "**Что нового**",
+        "• **Состав любой команды** — нажмите на **название команды в таблице** на главной странице, и откроется текущая **схема, стартовый состав и запасные** в одном окне.",
+        "• **Поле** — все игроки стартового состава стоят на поле на своих позициях, а цвет показывает линию: **вратарь, защитники, полузащитники, нападающие**.",
+        "• **Данные игроков** — у каждого игрока есть **номер, позиция и рейтинг OVR**, а также видно **средний OVR** команды.",
+        "• **Составы для каждого матча** — при сохранении матча **оба состава сохраняются вместе с ним**. Нажмите кнопку **«Составы»** в истории матчей, чтобы посмотреть, кто играл.",
+        "• **Режим редактирования** — вошедшие игроки могут менять схему, перетаскивать игроков по полю, добавлять игроков и переносить их между основой и скамейкой."
+      ].join("\n")
+    }
+  },
+  {
+    id: "release-stats",
+    created_at: "2026-11-03T14:00:00+02:00",
+    image: "card/ronaldo.png", imagePos: "50% 6%",
+    en: {
+      title: "Messi and Ronaldo cards: stats rebalanced for 96 OVR",
+      summary: "The **Messi** and **Ronaldo** cards were updated to match their **96 rating**: **new positions and pace**, plus stronger stats.",
+      body: [
+        "**Why**",
+        "• Both cards are **Phenomenon (96)**, but their stats were too low for that rating. Now they fit the top tier.",
+        "",
+        "**Messi** (CF, 96)",
+        "• **Before:** CAM · PAC 82 · SHO 92 · PAS 92 · DRI 96 · DEF 38 · PHY 66",
+        "• **Now:** **CF · PAC 94 · SHO 96 · PAS 96 · DRI 99 · DEF 40 · PHY 72**",
+        "",
+        "**Ronaldo** (LW, 96)",
+        "• **Before:** ST · PAC 90 · SHO 96 · PAS 82 · DRI 90 · DEF 38 · PHY 88",
+        "• **Now:** **LW · PAC 98 · SHO 99 · PAS 85 · DRI 92 · DEF 42 · PHY 92**",
+        "",
+        "• The update applies to **all cards, including ones you already own**."
+      ].join("\n")
+    },
+    ru: {
+      title: "Карточки Месси и Роналду: статы изменены под рейтинг 96",
+      summary: "Карточки **Месси** и **Роналду** обновлены под их **рейтинг 96**: **новые позиции и скорость**, а также усилены статы.",
+      body: [
+        "**Зачем**",
+        "• Обе карточки **Феномен (96)**, но статы были слишком низкими для такого рейтинга. Теперь они соответствуют высшему тиру.",
+        "",
+        "**Месси** (CF, 96)",
+        "• **Было:** CAM · PAC 82 · SHO 92 · PAS 92 · DRI 96 · DEF 38 · PHY 66",
+        "• **Стало:** **CF · PAC 94 · SHO 96 · PAS 96 · DRI 99 · DEF 40 · PHY 72**",
+        "",
+        "**Роналду** (LW, 96)",
+        "• **Было:** ST · PAC 90 · SHO 96 · PAS 82 · DRI 90 · DEF 38 · PHY 88",
+        "• **Стало:** **LW · PAC 98 · SHO 99 · PAS 85 · DRI 92 · DEF 42 · PHY 92**",
+        "",
+        "• Обновление касается **всех карточек, в том числе уже полученных**."
+      ].join("\n")
+    }
+  },
+  {
     id: "release-display",
     created_at: "2026-11-03T12:00:00+02:00",
     image: "img/second-background.jpg",
@@ -617,7 +687,7 @@ const RELEASE_NEWS = [
   {
     id: "release-packs",
     created_at: "2026-11-02T12:00:00+02:00",
-    image: "card/messi.webp",
+    image: "card/messi.webp", imagePos: "50% 24%",
     en: {
       title: "Pack opening is live: the Void Football Pack",
       summary: "Open the **Void Football Pack** for **1000 coins** and pull one of **40 football legends**. Rare cards and a collection to keep.",
@@ -716,6 +786,7 @@ function releaseNewsCard(item) {
   const image = document.createElement("img");
   image.className = "news-card-image";
   image.src = item.image;
+  if (item.imagePos) image.style.objectPosition = item.imagePos;
   image.alt = copy.title;
   image.loading = "lazy";
   const content = document.createElement("div");
@@ -826,6 +897,7 @@ function openNewsView(item) {
   const parsedDate = new Date(item.created_at);
   dateEl.textContent = Number.isNaN(parsedDate.getTime()) ? "" :
     parsedDate.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+  imgEl.style.objectPosition = item.imagePos || "";
   imgEl.src = item.image || supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
   imgEl.alt = item.title;
   newsViewDialog.showModal();
