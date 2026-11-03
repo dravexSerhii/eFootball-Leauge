@@ -14,6 +14,7 @@ const TRANSLATIONS = {
     eyebrow: "eFootball League",
     editTeams: "Teams",
     packsLink: "Pack opening",
+    dbLink: "Card database",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
     liveSimulation: "LIVE SIMULATION",
@@ -257,6 +258,7 @@ const TRANSLATIONS = {
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
     packsLink: "Открытие паков",
+    dbLink: "База карточек",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
     liveSimulation: "ЖИВАЯ СИМУЛЯЦИЯ",
@@ -581,6 +583,38 @@ function render() {
 }
 
 const RELEASE_NEWS = [
+  {
+    id: "release-carddb",
+    created_at: "2026-11-03T16:00:00+02:00",
+    image: "base/Yamal.png",
+    imagePos: "50% 22%",
+    en: {
+      title: "Card Database is live: Kane 110, Mbapp\u00e9 108, Yamal 108",
+      summary: "A new **Card Database** page with eFootball cards, full stats and **level boosts**. First cards: **Kane, Mbapp\u00e9, Yamal**.",
+      body: [
+        "**What's new**",
+        "• **New page** — open **Card database** in the top menu of the home page.",
+        "• **First cards** — **Harry Kane 110**, **Kylian Mbapp\u00e9 108** and **Lamine Yamal 108**, shown as full eFootball cards.",
+        "• **Full player stats** — click a card to see **Attacking, Defending and Strength** attributes, colour-coded by value (**90+ cyan**, 80+ green, 70+ yellow, below 70 red).",
+        "• **Level boosts** — upgraded attributes show a green **+N** badge, just like in the game.",
+        "• **Search and filters** — search by name, club or nation, filter by **position**, sort by rating, name or newest, and switch between **Cards** and **Table** view.",
+        "• **Always growing** — new cards are added with updates, so check back often."
+      ].join("\n")
+    },
+    ru: {
+      title: "База карточек: Кейн 110, Мбаппе 108, Ямаль 108",
+      summary: "Новая страница **База карточек** eFootball с полными статами и **прокачкой уровней**. Первые карточки: **Кейн, Мбаппе, Ямаль**.",
+      body: [
+        "**Что нового**",
+        "• **Новая страница** — откройте **«База карточек»** в верхнем меню главной страницы.",
+        "• **Первые карточки** — **Гарри Кейн 110**, **Килиан Мбаппе 108** и **Ламин Ямаль 108** в виде полноценных карточек eFootball.",
+        "• **Полные показатели** — нажмите на карточку, чтобы увидеть параметры **Атаки, Защиты и Силы** с цветом по значению (**90+ бирюзовый**, 80+ зелёный, 70+ жёлтый, ниже 70 красный).",
+        "• **Прокачка уровней** — улучшенные параметры отмечены зелёным значком **+N**, как в игре.",
+        "• **Поиск и фильтры** — поиск по имени, клубу или стране, фильтр по **позиции**, сортировка по рейтингу, имени или новизне, переключение **Карточки / Таблица**.",
+        "• **База растёт** — новые карточки добавляются с обновлениями, заглядывайте почаще."
+      ].join("\n")
+    }
+  },
   {
     id: "release-squads",
     created_at: "2026-11-03T15:00:00+02:00",

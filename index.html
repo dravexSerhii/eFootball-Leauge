@@ -31,8 +31,8 @@
         <header class="topbar">
             <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
             <div class="topbar-right">
-                <span id="authStatus" role="status" data-i18n="authStatus">Connecting to database…</span>
-                <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
+                <a class="db-link" href="cards.html" data-i18n="dbLink">Card database</a>
+                <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>                <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
                 <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="Halloween theme" aria-label="Halloween theme"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><radialGradient id="pkBody" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#f26a0f"/><stop offset="1" stop-color="#a73a00"/></radialGradient></defs><path d="M16 7c-2-3-1-5 1-6 0 2 1 3 2 3z" fill="#5a8f2a"/><path d="M16 8c-9-2-14 3-14 10s5 11 14 11 14-4 14-11S25 6 16 8z" fill="url(#pkBody)" stroke="#7a2400" stroke-width="1"/><path d="M16 8c-4 3-4 18 0 21M16 8c4 3 4 18 0 21" fill="none" stroke="#a73a00" stroke-width=".9" opacity=".7"/><path class="pk-eye" d="M7.5 15l4 1.2-3.2 3z M24.5 15l-4 1.2 3.2 3z M10 22l2 1.6 1.6-1.6 2.4 1.8 2.4-1.8 1.6 1.6 2-1.6-1 3.2-2.4.8-2.6-1.6-2.6 1.6-2.4-.8z" fill="#2a0d00"/></svg></button>
@@ -50,6 +50,7 @@
                 </div>
                 <div class="actions">
                     <a class="button packs-link" href="packs.html" data-i18n="packsLink">Pack opening</a>
+                    <a class="button db-link-mobile" href="cards.html" data-i18n="dbLink">Card database</a>
                     <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
                     <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span

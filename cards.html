@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0b14">
+    <title>eFootball League — Card Database</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="cards.css">
+</head>
+
+<body>
+    <header class="db-top">
+        <a class="db-back" href="index.html" id="backLink">← League</a>
+        <h1 id="dbTitle">eFootball Card Database</h1>
+        <div class="db-lang" role="group" aria-label="Language">
+            <button type="button" data-lang="en">EN</button><button type="button" data-lang="ru">RU</button>
+        </div>
+    </header>
+
+    <main class="db-main">
+        <section class="db-toolbar">
+            <input id="dbSearch" type="search" autocomplete="off" placeholder="Search name, club, nation…">
+            <select id="dbPos" aria-label="Position"></select>
+            <select id="dbSort" aria-label="Sort"></select>
+            <div class="db-view" role="group" aria-label="View">
+                <button type="button" data-view="grid" class="active" id="viewGrid">Cards</button>
+                <button type="button" data-view="table" id="viewTable">Table</button>
+            </div>
+            <span class="db-count" id="dbCount"></span>
+        </section>
+
+        <section id="dbGrid" class="db-grid"></section>
+        <section id="dbTable" class="db-table-wrap" hidden></section>
+        <p id="dbEmpty" class="db-empty" hidden></p>
+    </main>
+
+    <div class="db-modal" id="dbModal" hidden>
+        <div class="db-modal-box" role="dialog" aria-modal="true">
+            <button class="db-modal-close" id="dbClose" type="button" aria-label="Close">×</button>
+            <div id="dbDetail"></div>
+        </div>
+    </div>
+
+    <script src="cards-data.js"></script>
+    <script src="cards.js"></script>
+</body>
+
+</html>
