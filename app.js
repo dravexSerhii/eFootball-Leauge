@@ -580,15 +580,164 @@ function render() {
   renderTeamStats();
 }
 
+const RELEASE_NEWS = [
+  {
+    id: "release-display",
+    created_at: "2026-11-03T12:00:00+02:00",
+    image: "img/second-background.jpg",
+    en: {
+      title: "Display update: Halloween theme, new banner and coins",
+      summary: "A **Halloween theme** with a spooky look, a **new league banner**, a bloody running line and **coins in your profile**.",
+      body: [
+        "**What's new on the site**",
+        "• **Halloween theme** — press the pumpkin button next to the language switch. The whole site turns into a dark, spooky night: glowing orange accents, drifting fog, flying bats, rising embers, lightning flashes and a pulsing vignette. Headings switch to a horror font. Press it again to go back. **Your choice is remembered.**",
+        "• **New league banner** — a night scene with a huge glowing moon, bats, fog, a cobweb, blinking red eyes in the dark and embers. The title is bright and readable.",
+        "• **Bloody running line** — at the bottom of the banner **HAPPY HALLOWEEN** runs non-stop with dripping blood. It switches to Russian together with the site language.",
+        "• **Coins in your profile** — after you sign in, a gold badge with **your coin balance** appears next to your email in the top bar.",
+        "• **League coins** — your team earns coins for every league match: **win = 200, draw = 50, loss = 20**. Old matches count too, and every reward is paid **only once**. Accounts are linked to teams by email.",
+        "• **Daily bonus is now 100 coins** (once every 24 hours on the packs page).",
+        "• Pack opening ticker on top of the page now leads straight to the packs."
+      ].join("\n")
+    },
+    ru: {
+      title: "Обновление дизайна: Хэллоуин-тема, новый баннер и монеты",
+      summary: "**Хэллоуин-тема** в жутком стиле, **новый баннер лиги**, бегущая строка с кровью и **монеты в профиле**.",
+      body: [
+        "**Что нового на сайте**",
+        "• **Хэллоуин-тема** — нажмите кнопку-тыкву рядом с переключателем языка. Весь сайт превращается в тёмную жуткую ночь: светящиеся оранжевые акценты, плывущий туман, летающие летучие мыши, поднимающиеся угольки, вспышки молний и пульсирующая виньетка. Заголовки меняют шрифт на хоррор. Повторное нажатие возвращает обычный вид. **Ваш выбор запоминается.**",
+        "• **Новый баннер лиги** — ночная сцена с огромной светящейся луной, летучими мышами, туманом, паутиной, моргающими красными глазами в темноте и углями. Заголовок яркий и читаемый.",
+        "• **Бегущая строка с кровью** — внизу баннера без остановки бежит **СЧАСТЛИВОГО ХЭЛЛОУИНА** с капающей кровью. Язык меняется вместе с языком сайта.",
+        "• **Монеты в профиле** — после входа в аккаунт в верхней панели рядом с почтой появляется золотой значок с **вашим количеством монет**.",
+        "• **Монеты лиги** — ваша команда получает монеты за каждый матч лиги: **победа = 200, ничья = 50, поражение = 20**. Старые матчи тоже считаются, а каждая награда выдаётся **только один раз**. Аккаунты привязаны к командам по почте.",
+        "• **Ежедневный бонус теперь 100 монет** (раз в 24 часа на странице паков).",
+        "• Лента «Pack opening is live» вверху страницы теперь ведёт прямо в паки."
+      ].join("\n")
+    }
+  },
+  {
+    id: "release-packs",
+    created_at: "2026-11-02T12:00:00+02:00",
+    image: "card/messi.webp",
+    en: {
+      title: "Pack opening is live: the Void Football Pack",
+      summary: "Open the **Void Football Pack** for **1000 coins** and pull one of **40 football legends**. Rare cards and a collection to keep.",
+      body: [
+        "**How it works**",
+        "• Open the **Packs** page from the top ticker or the **Pack opening** button.",
+        "• One **Void Football Pack costs 1000 coins**. Every pack gives **1 player card** with its own rating and stats (PAC, SHO, PAS, DRI, DEF, PHY).",
+        "• Guests start with **5000 coins**. Signed-in players earn coins for league matches (**win 200 / draw 50 / loss 20**) and can take a **daily bonus of 100 coins**.",
+        "• Every card lands in your **Collection** menu — you can open it any time and look at all the players you own.",
+        "• Duplicates and unwanted cards can be **sold for coins**: Gold 150, Rare 400, Epic 1000, Icon 2500, Phenomenon 5000.",
+        "",
+        "**Rarity and chances**",
+        "• **Gold** (up to 87) — 72%",
+        "• **Rare** (88–89) — 20%",
+        "• **Epic** (90–94, purple) — 7%",
+        "• **Icon** (95) — 1%",
+        "• **Phenomenon** (96, red-gold Ballon d'Or style) — **0.5%**",
+        "",
+        "**Players in the packs (40)**",
+        "• **Phenomenon (96):** **Messi, Ronaldo**",
+        "• **Icon (95):** **Pelé, Maradona, Ronaldinho, Buffon**",
+        "• **Epic (90–92):** Yamal, Kahn, Mbappé, Vinícius Jr, Bellingham, Rodri, Kane, Thuram, Courtois, Dembélé, Olise, Cannavaro, Neuer",
+        "• **Rare (88–89):** Kvaratskhelia, Raphinha, Pedri, Valverde, Lautaro Martínez, Neymar, Agüero, Saliba, Kimmich, Suárez, Trent",
+        "• **Gold (82–87):** B. Silva, Forlán, N. Mendes, Kounde, Kanté, Huijsen, Safonov, Zabarnyi, Cucurella, McKennie"
+      ].join("\n")
+    },
+    ru: {
+      title: "Паки открыты: Пустотный пак футбола",
+      summary: "Откройте **Пустотный пак футбола** за **1000 монет** и вытащите одного из **40 футбольных легенд**. Редкие карты и своя коллекция.",
+      body: [
+        "**Как это работает**",
+        "• Откройте страницу **Паки** через ленту сверху или кнопку **Pack opening**.",
+        "• Один **Пустотный пак футбола стоит 1000 монет**. Каждый пак даёт **1 карту игрока** со своим рейтингом и статами (PAC, SHO, PAS, DRI, DEF, PHY).",
+        "• Гости начинают с **5000 монет**. Вошедшие игроки получают монеты за матчи лиги (**победа 200 / ничья 50 / поражение 20**) и могут брать **ежедневный бонус 100 монет**.",
+        "• Каждая карта попадает в меню **Коллекция** — туда можно зайти в любой момент и посмотреть всех своих игроков.",
+        "• Повторки и ненужные карты можно **продать за монеты**: Gold 150, Rare 400, Epic 1000, Icon 2500, Феномен 5000.",
+        "",
+        "**Редкость и шансы**",
+        "• **Gold** (до 87) — 72%",
+        "• **Rare** (88–89) — 20%",
+        "• **Epic** (90–94, фиолетовый) — 7%",
+        "• **Icon** (95) — 1%",
+        "• **Феномен** (96, красно-золотой стиль «Золотого мяча») — **0,5%**",
+        "",
+        "**Игроки в паках (40)**",
+        "• **Феномен (96):** **Месси, Роналду**",
+        "• **Icon (95):** **Пеле, Марадона, Роналдиньо, Буффон**",
+        "• **Epic (90–92):** Ямаль, Кан, Мбаппе, Винисиус, Беллингем, Родри, Кейн, Тюрам, Куртуа, Дембеле, Олисе, Каннаваро, Нойер",
+        "• **Rare (88–89):** Кварацхелия, Рафинья, Педри, Вальверде, Лаутаро Мартинес, Неймар, Агуэро, Салиба, Киммих, Суарес, Трент",
+        "• **Gold (82–87):** Б. Силва, Форлан, Н. Мендес, Кунде, Канте, Хёйсен, Сафонов, Забарный, Кукурелья, Маккенни"
+      ].join("\n")
+    }
+  }
+];
+
+// Renders "**bold**" segments as <strong> without using innerHTML.
+function appendRichInline(parent, text) {
+  text.split("**").forEach((part, index) => {
+    if (!part) return;
+    if (index % 2 === 1) {
+      const strong = document.createElement("strong");
+      strong.textContent = part;
+      parent.append(strong);
+    } else {
+      parent.append(part);
+    }
+  });
+}
+
+function renderRichBody(container, body) {
+  container.replaceChildren();
+  let list = null;
+  body.split("\n").forEach(line => {
+    if (line.startsWith("• ")) {
+      if (!list) {
+        list = document.createElement("ul");
+        container.append(list);
+      }
+      const li = document.createElement("li");
+      appendRichInline(li, line.slice(2));
+      list.append(li);
+      return;
+    }
+    list = null;
+    if (!line) return;
+    const p = document.createElement("p");
+    appendRichInline(p, line);
+    container.append(p);
+  });
+}
+
+function releaseNewsCard(item) {
+  const copy = item[currentLang] || item.en;
+  const card = document.createElement("article");
+  card.className = "news-card news-card-release";
+  const image = document.createElement("img");
+  image.className = "news-card-image";
+  image.src = item.image;
+  image.alt = copy.title;
+  image.loading = "lazy";
+  const content = document.createElement("div");
+  content.className = "news-card-content";
+  const date = document.createElement("p");
+  date.className = "news-card-date";
+  date.textContent = new Date(item.created_at).toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const title = document.createElement("h3");
+  title.className = "news-card-title";
+  title.textContent = copy.title;
+  const description = document.createElement("p");
+  description.className = "news-card-description";
+  appendRichInline(description, copy.summary);
+  content.append(date, title, description);
+  card.append(image, content);
+  card.addEventListener("click", () => openNewsView({ ...item, title: copy.title, body: copy.body }));
+  return card;
+}
+
 function renderNews() {
   newsList.replaceChildren();
-  if (newsItems.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "news-empty";
-    empty.textContent = t("noNews");
-    newsList.append(empty);
-    return;
-  }
+  RELEASE_NEWS.forEach(item => newsList.append(releaseNewsCard(item)));
   newsItems.forEach(item => {
     const card = document.createElement("article");
     card.className = "news-card";
@@ -672,11 +821,12 @@ function openNewsView(item) {
   const dateEl = document.getElementById("newsViewDialog").querySelector(".news-view-date");
   const imgEl = document.getElementById("newsViewImage");
   titleEl.textContent = item.title;
-  descEl.textContent = item.description;
+  if (item.body) renderRichBody(descEl, item.body);
+  else descEl.replaceChildren(item.description);
   const parsedDate = new Date(item.created_at);
   dateEl.textContent = Number.isNaN(parsedDate.getTime()) ? "" :
-    parsedDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  imgEl.src = supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
+    parsedDate.toLocaleDateString(currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+  imgEl.src = item.image || supabase.storage.from("news-images").getPublicUrl(item.image_path).data.publicUrl;
   imgEl.alt = item.title;
   newsViewDialog.showModal();
 }

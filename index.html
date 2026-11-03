@@ -6,10 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#111019">
     <title>eFootball League</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&display=swap">
+    <script>try { if (localStorage.getItem("leagueTheme") === "halloween") document.documentElement.dataset.theme = "halloween"; } catch (e) { }</script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <div class="hw-fx" aria-hidden="true">
+        <div class="hw-fog hw-fog-a"></div>
+        <div class="hw-fog hw-fog-b"></div>
+        <div class="hw-lightning"></div>
+        <i class="hw-bat" style="top:12%;--dur:16s;--dl:0s;--sz:46px"></i>
+        <i class="hw-bat" style="top:30%;--dur:22s;--dl:5s;--sz:30px"></i>
+        <i class="hw-bat" style="top:55%;--dur:19s;--dl:9s;--sz:38px"></i>
+        <i class="hw-bat" style="top:75%;--dur:26s;--dl:2s;--sz:26px"></i>
+        <i class="hw-ember" style="left:8%;--dur:9s;--dl:0s"></i><i class="hw-ember" style="left:22%;--dur:12s;--dl:3s"></i><i class="hw-ember" style="left:41%;--dur:10s;--dl:6s"></i><i class="hw-ember" style="left:57%;--dur:13s;--dl:1s"></i><i class="hw-ember" style="left:73%;--dur:11s;--dl:4s"></i><i class="hw-ember" style="left:90%;--dur:14s;--dl:7s"></i>
+        <div class="hw-vignette"></div>
+    </div>
     <a class="promo-ticker" href="packs.html" aria-label="Open packs">
         <div class="promo-ticker-track" id="promoTickerTrack"></div>
     </a>
@@ -21,6 +35,7 @@
                 <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
                 <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="Halloween theme" aria-label="Halloween theme"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><radialGradient id="pkBody" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#f26a0f"/><stop offset="1" stop-color="#a73a00"/></radialGradient></defs><path d="M16 7c-2-3-1-5 1-6 0 2 1 3 2 3z" fill="#5a8f2a"/><path d="M16 8c-9-2-14 3-14 10s5 11 14 11 14-4 14-11S25 6 16 8z" fill="url(#pkBody)" stroke="#7a2400" stroke-width="1"/><path d="M16 8c-4 3-4 18 0 21M16 8c4 3 4 18 0 21" fill="none" stroke="#a73a00" stroke-width=".9" opacity=".7"/><path class="pk-eye" d="M7.5 15l4 1.2-3.2 3z M24.5 15l-4 1.2 3.2 3z M10 22l2 1.6 1.6-1.6 2.4 1.8 2.4-1.8 1.6 1.6 2-1.6-1 3.2-2.4.8-2.6-1.6-2.6 1.6-2.4-.8z" fill="#2a0d00"/></svg></button>
                 <div class="language-toggle" aria-label="Language">
                     <button class="lang-btn lang-active" data-lang="en" type="button">EN</button>
                     <button class="lang-btn" data-lang="ru" type="button">RU</button>
@@ -487,7 +502,7 @@
             </div>
             <img id="newsViewImage" class="news-view-image" alt="News photo">
             <h3 id="newsViewTitle"></h3>
-            <p id="newsViewDescription" class="news-view-description"></p>
+            <div id="newsViewDescription" class="news-view-description"></div>
         </div>
     </dialog>
     <dialog id="authDialog" aria-labelledby="authDialogTitle">
@@ -509,6 +524,24 @@
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script>
+        (function () {
+            var btn = document.getElementById("themeToggle");
+            function sync() {
+                var on = document.documentElement.dataset.theme === "halloween";
+                btn.setAttribute("aria-pressed", on);
+                var m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.content = on ? "#07030b" : "#111019";
+            }
+            btn.addEventListener("click", function () {
+                var on = document.documentElement.dataset.theme !== "halloween";
+                if (on) document.documentElement.dataset.theme = "halloween"; else delete document.documentElement.dataset.theme;
+                try { localStorage.setItem("leagueTheme", on ? "halloween" : "default"); } catch (e) { }
+                sync();
+            });
+            sync();
+        })();
+    </script>
     <script type="module" src="app.js"></script>
 </body>
 
