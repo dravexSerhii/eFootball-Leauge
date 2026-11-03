@@ -3705,6 +3705,18 @@ html[data-theme="halloween"] .topbar-right .season-tag { border-color: rgba(255,
   .topbar-right #authStatus, .topbar-right .season-tag { display: none; }
   .topbar-right .theme-toggle { width: 36px; height: 36px; }
   .topbar-right #authButton { padding: 0 12px; min-height: 36px; }
+  .page-shell > .topbar { gap: 6px; overflow: hidden; }
+  .topbar .brand { flex: 0 0 auto; }
+  .topbar .brand > span:last-child { display: none; }
+  .topbar-right { flex: 1 1 auto; min-width: 0; justify-content: flex-end; flex-wrap: nowrap; }
+  .topbar-right > * { flex: 0 0 auto; }
+  .topbar-right .language-toggle .lang-btn { padding: 0 9px; min-width: 0; }
+  .topbar-right .auth-coins { padding: 0 8px; }
+}
+@media (max-width: 380px) {
+  .topbar-right { gap: 4px; }
+  .topbar-right #authButton { padding: 0 9px; font-size: 12px; }
+  .topbar-right .theme-toggle { width: 32px; height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .page-shell > .topbar::before { animation: none; }
