@@ -497,8 +497,8 @@ const TRANSLATIONS = {
   }
 };
 const TEAM_PHOTOS = [
-  "img/logo-promashkov.webp",
-  "img/logo-lionslav.webp"
+  "assets/img/logo-promashkov.webp",
+  "assets/img/logo-lionslav.webp"
 ];
 const MAX_TEAMS = 20;
 const getTeamPhoto = index => TEAM_PHOTOS[index] || state.teams[index]?.logo || null;
@@ -586,7 +586,7 @@ const RELEASE_NEWS = [
   {
     id: "release-carddb",
     created_at: "2026-11-03T16:00:00+02:00",
-    image: "base/Yamal.png",
+    image: "assets/base/Yamal.png",
     imagePos: "50% 22%",
     en: {
       title: "Card Database is live: Kane 110, Mbapp\u00e9 108, Yamal 108",
@@ -618,7 +618,7 @@ const RELEASE_NEWS = [
   {
     id: "release-squads",
     created_at: "2026-11-03T15:00:00+02:00",
-    image: "img/squad.jpeg",
+    image: "assets/img/squad.jpeg",
     en: {
       title: "Team lineups are now on the home page",
       summary: "You can now **view the squad of every team** right from the home page: formation, starting XI and substitutes.",
@@ -647,7 +647,7 @@ const RELEASE_NEWS = [
   {
     id: "release-stats",
     created_at: "2026-11-03T14:00:00+02:00",
-    image: "card/ronaldo.png", imagePos: "50% 6%",
+    image: "assets/card/ronaldo.png", imagePos: "50% 6%",
     en: {
       title: "Messi and Ronaldo cards: stats rebalanced for 96 OVR",
       summary: "The **Messi** and **Ronaldo** cards were updated to match their **96 rating**: **new positions and pace**, plus stronger stats.",
@@ -688,7 +688,7 @@ const RELEASE_NEWS = [
   {
     id: "release-display",
     created_at: "2026-11-03T12:00:00+02:00",
-    image: "img/second-background.jpg",
+    image: "assets/img/second-background.jpg",
     en: {
       title: "Display update: Halloween theme, new banner and coins",
       summary: "A **Halloween theme** with a spooky look, a **new league banner**, a bloody running line and **coins in your profile**.",
@@ -721,7 +721,7 @@ const RELEASE_NEWS = [
   {
     id: "release-packs",
     created_at: "2026-11-02T12:00:00+02:00",
-    image: "card/messi.webp", imagePos: "50% 24%",
+    image: "assets/card/messi.webp", imagePos: "50% 24%",
     en: {
       title: "Pack opening is live: the Void Football Pack",
       summary: "Open the **Void Football Pack** for **1000 coins** and pull one of **40 football legends**. Rare cards and a collection to keep.",

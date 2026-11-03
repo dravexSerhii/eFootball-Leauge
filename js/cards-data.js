@@ -4,7 +4,7 @@
 window.EF_CARDS = [
   {
     id: "kane", name: "Harry Kane", rating: 110, pos: "CF", nation: "England", club: "Bayern Munich",
-    type: "Epic", playstyle: "Goal Poacher", skill: "Heading", photo: "base/kane-card.png",
+    type: "Epic", playstyle: "Goal Poacher", skill: "Heading", photo: "assets/base/kane-card.png",
     stats: [110, 98, 92, 112, 84, 96], updated: "2026-11-03",
     detail: {
       attack: [[95, 5], [97, 6], 92, 94, 90, 85, [94, 5], 81, 81, 83],
@@ -14,7 +14,7 @@ window.EF_CARDS = [
   },
   {
     id: "mbappe", name: "Kylian Mbapp\u00e9", rating: 108, pos: "CF", nation: "France", club: "Real Madrid",
-    type: "Epic", playstyle: "Goal Poacher", skill: "Acceleration", photo: "base/mbappe.png",
+    type: "Epic", playstyle: "Goal Poacher", skill: "Acceleration", photo: "assets/base/mbappe.png",
     stats: [106, 100, 102, 106, 117, 88], updated: "2026-11-03",
     detail: {
       attack: [[97, 1], 91, 93, 90, 72, 70, [101, 7], 62, 81, 87],
@@ -24,7 +24,7 @@ window.EF_CARDS = [
   },
   {
     id: "yamal", name: "Lamine Yamal", rating: 108, pos: "RWF", nation: "Spain", club: "FC Barcelona",
-    type: "Epic", playstyle: "Creative Playmaker", skill: "Dribbling", photo: "base/Yamal.png",
+    type: "Epic", playstyle: "Creative Playmaker", skill: "Dribbling", photo: "assets/base/Yamal.png",
     stats: [100, 110, 112, 100, 108, 82], updated: "2026-11-03",
     // Detailed attributes in game order; [value, levelBoost] shows the green "+N" badge
     detail: {

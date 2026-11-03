@@ -319,13 +319,13 @@
     image.onerror = () => {
       attempt += 1;
       if (attempt < sources.length) {
-        image.src = `card/${sources[attempt]}`;
+        image.src = `assets/card/${sources[attempt]}`;
         return;
       }
       image.remove();
       photo.append(el("span", "sil", "\uD83D\uDC64"));
     };
-    image.src = `card/${sources[0]}`;
+    image.src = `assets/card/${sources[0]}`;
     photo.append(image);
     top.append(meta, photo);
 
@@ -645,7 +645,7 @@
       },
       // "Synthetic Deception" by JoelFazhari (Pixabay Content License), starts with the card and fades out at the end
       track(dur) {
-        const a = new Audio("sfx/synthetic-deception.mp3");
+        const a = new Audio("assets/sfx/synthetic-deception.mp3");
         a.volume = 0;
         a.play().catch(() => {});
         const t0 = performance.now();
