@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0905">
+    <title>eFootball League — Pack Opening</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="packs.css">
+</head>
+
+<body>
+    <header class="pk-top">
+        <a class="pk-back" href="index.html" id="backLink">← League</a>
+        <div class="pk-stats">
+            <span class="pk-coins" id="coinsBox"><i class="coin" aria-hidden="true"></i><b id="statCoins">0</b></span>
+            <span><b id="statPacks">0</b> <i id="lblPacks">packs opened</i></span>
+            <span><b id="statCollected">0</b>/<span id="statTotal">10</span> <i id="lblCollected">collected</i></span>
+        </div>
+        <div class="pk-lang" role="group" aria-label="Language">
+            <button type="button" data-lang="en">EN</button><button type="button" data-lang="ru">RU</button>
+        </div>
+    </header>
+
+    <nav class="pk-tabs" aria-label="Sections">
+        <button type="button" class="active" data-view="packs" id="tabPacks">Packs</button>
+        <button type="button" data-view="collection" id="tabCollection">Collection</button>
+    </nav>
+
+    <main class="pk-stage" id="stage">
+        <div class="pk-glow" aria-hidden="true"></div>
+        <div class="blackhole" aria-hidden="true">
+            <div class="bh-lens"></div>
+            <div class="bh-disk"><i></i></div>
+            <div class="bh-core"></div>
+            <div class="bh-disk front"><i></i></div>
+        </div>
+        <div class="pk-particles" id="particles" aria-hidden="true"></div>
+
+        <section class="pk-intro" id="intro">
+            <h1 id="title">Void Football Pack</h1>
+            <p id="subtitle">Tap the pack to open it</p>
+
+            <button class="pack" id="pack" type="button" aria-label="Open pack">
+                <span class="pack-body">
+                    <span class="pack-crimp top"></span>
+                    <span class="pack-crimp bottom"></span>
+                    <span class="pack-shine"></span>
+                    <span class="pack-inner">
+                        <span class="pack-hole" aria-hidden="true"></span>
+                        <span class="pack-logo"><span>eFootball</span><span>League</span></span>
+                        <span class="pack-type" id="packType">VOID PACK</span>
+                        <span class="pack-prod">prod. Serhii Promashkov</span>
+                    </span>
+                </span>
+            </button>
+
+            <button class="pk-btn" id="openButton" type="button">Open pack</button>
+            <p class="pk-note" id="buyNote" hidden></p>
+            <p class="pk-note ok" id="rewardNote" hidden></p>
+            <button class="pk-btn ghost small" id="bonusButton" type="button">Daily bonus</button>
+
+            <ul class="pk-odds" id="odds" aria-label="Drop chances"></ul>
+        </section>
+
+        <section class="pk-reveal" id="reveal" hidden>
+            <div class="pk-cards" id="cards"></div>
+            <div class="pk-actions" id="actions" hidden>
+                <button class="pk-btn" id="againButton" type="button">Open another pack</button>
+            </div>
+            <button class="pk-btn ghost" id="revealAllButton" type="button" hidden>Reveal all</button>
+            <p class="pk-hint" id="revealHint">Tap a card to reveal it</p>
+        </section>
+
+        <canvas class="pk-fireworks" id="fireworks" aria-hidden="true"></canvas>
+        <div class="pk-flash" id="flash" aria-hidden="true"></div>
+
+        <div class="pk-walkout" id="walkout" hidden aria-hidden="true">
+            <div class="pk-rays"></div>
+            <div class="pk-walkout-text" id="walkoutText"></div>
+        </div>
+    </main>
+
+    <section class="pk-collection" id="collectionView" aria-labelledby="collectionTitle" hidden>
+        <h2 id="collectionTitle">Collection</h2>
+        <div class="pk-collection-grid" id="collection"></div>
+    </section>
+
+    <script src="packs.js"></script>
+</body>
+
+</html>

@@ -23,6 +23,10 @@ For an existing project, run `supabase-migration-match-stats.sql` once in the Su
 
 Statistics can be left blank. If possession is entered, enter it for both teams and make the total 100%. Saved statistics appear by expanding the match in the Latest matches list.
 
+## League coins
+
+Run `supabase-migration-coins.sql` once in the Supabase SQL Editor. It links each account e-mail to a team (`team_owners`: team 0 = first team in `league_settings.teams`, team 1 = second) and adds the `claim_league_coins()` function. Win = 200 coins, draw = 50, loss = 20. The packs page claims the coins that are not yet collected when a linked account opens it. To link another e-mail or change a team, edit the rows in `team_owners`.
+
 ## Team photos
 
 Team logo files are stored in `img/` and their relative paths are set in the `TEAM_PHOTOS` array in `app.js`:
