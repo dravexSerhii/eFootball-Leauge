@@ -61,6 +61,7 @@ const TRANSLATIONS = {
     totalMatches: "Total: {0} matches",
     tableTitle: "Table",
     updatedAfterMatch: "UPDATED AFTER EACH MATCH",
+    halloween: "HAPPY HALLOWEEN",
     colPos: "#",
     colTeam: "Team",
     colForm: "Form",
@@ -303,6 +304,7 @@ const TRANSLATIONS = {
     totalMatches: "Всего матчей: {0}",
     tableTitle: "Таблица",
     updatedAfterMatch: "ОБНОВЛЯЕТСЯ ПОСЛЕ КАЖДОГО МАТЧА",
+    halloween: "СЧАСТЛИВОГО ХЭЛЛОУИНА",
     colPos: "#",
     colTeam: "Команда",
     colForm: "Форма",
@@ -1863,6 +1865,40 @@ function updateAuthUi() {
     authButton.textContent = t("signOut");
     authButton.disabled = false;
   }
+  updateAuthCoins();
+}
+
+// Coins are kept per account in this browser; the server pays out league match rewards once.
+function packsSaveKey() {
+  return session ? `leaguePacks:${session.user.id}` : null;
+}
+
+function updateAuthCoins() {
+  const box = document.getElementById("authCoins");
+  const key = packsSaveKey();
+  box.hidden = !key;
+  if (!key) return;
+  let coins = 0;
+  try { coins = Number(JSON.parse(localStorage.getItem(key))?.coins) || 0; } catch { /* no save yet */ }
+  document.getElementById("authCoinsValue").textContent = coins.toLocaleString();
+}
+
+async function claimLeagueCoins() {
+  const key = packsSaveKey();
+  if (!key) return;
+  const { data, error } = await supabase.rpc("claim_league_coins");
+  if (error || !data) {
+    console.error("League coins claim failed:", error);
+    return;
+  }
+  if (data.team !== null && data.granted > 0) {
+    let save = null;
+    try { save = JSON.parse(localStorage.getItem(key)); } catch { /* start a new save */ }
+    if (!save || typeof save.opened !== "number" || !save.owned) save = { opened: 0, owned: {}, coins: 0, bonusAt: 0 };
+    save.coins = (Number(save.coins) || 0) + data.granted;
+    localStorage.setItem(key, JSON.stringify(save));
+  }
+  updateAuthCoins();
 }
 
 function mapMatch(row) {
@@ -1992,6 +2028,7 @@ async function handleSession(nextSession) {
   try {
     await fetchServerState();
     if (generation !== sessionGeneration) return;
+    void claimLeagueCoins();
     await refreshNews();
     subscribeToNews();
     subscribeToChanges(generation);

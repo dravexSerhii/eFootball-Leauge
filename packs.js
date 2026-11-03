@@ -114,7 +114,7 @@
   const STORE_KEY = "leaguePacks";
   const PACK_PRICE = 1000;
   const START_COINS = 5000;
-  const BONUS = 1000;
+  const BONUS = 100;
   const BONUS_COOLDOWN = 24 * 3600 * 1000;
   const SELL_PRICE = { gold: 150, rare: 400, epic: 1000, icon: 2500, ballon: 5000 };
   const TEXT = {

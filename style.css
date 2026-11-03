@@ -260,18 +260,33 @@
     .hero-card {
       position: relative;
       overflow: hidden;
-      min-height: 214px;
+      min-height: 230px;
       display: flex;
       align-items: center;
-      padding: 34px 42px;
+      padding: 34px 42px 78px;
       margin-bottom: 22px;
-      border: 1px solid rgba(255, 255, 255, .1);
+      border: 1px solid #f4d35e;
       border-radius: 22px;
       background:
-        linear-gradient(90deg, rgba(20, 15, 37, .88), rgba(20, 18, 37, .54)),
-        url("img/second-background.jpg") center 48% / cover no-repeat,
-        linear-gradient(112deg, #33235b 0%, #27203a 48%, #1b1924 100%);
-      box-shadow: var(--shadow);
+        radial-gradient(ellipse 60% 120% at 82% -10%, rgba(255, 236, 160, .55), transparent 60%),
+        linear-gradient(105deg, #4a3208 0%, #8a6414 28%, #d9a82e 52%, #f6d874 66%, #b4821c 84%, #5a3d09 100%);
+      box-shadow: var(--shadow), 0 0 28px rgba(244, 211, 94, .28), inset 0 0 0 2px rgba(80, 50, 5, .5), inset 0 1px 0 rgba(255, 255, 255, .5);
+    }
+
+    .hero-card .hero-content::before {
+      content: "";
+      position: absolute;
+      inset: -200% -40%;
+      background: linear-gradient(100deg, transparent 42%, rgba(255, 255, 255, .55) 50%, transparent 58%);
+      transform: translateX(-120%);
+      animation: gold-sheen 6s ease-in-out infinite;
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+    }
+
+    @keyframes gold-sheen {
+      0%, 55% { transform: translateX(-120%); }
+      100% { transform: translateX(120%); }
     }
 
     .hero-card::before,
@@ -279,7 +294,7 @@
       position: absolute;
       content: "";
       pointer-events: none;
-      border: 1px solid rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 244, 190, .4);
       border-radius: 50%;
     }
 
@@ -303,7 +318,7 @@
     }
 
     .hero-kicker {
-      color: #c5b4ff;
+      color: #3a2704;
       font-size: 11px;
       font-weight: 850;
       letter-spacing: .16em;
@@ -312,14 +327,160 @@
 
     .hero-title {
       margin: 10px 0 7px;
-      font-size: clamp(23px, 4vw, 34px);
-      letter-spacing: -.04em;
+      font-size: clamp(23px, 4vw, 38px);
+      letter-spacing: -.03em;
+      background: linear-gradient(180deg, #5a3a05 0%, #2e1d02 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 1px 0 rgba(255, 244, 190, .7));
     }
 
     .hero-subtitle {
       margin: 0;
-      color: #c1bdca;
+      color: #3a2704;
       font-size: 13px;
+    }
+
+    .blood-ticker {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 46px;
+      z-index: 2;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      background: linear-gradient(180deg, #5c0000 0%, #8d0505 45%, #3a0000 100%);
+      border-top: 2px solid #2a0000;
+      box-shadow: 0 -6px 18px rgba(120, 0, 0, .55), inset 0 6px 10px rgba(255, 60, 60, .18);
+    }
+
+    .blood-ticker::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 70%, rgba(255, 40, 40, .35) 0 6px, transparent 7px),
+        radial-gradient(circle at 47% 30%, rgba(255, 40, 40, .3) 0 4px, transparent 5px),
+        radial-gradient(circle at 81% 65%, rgba(255, 40, 40, .35) 0 7px, transparent 8px);
+      animation: blood-pulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes blood-pulse {
+      50% { opacity: .35; }
+    }
+
+    .blood-drips {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .blood-drips i {
+      position: absolute;
+      top: -2px;
+      width: 7px;
+      height: var(--h);
+      border-radius: 0 0 7px 7px;
+      background: linear-gradient(90deg, #7a0000, #e01616 45%, #8b0000);
+      transform-origin: top;
+      animation: blood-drip var(--d) ease-in infinite;
+    }
+
+    .blood-drips i::after {
+      content: "";
+      position: absolute;
+      left: -2px;
+      bottom: -4px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      background: radial-gradient(circle at 35% 30%, #ff6a6a, #c10d0d 60%, #6b0000);
+    }
+
+    @keyframes blood-drip {
+      0% { transform: scaleY(.15); opacity: 1; }
+      55% { transform: scaleY(1); opacity: 1; }
+      85% { transform: scaleY(1) translateY(10px); opacity: .85; }
+      100% { transform: scaleY(1) translateY(30px); opacity: 0; }
+    }
+
+    .blood-track {
+      display: flex;
+      width: max-content;
+      animation: blood-run 26s linear infinite;
+      will-change: transform;
+    }
+
+    .blood-track span {
+      display: flex;
+      align-items: center;
+      flex: none;
+      gap: 26px;
+      padding-right: 26px;
+    }
+
+    .blood-track b {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      white-space: nowrap;
+      color: #ffd9d9;
+      text-shadow: 0 0 6px #ff1e1e, 0 0 14px #b00000, 0 3px 0 #3a0000;
+      animation: blood-flicker 3.2s steps(1) infinite;
+    }
+
+    .blood-track em {
+      font-style: normal;
+      font-size: 22px;
+      filter: drop-shadow(0 0 6px rgba(255, 0, 0, .8));
+      animation: bat-flap 1.2s ease-in-out infinite;
+    }
+
+    @keyframes blood-run {
+      to { transform: translateX(-50%); }
+    }
+
+    @keyframes blood-flicker {
+      0%, 92%, 96% { opacity: 1; }
+      94%, 98% { opacity: .55; }
+    }
+
+    @keyframes bat-flap {
+      50% { transform: translateY(-4px) scale(1.15) rotate(-8deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blood-track, .blood-drips i, .hero-content::before, .blood-ticker::before, .blood-track b, .blood-track em { animation: none; }
+    }
+
+    .auth-coins {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid rgba(244, 211, 94, .55);
+      border-radius: 999px;
+      background: rgba(244, 211, 94, .12);
+      color: #f4d35e;
+      font-size: 12px;
+    }
+
+    .auth-coins[hidden] { display: none; }
+
+    .auth-coins .coin {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff6c4, #f2c94c 55%, #a8761f);
+      box-shadow: 0 0 8px rgba(242, 201, 76, .6);
     }
 
     .hero-ball {
