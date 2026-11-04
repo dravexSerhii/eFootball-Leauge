@@ -1,3 +1,5 @@
+import { ACHIEVEMENTS, evaluateAchievements } from "./achievements.js";
+
 const GROUPS = ["attack", "defense", "passes", "possession", "conversion"];
 const UI = {
   en: {
@@ -1637,6 +1639,51 @@ function updateWinnerOdds(probabilities, now = performance.now()) {
   });
 }
 
+function renderAchievements(analysis) {
+  $("achievementsEyebrow").textContent = L("ЗНАЧКИ ЛИГИ", "LEAGUE BADGES");
+  $("achievementsTitle").textContent = L("Достижения", "Achievements");
+  $("achievementsDescription").textContent = L(
+    "Считаются по всем сыгранным матчам. Значок загорается, когда условие выполнено.",
+    "Based on all played matches. A badge lights up once its condition is met."
+  );
+  const teams = analysis.teams;
+  const results = teams.map((team) => evaluateAchievements(state.matches, team.index));
+  $("achievementTotals").replaceChildren(...teams.map((team, i) => {
+    const chip = node("span", "achievement-total");
+    chip.append(logoFor(team.index, team.name), node("b", "", `${results[i].filter((r) => r.unlocked).length}/${ACHIEVEMENTS.length}`));
+    chip.title = team.name;
+    return chip;
+  }));
+  $("achievementGrid").replaceChildren(...ACHIEVEMENTS.map((achievement, aIndex) => {
+    const anyUnlocked = results.some((list) => list[aIndex].unlocked);
+    const card = node("article", `achievement-card tier-${achievement.tier}${anyUnlocked ? " is-unlocked" : ""}`);
+    const badge = node("div", "achievement-badge");
+    badge.innerHTML = achievement.icon;
+    const [title, description] = L(achievement.ru, achievement.en);
+    const body = node("div", "achievement-body");
+    body.append(node("h3", "", title), node("p", "", description));
+    const owners = node("div", "achievement-owners");
+    teams.forEach((team, i) => {
+      const result = results[i][aIndex];
+      const row = node("div", `achievement-owner${result.unlocked ? " done" : ""}`);
+      const bar = node("span", "achievement-bar");
+      const fill = node("i");
+      fill.style.width = `${result.value / result.target * 100}%`;
+      bar.append(fill);
+      row.append(
+        logoFor(team.index, team.name),
+        bar,
+        node("b", "", result.unlocked ? "✓" : `${Math.floor(result.value)}/${result.target}`)
+      );
+      row.title = team.name;
+      owners.append(row);
+    });
+    body.append(owners);
+    card.append(badge, body);
+    return card;
+  }));
+}
+
 function home0Forecast(analysis) {
   const [home, away] = analysis.teams;
   return home && away ? forecastMatch(home, away, analysis.teams)?.probabilities : null;
@@ -1662,6 +1709,7 @@ function render() {
   updateWinnerOdds(initialProbabilities);
   updateOdds(initialProbabilities);
   renderForecasts(analysis);
+  renderAchievements(analysis);
   $("medianBadge").textContent = analysis.median === null ? t().noRatings : `${t().median}: ${Math.round(analysis.median)} / 100`;
   $("teamGrid").replaceChildren(...analysis.teams.map((team) => renderTeamCard(team, analysis.teams.filter((item) => item.metrics.rating !== null))));
 }
