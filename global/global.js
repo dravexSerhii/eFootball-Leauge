@@ -84,6 +84,7 @@ const UI = {
     drawFavorite: "Draw is the likeliest result",
     favoriteProbability: (value) => `Most likely result · ${value}%`,
     teamMatchup: (home, away) => `${home} vs ${away}`,
+    goalsShort: "expected goals",
     expectedGoals: (homeName, homeGoals, awayName, awayGoals) => `Expected goals · ${homeName} ${homeGoals} – ${awayGoals} ${awayName}`,
     whyFavoriteTitle: "Why the model favors this outcome",
     whyTeamFavorite: (team, probability, goals, opponentGoals) => `${team} is the predicted winner (${probability}%). The model projects ${goals} expected goals against ${opponentGoals} for the opponent.`,
@@ -203,6 +204,7 @@ const UI = {
     drawFavorite: "Наиболее вероятна ничья",
     favoriteProbability: (value) => `Самый вероятный исход · ${value}%`,
     teamMatchup: (home, away) => `${home} против ${away}`,
+    goalsShort: "ожидаемых голов",
     expectedGoals: (homeName, homeGoals, awayName, awayGoals) => `Ожидаемые голы · ${homeName} ${homeGoals} – ${awayGoals} ${awayName}`,
     whyFavoriteTitle: "Почему модель выбрала этот исход",
     whyTeamFavorite: (team, probability, goals, opponentGoals) => `${team} — прогнозируемый победитель (${probability}%). Модель ожидает ${goals} гола против ${opponentGoals} у соперника.`,
@@ -251,6 +253,7 @@ let liveAvailable = false;
 let currentAnalysis = null;
 let liveProbabilityBase = null;
 let liveProbabilityBaseKey = "";
+let shownFavoriteIndex = -1;
 let liveProbabilityHistory = [];
 let liveProbabilityStartedAt = 0;
 let lastProbabilityRenderAt = 0;
@@ -583,6 +586,7 @@ function renderFavorite(analysis, liveProbabilities = null) {
   const displayedProbabilities = percentageHundredths(probabilities);
   const favoriteIndex = probabilities.indexOf(Math.max(...probabilities));
   const favoriteProbability = (displayedProbabilities[favoriteIndex] / 100).toFixed(2);
+  shownFavoriteIndex = favoriteIndex;
   const layout = node("div", "favorite-layout");
   const favorite = node("div", `favorite-team${favoriteIndex === 1 ? " is-draw-favorite" : ""}`);
   if (favoriteIndex !== 1) favorite.append(logoFor(favoriteIndex === 0 ? home.index : away.index, favoriteIndex === 0 ? home.name : away.name));
@@ -1148,6 +1152,10 @@ function updateFavoriteProbabilities(probabilities) {
     value.textContent = formatProbability(values[index] / 100);
     value.closest(".probability-cell").classList.toggle("is-match-favorite", index === favoriteIndex);
   });
+  if (favoriteIndex !== shownFavoriteIndex && currentAnalysis) {
+    renderFavorite(currentAnalysis, probabilities);
+    return;
+  }
   const favoriteLabel = $("favoriteContent").querySelector(".favorite-tier");
   if (favoriteLabel) favoriteLabel.textContent = t().favoriteProbability((values[favoriteIndex] / 100).toFixed(2));
 }
@@ -1295,7 +1303,7 @@ function renderForecasts(analysis) {
       }
       probabilities.append(cell);
     });
-    const expected = forecast ? node("span", "forecast-score", `${forecast.homeGoals.toFixed(1)} — ${forecast.awayGoals.toFixed(1)} xG`) : null;
+    const expected = forecast ? node("span", "forecast-score", `${forecast.homeGoals.toFixed(1)} — ${forecast.awayGoals.toFixed(1)} ${t().goalsShort}`) : null;
     row.append(fixture, probabilities);
     if (expected) row.append(expected);
     return row;

@@ -2272,7 +2272,7 @@ function subscribeToChanges(generation) {
       event: "UPDATE",
       schema: "public",
       table: "league_coin_wallets",
-      filter: `user_id=eq.${session.user.id}`
+      filter: `user_id=eq.${session?.user?.id ?? "00000000-0000-0000-0000-000000000000"}`
     }, () => {
       if (generation === sessionGeneration) void claimLeagueCoins();
     })
