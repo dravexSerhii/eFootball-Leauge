@@ -2128,7 +2128,7 @@ function updateAuthUi() {
   updateAuthCoins();
 }
 
-// Coins are kept per account in this browser; the server pays out league match rewards once.
+// The local save mirrors the shared server wallet so the header can show its current balance.
 function packsSaveKey() {
   return session ? `leaguePacks:${session.user.id}` : null;
 }
@@ -2146,18 +2146,21 @@ function updateAuthCoins() {
 async function claimLeagueCoins() {
   const key = packsSaveKey();
   if (!key) return;
-  const { data, error } = await supabase.rpc("claim_league_coins");
+  let save = null;
+  try { save = JSON.parse(localStorage.getItem(key)); } catch { /* start a new local mirror */ }
+  if (!save || typeof save.opened !== "number" || !save.owned) {
+    save = { opened: 0, owned: {}, coins: 0, bonusAt: 0 };
+  }
+  const { data, error } = await supabase.rpc("claim_league_coins", {
+    p_initial_balance: Number(save.coins) || 0,
+    p_initial_inventory: save.owned
+  });
   if (error || !data) {
     console.error("League coins claim failed:", error);
     return;
   }
-  if (data.team !== null && data.granted > 0) {
-    let save = null;
-    try { save = JSON.parse(localStorage.getItem(key)); } catch { /* start a new save */ }
-    if (!save || typeof save.opened !== "number" || !save.owned) save = { opened: 0, owned: {}, coins: 0, bonusAt: 0 };
-    save.coins = (Number(save.coins) || 0) + data.granted;
-    localStorage.setItem(key, JSON.stringify(save));
-  }
+  save.coins = Number(data.balance) || 0;
+  localStorage.setItem(key, JSON.stringify(save));
   updateAuthCoins();
 }
 
@@ -2244,7 +2247,10 @@ async function fetchServerState() {
 async function refreshFromServer() {
   if (!configReady) return;
   try {
+    const previousLatestMatchId = state.matches[state.matches.length - 1]?.id;
     await fetchServerState();
+    const latestMatchId = state.matches[state.matches.length - 1]?.id;
+    if (session && latestMatchId !== previousLatestMatchId) await claimLeagueCoins();
     await refreshNews();
   } catch (error) {
     console.error("Failed to refresh the league from the server:", error);
@@ -2261,6 +2267,14 @@ function subscribeToChanges(generation) {
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "league_matches" }, () => {
       if (generation === sessionGeneration) void refreshFromServer();
+    })
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "league_coin_wallets",
+      filter: `user_id=eq.${session.user.id}`
+    }, () => {
+      if (generation === sessionGeneration) void claimLeagueCoins();
     })
     .subscribe(status => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -3055,6 +3069,7 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
   }
   state.matches.push(mapMatch(data));
   state.matches.sort((a, b) => new Date(a.date) - new Date(b.date));
+  void claimLeagueCoins();
   render();
   matchDialog.close();
   showToast(t("matchSaved"));

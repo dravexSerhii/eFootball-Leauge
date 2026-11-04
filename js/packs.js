@@ -128,7 +128,8 @@
       rewardGot: "League rewards: +{0} coins (win 200, draw 50, loss 20).",
       rewardNone: "No new league coins yet. Win 200, draw 50, loss 20.",
       rewardSignIn: "Sign in on the league page to receive coins for your matches.",
-      rewardNoTeam: "This account is not linked to a team."
+      rewardNoTeam: "This account is not linked to a team.",
+      walletError: "Could not sync your shared wallet. Please try again."
     },
     ru: {
       back: "\u2190 Лига", packs: "паков открыто", collected: "собрано",
@@ -140,7 +141,8 @@
       rewardGot: "Награда лиги: +{0} монет (победа 200, ничья 50, поражение 20).",
       rewardNone: "Новых монет лиги пока нет. Победа 200, ничья 50, поражение 20.",
       rewardSignIn: "Войдите на странице лиги, чтобы получать монеты за матчи.",
-      rewardNoTeam: "Этот аккаунт не привязан к команде."
+      rewardNoTeam: "Этот аккаунт не привязан к команде.",
+      walletError: "Не удалось синхронизировать общий баланс. Попробуйте ещё раз."
     }
   };
 
@@ -201,8 +203,29 @@
     }
   }
 
-  function claimBonus() {
-    if (save.bonusAt + BONUS_COOLDOWN > Date.now()) return;
+  async function claimBonus() {
+    if (!walletReady) return;
+    if (!cloudClient && save.bonusAt + BONUS_COOLDOWN > Date.now()) return;
+    if (cloudClient) {
+      const { data, error } = await cloudClient.rpc("claim_league_daily_bonus");
+      if (error || !data) {
+        console.error("Daily coin bonus claim failed:", error || new Error("No wallet data"));
+        $("buyNote").textContent = tr("rewardNone");
+        $("buyNote").hidden = false;
+        return;
+      }
+      if (!data.claimed) {
+        save.bonusAt = Date.parse(data.bonus_at) || Date.now();
+        $("buyNote").textContent = tr("rewardNone");
+        $("buyNote").hidden = false;
+      } else {
+        save.coins = Number(data.balance) || 0;
+        save.bonusAt = Date.parse(data.bonus_at) || Date.now();
+      }
+      persist();
+      updateCoins();
+      return;
+    }
     save.coins += BONUS;
     save.bonusAt = Date.now();
     persist();
@@ -210,8 +233,22 @@
     $("buyNote").hidden = true;
   }
 
-  function sellOne(player) {
+  async function sellOne(player) {
+    if (!walletReady) return;
     if ((save.owned[player.id] || 0) < 2) return;
+    if (cloudClient) {
+      const { data, error } = await cloudClient.rpc("sell_league_duplicate", { p_player_id: player.id });
+      if (error || !data) {
+        console.error("Duplicate card sale failed:", error || new Error("No wallet data"));
+        return;
+      }
+      save.owned[player.id] = Number(data.quantity) || 0;
+      save.coins = Number(data.balance) || 0;
+      persist();
+      updateCoins();
+      renderCollection();
+      return;
+    }
     save.owned[player.id] -= 1;
     save.coins += SELL_PRICE[tierOf(player)];
     persist();
@@ -1228,8 +1265,8 @@
   }
 
   async function openPack() {
-    if (busy) return;
-    if (save.coins < PACK_PRICE) {
+    if (busy || !walletReady) return;
+    if (!cloudClient && save.coins < PACK_PRICE) {
       const note = $("buyNote");
       note.textContent = tr("poor");
       note.hidden = false;
@@ -1243,8 +1280,46 @@
     $("openButton").disabled = true;
     $("buyNote").hidden = true;
     const pack = $("pack");
-    const cards = drawPack();
-    save.coins -= PACK_PRICE;
+    let cards = drawPack();
+    if (cloudClient) {
+      const { data, error } = await cloudClient.rpc("open_league_pack", {
+        p_initial_balance: save.coins,
+        p_initial_inventory: save.owned
+      });
+      if (error || !data) {
+        console.error("Pack purchase failed:", error || new Error("No wallet data"));
+        $("buyNote").textContent = tr("walletError");
+        $("buyNote").hidden = false;
+        busy = false;
+        $("openButton").disabled = false;
+        return;
+      }
+      const awardedPlayer = PLAYERS.find(player => player.id === data.player_id);
+      if (!data.purchased) {
+        save.coins = Number(data.balance) || 0;
+        updateCoins();
+        $("buyNote").textContent = tr("poor");
+        $("buyNote").hidden = false;
+        busy = false;
+        $("openButton").disabled = false;
+        return;
+      }
+      if (!awardedPlayer) {
+        console.error("Pack purchase returned an invalid card:", data);
+        save.coins = Number(data.balance) || 0;
+        persist();
+        updateCoins();
+        $("buyNote").textContent = tr("walletError");
+        $("buyNote").hidden = false;
+        busy = false;
+        $("openButton").disabled = false;
+        return;
+      }
+      save.coins = Number(data.balance) || 0;
+      cards = [awardedPlayer];
+    } else {
+      save.coins -= PACK_PRICE;
+    }
     save.opened += 1;
     persist();
     updateCoins();
@@ -1309,7 +1384,10 @@
   updateStats();
   sparks(26, 0, true);
 
-  // Each signed-in account has its own save; the server pays out league match coins once per match.
+  // Signed-in accounts use shared server wallets; guests keep local saves.
+  let cloudClient = null;
+  let walletChannel = null;
+  let walletReady = false;
   let rewardState = "signin";
   let rewardAmount = 0;
   function showReward() {
@@ -1326,28 +1404,63 @@
       ]);
       const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data } = await client.auth.getSession();
-      if (!data.session) { showReward(); return; }
+      if (!data.session) {
+        walletReady = true;
+        showReward();
+        return;
+      }
       while (busy) await sleep(500);
+      cloudClient = client;
+      if (!walletChannel) {
+        walletChannel = client.channel(`league-wallet-${data.session.user.id}`)
+          .on("postgres_changes", {
+            event: "UPDATE",
+            schema: "public",
+            table: "league_coin_wallets",
+            filter: `user_id=eq.${data.session.user.id}`
+          }, event => {
+            save.coins = Number(event.new.balance) || 0;
+            save.bonusAt = Date.parse(event.new.bonus_claimed_at) || 0;
+            persist();
+            updateCoins();
+          })
+          .subscribe();
+      }
       storeKey = `${STORE_KEY}:${data.session.user.id}`;
       save = loadSave(storeKey, 0);
-      const { data: res, error } = await client.rpc("claim_league_coins");
+      const { data: res, error } = await client.rpc("claim_league_coins", {
+        p_initial_balance: save.coins,
+        p_initial_inventory: save.owned
+      });
       if (error || !res) throw error || new Error("no reward data");
+      save.coins = Number(res.balance) || 0;
+      save.bonusAt = Date.parse(res.bonus_at) || 0;
+      const { data: inventory, error: inventoryError } = await client
+        .from("league_pack_inventory").select("player_id,quantity");
+      if (inventoryError) throw inventoryError;
+      save.owned = Object.fromEntries(inventory.map(item => [item.player_id, item.quantity]));
       if (res.team === null) rewardState = "noteam";
       else if (res.granted > 0) {
-        save.coins += res.granted;
-        persist();
         rewardState = "got";
         rewardAmount = res.granted;
       } else rewardState = "none";
       persist();
       updateCoins();
       updateStats();
+      walletReady = true;
       showReward();
     } catch (error) {
       console.error("League coins sync failed:", error);
+      $("rewardNote").hidden = false;
+      $("rewardNote").textContent = tr("walletError");
+      walletReady = true;
     }
   }
   void syncLeagueCoins();
+  window.addEventListener("focus", () => { if (cloudClient) void syncLeagueCoins(); });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && cloudClient) void syncLeagueCoins();
+  });
 
   // ?demo=<player id> (e.g. messi, ronaldo, maradona, kane) plays that walkout without spending coins
   const demoId = new URLSearchParams(location.search).get("demo");
