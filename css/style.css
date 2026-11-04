@@ -3831,6 +3831,49 @@ html[data-theme="halloween"] .topbar-right .global-link { background: linear-gra
   .site-menu-panel { width: min(248px, calc(100vw - 32px)); }
 }
 
+@media (max-width: 480px) {
+  .page-shell > .topbar { overflow: visible; }
+  .topbar .brand { gap: 0; }
+  .topbar .brand-mark { width: 34px; height: 34px; }
+  .topbar-right {
+    flex: 0 1 auto;
+    max-width: calc(100% - 44px);
+    gap: 4px;
+  }
+  .topbar-right > * { flex: 0 0 auto; }
+  .site-menu { position: static; }
+  .site-menu summary {
+    width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+  .site-menu-label { display: none; }
+  .site-menu-panel {
+    position: fixed;
+    z-index: 60;
+    top: calc(32px + 58px + 8px);
+    right: 14px;
+    left: auto;
+    width: min(248px, calc(100vw - 28px));
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+  }
+  .topbar-right #authButton { padding: 0 8px; font-size: 11px; }
+  .topbar-right .auth-coins { gap: 4px; padding: 0 6px; }
+  .topbar-right .language-toggle .lang-btn { padding: 0 7px; }
+}
+
+@media (max-width: 380px) {
+  .topbar .brand-mark { width: 32px; height: 32px; }
+  .topbar-right { gap: 3px; }
+  .site-menu summary { width: 36px; min-height: 36px; }
+  .topbar-right .theme-toggle { width: 32px; height: 32px; }
+  .topbar-right #authButton { padding: 0 6px; font-size: 10px; }
+  .topbar-right .auth-coins { padding: 0 4px; font-size: 10px; }
+  .topbar-right .language-toggle .lang-btn { padding: 0 5px; }
+}
+
 main > .hero-card,
 main > .championship-race,
 main > .upcoming-match,
