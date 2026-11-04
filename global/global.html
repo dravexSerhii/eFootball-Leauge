@@ -85,6 +85,25 @@
                 <aside class="forecast-explanation" id="forecastExplanation" aria-live="polite"></aside>
             </div>
         </section>
+        <section class="insight-panel panel" aria-labelledby="insightTitle">
+            <div class="section-head">
+                <div>
+                    <p class="ga-eyebrow" id="insightEyebrow">AI ANALYST</p>
+                    <h2 id="insightTitle">Why the model picked this outcome</h2>
+                </div>
+            </div>
+            <div id="insightContent"></div>
+            <div class="odds-block">
+                <h3 id="oddsTitle">AI odds</h3>
+                <div id="oddsGrid" class="odds-grid"></div>
+                <p class="forecast-note" id="oddsNote"></p>
+            </div>
+            <div class="improve-block">
+                <h3 id="improveTitle">How to improve</h3>
+                <div class="improve-tabs" id="improveTabs" role="tablist"></div>
+                <div id="improveContent" role="tabpanel" aria-live="polite"></div>
+            </div>
+        </section>
         <section class="strengths-panel panel" aria-labelledby="strengthsTitle">
             <div class="section-head">
                 <div>

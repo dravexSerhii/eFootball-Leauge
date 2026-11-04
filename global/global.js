@@ -113,7 +113,7 @@ const UI = {
     favoriteMargin: (n) => `Overall rating advantage: ${n} points.`,
     closeRace: "No clear favorite: the top ratings are very close.",
     onlyOne: "Only one team has recorded match statistics in this period, so it cannot be compared yet.",
-    method: "<b>Rating tiers:</b> S+ ≥95, S ≥90, A+ ≥85, A ≥80, B+ ≥75, B ≥70, C+ ≥65, C below 65. Match-performance ratings use mobile-scale statistics; defense scores higher for fewer opponent shots and goals conceded, so a stronger defense extends farther on the radar. Squad strength is calculated separately from the average OVR of rated starters by attack, midfield, and defense; substitutes and placeholder players are excluded. The probability model's base forecast uses recency-weighted data from the last five matches and recalculates when saved results or statistics change. Between database updates, the chart applies a clearly labeled simulated momentum that shifts the display once per second; this is a visual model simulation, not new live-match information. Estimates are not guaranteed outcomes.",
+    method: "<b>Rating tiers:</b> S+++ ≥95, S++ ≥90, S+ ≥85, S ≥80, A+ ≥75, A ≥70, B+ ≥65, B ≥60, C+ ≥55, C below 55. Match-performance ratings use mobile-scale statistics; defense scores higher for fewer opponent shots and goals conceded, so a stronger defense extends farther on the radar. Squad strength is calculated separately from the average OVR of rated starters by attack, midfield, and defense; substitutes and placeholder players are excluded. The probability model's base forecast uses recency-weighted data from the last five matches and recalculates when saved results or statistics change. Between database updates, the chart applies a clearly labeled simulated momentum that shifts the display once per second; this is a visual model simulation, not new live-match information. Estimates are not guaranteed outcomes.",
     loadError: "Could not load live league data. ",
     waiting: "Connecting to the league database…",
     noConfig: "Supabase configuration is unavailable.",
@@ -233,7 +233,7 @@ const UI = {
     favoriteMargin: (n) => `Преимущество по общему рейтингу: ${n} п.`,
     closeRace: "Явного фаворита нет: рейтинги команд почти равны.",
     onlyOne: "В этом периоде статистика записана только для одной команды — сравнить их пока нельзя.",
-    method: "<b>Градация рейтинга:</b> S+ ≥95, S ≥90, A+ ≥85, A ≥80, B+ ≥75, B ≥70, C+ ≥65, C ниже 65. Рейтинг игры рассчитывается по мобильной статистике; защита выше при меньшем числе ударов соперника и пропущенных голов, поэтому сильная защита уходит дальше от центра ромба. Сила состава отдельно рассчитывается как средний OVR оценённых игроков стартового состава по линиям: нападение, полузащита и защита; запасные и шаблонные игроки исключены. Базовый прогноз вероятностей рассчитывается по взвешенным данным последних пяти матчей и меняется при обновлении результатов или статистики. Между обновлениями базы график раз в секунду применяет явно обозначенную симулированную динамику модели; это визуальная симуляция, а не новые live-данные матча. Оценка не гарантирует результат.",
+    method: "<b>Градация рейтинга:</b> S+++ ≥95, S++ ≥90, S+ ≥85, S ≥80, A+ ≥75, A ≥70, B+ ≥65, B ≥60, C+ ≥55, C ниже 55. Рейтинг игры рассчитывается по мобильной статистике; защита выше при меньшем числе ударов соперника и пропущенных голов, поэтому сильная защита уходит дальше от центра ромба. Сила состава отдельно рассчитывается как средний OVR оценённых игроков стартового состава по линиям: нападение, полузащита и защита; запасные и шаблонные игроки исключены. Базовый прогноз вероятностей рассчитывается по взвешенным данным последних пяти матчей и меняется при обновлении результатов или статистики. Между обновлениями базы график раз в секунду применяет явно обозначенную симулированную динамику модели; это визуальная симуляция, а не новые live-данные матча. Оценка не гарантирует результат.",
     loadError: "Не удалось загрузить данные лиги. ",
     waiting: "Подключаемся к базе лиги…",
     noConfig: "Настройки Supabase недоступны.",
@@ -302,13 +302,15 @@ function node(tag, className, text) {
 }
 
 function tierFor(rating) {
-  if (rating >= 95) return "S+";
-  if (rating >= 90) return "S";
-  if (rating >= 85) return "A+";
-  if (rating >= 80) return "A";
-  if (rating >= 75) return "B+";
-  if (rating >= 70) return "B";
-  if (rating >= 65) return "C+";
+  if (rating >= 95) return "S+++";
+  if (rating >= 90) return "S++";
+  if (rating >= 85) return "S+";
+  if (rating >= 80) return "S";
+  if (rating >= 75) return "A+";
+  if (rating >= 70) return "A";
+  if (rating >= 65) return "B+";
+  if (rating >= 60) return "B";
+  if (rating >= 55) return "C+";
   return "C";
 }
 
@@ -1145,6 +1147,7 @@ function renderLiveProbabilityChart(labels, probabilities, now = performance.now
 }
 
 function updateFavoriteProbabilities(probabilities) {
+  updateOdds(probabilities);
   const values = percentageHundredths(probabilities);
   const favoriteIndex = probabilities.indexOf(Math.max(...probabilities));
   $("currentMatchProbabilities").querySelectorAll("[data-probability-value]").forEach((value) => {
@@ -1311,6 +1314,276 @@ function renderForecasts(analysis) {
   fixtures.replaceChildren(...rounds);
 }
 
+const L = (ru, en) => lang === "ru" ? ru : en;
+const BOOKMAKER_MARGIN = 0.06;
+let improveTeamIndex = 0;
+let oddsContext = null;
+
+function teamAdvantages(a, b) {
+  const x = a.metrics, y = b.metrics;
+  const list = [];
+  const both = (key) => x[key] !== null && x[key] !== undefined && y[key] !== null && y[key] !== undefined;
+  const f1 = (v) => v.toFixed(1);
+  if (both("avgPossession") && x.avgPossession - y.avgPossession >= 1) {
+    list.push({ score: (x.avgPossession - y.avgPossession) / 12,
+      ru: `дольше владеет мячом (${f1(x.avgPossession)}% против ${f1(y.avgPossession)}%)`,
+      en: `holds the ball longer (${f1(x.avgPossession)}% vs ${f1(y.avgPossession)}%)`,
+      factRu: `Владение: ${f1(x.avgPossession)}% против ${f1(y.avgPossession)}%`,
+      factEn: `Possession: ${f1(x.avgPossession)}% vs ${f1(y.avgPossession)}%` });
+  }
+  if (both("avgShotsFor") && x.avgShotsFor > y.avgShotsFor) {
+    const extra = x.avgShotsFor - y.avgShotsFor;
+    list.push({ score: extra / Math.max(y.avgShotsFor, 1),
+      ru: `создаёт на ${f1(extra)} удара за матч больше (${f1(x.avgShotsFor)} против ${f1(y.avgShotsFor)})`,
+      en: `creates ${f1(extra)} more shots per match (${f1(x.avgShotsFor)} vs ${f1(y.avgShotsFor)})`,
+      factRu: `Удары за матч: ${f1(x.avgShotsFor)} против ${f1(y.avgShotsFor)}`,
+      factEn: `Shots per match: ${f1(x.avgShotsFor)} vs ${f1(y.avgShotsFor)}` });
+  }
+  if (both("conversionRate") && x.conversionRate > y.conversionRate) {
+    list.push({ score: (x.conversionRate - y.conversionRate) / Math.max(y.conversionRate, 10),
+      ru: `точнее реализует моменты (${f1(x.conversionRate)}% против ${f1(y.conversionRate)}%)`,
+      en: `finishes chances better (${f1(x.conversionRate)}% vs ${f1(y.conversionRate)}%)`,
+      factRu: `Реализация: ${f1(x.conversionRate)}% против ${f1(y.conversionRate)}%`,
+      factEn: `Conversion: ${f1(x.conversionRate)}% vs ${f1(y.conversionRate)}%` });
+  }
+  if (both("avgShotsAgainst") && x.avgShotsAgainst < y.avgShotsAgainst) {
+    list.push({ score: (y.avgShotsAgainst - x.avgShotsAgainst) / Math.max(x.avgShotsAgainst, 1),
+      ru: `надёжнее в защите: соперник бьёт по нему ${f1(x.avgShotsAgainst)} раза за матч против ${f1(y.avgShotsAgainst)}`,
+      en: `is more solid defensively: opponents take ${f1(x.avgShotsAgainst)} shots per match vs ${f1(y.avgShotsAgainst)}`,
+      factRu: `Удары соперника по воротам: ${f1(x.avgShotsAgainst)} против ${f1(y.avgShotsAgainst)}`,
+      factEn: `Shots faced: ${f1(x.avgShotsAgainst)} vs ${f1(y.avgShotsAgainst)}` });
+  }
+  if (both("avgPasses") && x.avgPasses > y.avgPasses) {
+    list.push({ score: (x.avgPasses - y.avgPasses) / Math.max(y.avgPasses, 30),
+      ru: `лучше контролирует игру пасами (${f1(x.avgPasses)} против ${f1(y.avgPasses)})`,
+      en: `controls play better with passing (${f1(x.avgPasses)} vs ${f1(y.avgPasses)})`,
+      factRu: `Пасы за матч: ${f1(x.avgPasses)} против ${f1(y.avgPasses)}`,
+      factEn: `Passes per match: ${f1(x.avgPasses)} vs ${f1(y.avgPasses)}` });
+  }
+  if (x.rating !== null && y.rating !== null && x.rating > y.rating) {
+    list.push({ score: (x.rating - y.rating) / 25,
+      ru: `выше общий рейтинг (${x.rating} против ${y.rating})`,
+      en: `has a higher overall rating (${x.rating} vs ${y.rating})`,
+      factRu: `Рейтинг команды: ${x.rating} против ${y.rating}`,
+      factEn: `Team rating: ${x.rating} vs ${y.rating}` });
+  }
+  return list.sort((p, q) => q.score - p.score);
+}
+
+function renderInsights(analysis) {
+  const [home, away] = analysis.teams;
+  $("insightEyebrow").textContent = L("ИИ-АНАЛИТИК", "AI ANALYST");
+  $("insightTitle").textContent = L("Почему модель выбрала этот исход", "Why the model picked this outcome");
+  $("oddsTitle").textContent = L("Коэффициенты ИИ", "AI odds");
+  $("improveTitle").textContent = L("Что улучшить для победы", "What to improve to win");
+  const content = $("insightContent");
+  const forecast = home && away ? forecastMatch(home, away, analysis.teams) : null;
+  if (!forecast) {
+    content.replaceChildren(node("p", "favorite-empty", t().noFavorite));
+    $("oddsGrid").replaceChildren();
+    $("improveTabs").replaceChildren();
+    $("improveContent").replaceChildren();
+    oddsContext = null;
+    return;
+  }
+  const p = forecast.probabilities;
+  const favoriteTeam = p[0] >= p[2] ? home : away;
+  const underdog = favoriteTeam === home ? away : home;
+  const favoriteWin = Math.max(p[0], p[2]);
+  const drawLeads = p[1] > favoriteWin;
+  const pro = teamAdvantages(favoriteTeam, underdog);
+  const con = teamAdvantages(underdog, favoriteTeam);
+  const joinList = (items, key) => items.slice(0, 3).map((item) => item[key]).join(L("; ", "; "));
+  const lead = node("p", "insight-lead");
+  const pct = (favoriteWin * 100).toFixed(2);
+  if (pro.length) {
+    lead.textContent = L(
+      `Мы считаем, что фаворит — ${favoriteTeam.name} (${pct}% на победу), потому что команда ${joinList(pro, "ru")}.`,
+      `We consider ${favoriteTeam.name} the favorite (${pct}% to win) because the team ${joinList(pro, "en")}.`
+    );
+  } else {
+    lead.textContent = L(
+      `Явного статистического перевеса нет: ${favoriteTeam.name} впереди лишь на уровне модели (${pct}% на победу).`,
+      `There is no clear statistical edge: ${favoriteTeam.name} leads only marginally in the model (${pct}% to win).`
+    );
+  }
+  const counter = node("p", "insight-counter");
+  counter.textContent = con.length
+    ? L(`Но у ${underdog.name} есть козыри: команда ${joinList(con.slice(0, 2), "ru")}. Поэтому сюрприз возможен.`,
+        `But ${underdog.name} has strengths: the team ${joinList(con.slice(0, 2), "en")}. An upset is possible.`)
+    : L(`У ${underdog.name} по накопленной статистике нет явных козырей, поэтому перевес ${favoriteTeam.name} выглядит устойчивым.`,
+        `${underdog.name} has no clear statistical advantage, so ${favoriteTeam.name}'s edge looks stable.`);
+  const goals = node("p", "insight-counter");
+  goals.textContent = L(
+    `Ожидаемые голы: ${home.name} ${forecast.homeGoals.toFixed(2)} — ${forecast.awayGoals.toFixed(2)} ${away.name}. Ничья: ${(p[1] * 100).toFixed(2)}%${drawLeads ? " — это самый вероятный исход." : "."}`,
+    `Expected goals: ${home.name} ${forecast.homeGoals.toFixed(2)} – ${forecast.awayGoals.toFixed(2)} ${away.name}. Draw: ${(p[1] * 100).toFixed(2)}%${drawLeads ? " — the most likely outcome." : "."}`
+  );
+  const facts = pro.slice(0, 3).map((item) => L(item.factRu, item.factEn));
+  const fillers = [
+    L(`Ожидаемые голы: ${favoriteTeam === home ? forecast.homeGoals.toFixed(2) : forecast.awayGoals.toFixed(2)} против ${favoriteTeam === home ? forecast.awayGoals.toFixed(2) : forecast.homeGoals.toFixed(2)}`,
+      `Expected goals: ${favoriteTeam === home ? forecast.homeGoals.toFixed(2) : forecast.awayGoals.toFixed(2)} vs ${favoriteTeam === home ? forecast.awayGoals.toFixed(2) : forecast.homeGoals.toFixed(2)}`),
+    L(`Вероятность ничьей: ${(p[1] * 100).toFixed(2)}%`, `Draw probability: ${(p[1] * 100).toFixed(2)}%`),
+    L(`Матчей в выборке: ${analysis.matches.length}`, `Matches in sample: ${analysis.matches.length}`)
+  ];
+  while (facts.length < 3) facts.push(fillers[facts.length]);
+  const factList = node("ul", "insight-facts");
+  facts.forEach((fact, index) => {
+    const li = node("li", "");
+    li.append(node("b", "", String(index + 1)), node("span", "", fact));
+    factList.append(li);
+  });
+  content.replaceChildren(lead, counter, goals, node("h4", "insight-facts-title", L("3 факта", "3 key facts")), factList);
+
+  renderOdds(home, away, forecast);
+  renderImprove(analysis);
+}
+
+function renderOdds(home, away, forecast) {
+  const hg = forecast.homeGoals, ag = forecast.awayGoals;
+  const line = Math.max(2, Math.floor(hg + ag)) + 0.5;
+  let over = 1;
+  for (let k = 0; k <= Math.floor(line); k++) over -= poisson(hg + ag, k);
+  const btts = (1 - Math.exp(-hg)) * (1 - Math.exp(-ag));
+  oddsContext = { home, away };
+  const markets = [
+    { key: "p0", label: L(`Победа ${home.name}`, `${home.name} win`), live: 0 },
+    { key: "p1", label: L("Ничья", "Draw"), live: 1 },
+    { key: "p2", label: L(`Победа ${away.name}`, `${away.name} win`), live: 2 },
+    { key: "dc0", label: L(`${home.name} или ничья`, `${home.name} or draw`), live: [0, 1] },
+    { key: "dc2", label: L(`${away.name} или ничья`, `${away.name} or draw`), live: [1, 2] },
+    { key: "over", label: L(`Тотал больше ${line}`, `Over ${line} goals`), prob: over },
+    { key: "under", label: L(`Тотал меньше ${line}`, `Under ${line} goals`), prob: 1 - over },
+    { key: "btts", label: L("Обе забьют: да", "Both score: yes"), prob: btts }
+  ];
+  $("oddsGrid").replaceChildren(...markets.map((market) => {
+    const cell = node("div", "odds-cell");
+    cell.dataset.market = market.key;
+    if (market.live !== undefined) cell.dataset.live = JSON.stringify(market.live);
+    else cell.dataset.prob = String(market.prob);
+    cell.append(node("span", "odds-label", market.label), node("strong", "odds-value", "—"), node("small", "odds-prob", ""));
+    return cell;
+  }));
+  $("oddsNote").textContent = L(
+    `Коэффициенты = 1 / вероятность с маржой ${BOOKMAKER_MARGIN * 100}%, пересчитываются вместе с живой моделью. Это игровая оценка ИИ, не реальные ставки.`,
+    `Odds = 1 / probability with a ${BOOKMAKER_MARGIN * 100}% margin, recalculated with the live model. This is an AI estimate for fun, not real betting.`
+  );
+}
+
+function updateOdds(probabilities) {
+  document.querySelectorAll("#oddsGrid .odds-cell").forEach((cell) => {
+    const live = cell.dataset.live ? JSON.parse(cell.dataset.live) : null;
+    const prob = live === null ? Number(cell.dataset.prob)
+      : [].concat(live).reduce((sum, index) => sum + probabilities[index], 0);
+    const odds = Math.max(1.01, (1 - BOOKMAKER_MARGIN) / Math.max(prob, 0.005));
+    cell.querySelector(".odds-value").textContent = odds.toFixed(2);
+    cell.querySelector(".odds-prob").textContent = `${(prob * 100).toFixed(2)}%`;
+    cell.classList.toggle("is-best", live !== null && !Array.isArray(live) && prob === Math.max(...probabilities));
+  });
+}
+
+function improvementTips(team, opponent) {
+  const x = team.metrics, y = opponent.metrics;
+  const f1 = (v) => v.toFixed(1);
+  const tips = [];
+  const ok = (v) => v !== null && v !== undefined;
+  if (ok(x.avgShotsFor) && (x.avgShotsFor < 5 || (ok(y.avgShotsFor) && x.avgShotsFor < y.avgShotsFor))) {
+    const target = Math.ceil(Math.max(5, ok(y.avgShotsFor) ? y.avgShotsFor + 1 : 5));
+    tips.push({ priority: (target - x.avgShotsFor) / target,
+      title: L("Создавать больше ударов", "Create more shots"),
+      ru: `Сейчас ${f1(x.avgShotsFor)} ударов за матч. Цель — ${target}+: чаще выходите в атаку через фланги и быстрее выходите на удар после отбора.`,
+      en: `Currently ${f1(x.avgShotsFor)} shots per match. Target ${target}+: attack through the wings more and shoot sooner after winning the ball.` });
+  }
+  if (ok(x.conversionRate) && (x.conversionRate < 30 || (ok(y.conversionRate) && x.conversionRate < y.conversionRate))) {
+    const target = Math.ceil(Math.max(30, ok(y.conversionRate) ? y.conversionRate : 30));
+    tips.push({ priority: (target - x.conversionRate) / target,
+      title: L("Повысить реализацию", "Improve finishing"),
+      ru: `Реализация ${f1(x.conversionRate)}%, цель — ${target}%. Бейте из выгодных позиций, не торопитесь с ударами издалека.`,
+      en: `Conversion is ${f1(x.conversionRate)}%, target ${target}%. Shoot from good positions and avoid rushed long shots.` });
+  }
+  if (ok(x.avgShotsAgainst) && (x.avgShotsAgainst > 4 || (ok(y.avgShotsAgainst) && x.avgShotsAgainst > y.avgShotsAgainst))) {
+    tips.push({ priority: (x.avgShotsAgainst - 3) / Math.max(x.avgShotsAgainst, 3),
+      title: L("Укрепить защиту", "Tighten the defense"),
+      ru: `Соперники бьют ${f1(x.avgShotsAgainst)} раза за матч. Держите линию компактнее, меньше теряйте мяч в центре и закрывайте зону перед штрафной.`,
+      en: `Opponents take ${f1(x.avgShotsAgainst)} shots per match. Keep the line compact, lose the ball less in midfield and protect the zone in front of the box.` });
+  }
+  if (ok(x.avgGoalsAgainst) && x.avgGoalsAgainst > 2) {
+    tips.push({ priority: (x.avgGoalsAgainst - 2) / 3,
+      title: L("Меньше пропускать", "Concede less"),
+      ru: `В среднем ${f1(x.avgGoalsAgainst)} пропущенных за матч. Проверьте вратаря и центральных защитников, не оставляйте опасные контратаки.`,
+      en: `${f1(x.avgGoalsAgainst)} goals conceded per match on average. Review the goalkeeper and centre-backs and avoid exposing counter-attacks.` });
+  }
+  if (ok(x.avgPasses) && (x.avgPasses < 80 || (ok(y.avgPasses) && x.avgPasses < y.avgPasses))) {
+    tips.push({ priority: (Math.max(80, ok(y.avgPasses) ? y.avgPasses : 80) - x.avgPasses) / 100,
+      title: L("Больше пасов", "Pass more"),
+      ru: `Всего ${f1(x.avgPasses)} пасов за матч. Играйте короче и чаще перекладывайте мяч, чтобы контролировать темп.`,
+      en: `Only ${f1(x.avgPasses)} passes per match. Play shorter passes and keep the ball moving to control tempo.` });
+  }
+  if (ok(x.avgPossession) && x.avgPossession < 50) {
+    tips.push({ priority: (50 - x.avgPossession) / 50,
+      title: L("Улучшить владение", "Improve possession"),
+      ru: `Владение ${f1(x.avgPossession)}%. Усильте центр поля и быстрее прессингуйте после потери мяча.`,
+      en: `Possession is ${f1(x.avgPossession)}%. Strengthen midfield and press faster after losing the ball.` });
+  }
+  const own = getLineupStrength(state.lineups?.[team.index]);
+  const rival = getLineupStrength(state.lineups?.[opponent.index]);
+  const lineNames = { attack: L("нападение", "attack"), midfield: L("полузащиту", "midfield"), defense: L("защиту", "defense") };
+  Object.keys(lineNames).forEach((key) => {
+    if (own[key].average !== null && rival[key].average !== null && own[key].average < rival[key].average) {
+      const gap = rival[key].average - own[key].average;
+      tips.push({ priority: gap / 30,
+        title: L(`Усилить линию: ${lineNames[key]}`, `Upgrade the ${lineNames[key]} line`),
+        ru: `Средний рейтинг линии ${own[key].average.toFixed(1)} против ${rival[key].average.toFixed(1)} у соперника (−${gap.toFixed(1)}). Поставьте игроков сильнее или откройте новые карты.`,
+        en: `Line rating ${own[key].average.toFixed(1)} vs ${rival[key].average.toFixed(1)} for the opponent (−${gap.toFixed(1)}). Field stronger players or open new cards.` });
+    }
+  });
+  return tips.sort((a, b) => b.priority - a.priority).slice(0, 4);
+}
+
+function renderImprove(analysis) {
+  const tabs = $("improveTabs");
+  const host = $("improveContent");
+  if (improveTeamIndex >= analysis.teams.length) improveTeamIndex = 0;
+  tabs.replaceChildren(...analysis.teams.map((team, index) => {
+    const button = node("button", `improve-tab${index === improveTeamIndex ? " active" : ""}`);
+    button.type = "button";
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(index === improveTeamIndex));
+    button.append(logoFor(team.index, team.name), node("span", "", team.name));
+    button.addEventListener("click", () => {
+      improveTeamIndex = index;
+      renderImprove(analysis);
+    });
+    return button;
+  }));
+  const team = analysis.teams[improveTeamIndex];
+  const opponent = analysis.teams[improveTeamIndex === 0 ? 1 : 0];
+  if (!team || !opponent) {
+    host.replaceChildren();
+    return;
+  }
+  const tips = improvementTips(team, opponent);
+  if (!tips.length) {
+    host.replaceChildren(node("p", "favorite-empty", L(
+      `У ${team.name} нет явных слабых мест относительно ${opponent.name}. Сохраняйте текущий стиль и вносите статистику каждого матча.`,
+      `${team.name} has no clear weaknesses against ${opponent.name}. Keep the current style and record stats for every match.`
+    )));
+    return;
+  }
+  host.replaceChildren(...tips.map((tip, index) => {
+    const card = node("article", "improve-card");
+    card.append(node("b", "improve-num", String(index + 1)));
+    const body = node("div", "");
+    body.append(node("h4", "", tip.title), node("p", "", L(tip.ru, tip.en)));
+    card.append(body);
+    return card;
+  }));
+}
+
+function home0Forecast(analysis) {
+  const [home, away] = analysis.teams;
+  return home && away ? forecastMatch(home, away, analysis.teams)?.probabilities : null;
+}
+
 function render() {
   const analysis = analyze();
   renderTicker(state.matches);
@@ -1323,6 +1596,10 @@ function render() {
       : null
   );
   renderStrengths(analysis);
+  renderInsights(analysis);
+  updateOdds(liveProbabilityBase
+    ? getLiveProbabilities(liveProbabilityBase, (performance.now() - liveProbabilityStartedAt) / 1000)
+    : (home0Forecast(analysis) || [1 / 3, 1 / 3, 1 / 3]));
   renderForecasts(analysis);
   $("medianBadge").textContent = analysis.median === null ? t().noRatings : `${t().median}: ${Math.round(analysis.median)} / 100`;
   $("teamGrid").replaceChildren(...analysis.teams.map((team) => renderTeamCard(team, analysis.teams.filter((item) => item.metrics.rating !== null))));
