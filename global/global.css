@@ -264,6 +264,18 @@ body {
 .ga-method { margin-top: 18px; color: var(--muted); font-size: 11px; line-height: 1.65; }
 .ga-method b { color: var(--green-bright); }
 .insight-panel { margin: 0 0 26px; }
+.winner-odds { margin-top: 18px; padding: 18px 20px 20px; border-radius: 14px; color: #0b1f2a; background: #fff; }
+.winner-odds h3 { margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid #e6eaed; color: #0b1f2a; font: 700 20px Inter, sans-serif; }
+.winner-odds-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.winner-pill { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 14px; border: 1px solid #d4d9dd; border-radius: 12px; background: #fff; font: 600 14px Inter, sans-serif; }
+.winner-pill .team-logo { flex: 0 0 28px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: #eef1f3; color: #0b1f2a; font-size: 10px; }
+.winner-draw-icon { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #eef1f3; color: #0b1f2a; font: 800 13px Inter, sans-serif; }
+.winner-name { flex: 1; min-width: 0; overflow: hidden; color: #0b1f2a; text-overflow: ellipsis; white-space: nowrap; letter-spacing: .02em; }
+.winner-arrow { font: 400 22px/1 Inter, sans-serif; transition: color .3s; }
+.winner-arrow.is-down { color: #e11d1d; }
+.winner-arrow.is-up { color: #16c05a; }
+.winner-value { color: #0b1f2a; font: 800 15px Inter, sans-serif; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .winner-odds-row { grid-template-columns: 1fr; gap: 8px; } }
 .insight-lead { margin: 0 0 10px; font-size: 15px; line-height: 1.65; }
 .insight-counter { margin: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.6; }
 .insight-facts-title, .odds-block h3, .improve-block h3 { margin: 16px 0 10px; font: 700 18px/1.1 Oswald, sans-serif; letter-spacing: .02em; }

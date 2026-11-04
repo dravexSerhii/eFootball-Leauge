@@ -1148,6 +1148,7 @@ function renderLiveProbabilityChart(labels, probabilities, now = performance.now
 
 function updateFavoriteProbabilities(probabilities) {
   updateOdds(probabilities);
+  updateWinnerOdds(probabilities);
   const values = percentageHundredths(probabilities);
   const favoriteIndex = probabilities.indexOf(Math.max(...probabilities));
   $("currentMatchProbabilities").querySelectorAll("[data-probability-value]").forEach((value) => {
@@ -1579,6 +1580,63 @@ function renderImprove(analysis) {
   }));
 }
 
+function shortTeamName(name) {
+  const clean = String(name).replace(/^FC\s+/i, "").trim();
+  return clean.slice(0, 3).toUpperCase();
+}
+
+let winnerOddsRef = { time: 0, odds: [], dir: ["down", "down", "down"] };
+
+function renderWinnerOdds(analysis) {
+  $("winnerOddsTitle").textContent = L("Коэффициенты на победу", "Winner Odds");
+  const [home, away] = analysis.teams;
+  const row = $("winnerOddsRow");
+  if (!home || !away) {
+    row.replaceChildren();
+    return;
+  }
+  const items = [
+    { logo: logoFor(home.index, home.name), name: shortTeamName(home.name), full: home.name },
+    { logo: node("span", "winner-draw-icon", "X"), name: L("НИЧЬЯ", "DRAW"), full: L("Ничья", "Draw") },
+    { logo: logoFor(away.index, away.name), name: shortTeamName(away.name), full: away.name }
+  ];
+  row.replaceChildren(...items.map((item, index) => {
+    const pill = node("div", "winner-pill");
+    pill.dataset.winnerIndex = String(index);
+    pill.title = item.full;
+    const arrow = node("span", "winner-arrow is-down", "↓");
+    arrow.setAttribute("aria-hidden", "true");
+    pill.append(item.logo, node("span", "winner-name", item.name), arrow, node("b", "winner-value", "—"));
+    return pill;
+  }));
+  winnerOddsRef = { time: 0, odds: [], dir: ["down", "down", "down"] };
+}
+
+function updateWinnerOdds(probabilities, now = performance.now()) {
+  const pills = document.querySelectorAll("#winnerOddsRow .winner-pill");
+  if (!pills.length) return;
+  const odds = probabilities.map((value) => Math.max(1.01, (1 - BOOKMAKER_MARGIN) / Math.max(value, 0.005)));
+  const ref = winnerOddsRef;
+  if (!ref.odds.length) {
+    ref.odds = [...odds];
+    ref.time = now;
+  } else if (now - ref.time >= 1000) {
+    odds.forEach((value, index) => {
+      if (Math.abs(value - ref.odds[index]) >= 0.005) ref.dir[index] = value > ref.odds[index] ? "up" : "down";
+    });
+    ref.odds = [...odds];
+    ref.time = now;
+  }
+  pills.forEach((pill, index) => {
+    pill.querySelector(".winner-value").textContent = odds[index].toFixed(2);
+    const arrow = pill.querySelector(".winner-arrow");
+    const up = ref.dir[index] === "up";
+    arrow.textContent = up ? "↑" : "↓";
+    arrow.classList.toggle("is-up", up);
+    arrow.classList.toggle("is-down", !up);
+  });
+}
+
 function home0Forecast(analysis) {
   const [home, away] = analysis.teams;
   return home && away ? forecastMatch(home, away, analysis.teams)?.probabilities : null;
@@ -1597,9 +1655,12 @@ function render() {
   );
   renderStrengths(analysis);
   renderInsights(analysis);
-  updateOdds(liveProbabilityBase
+  renderWinnerOdds(analysis);
+  const initialProbabilities = liveProbabilityBase
     ? getLiveProbabilities(liveProbabilityBase, (performance.now() - liveProbabilityStartedAt) / 1000)
-    : (home0Forecast(analysis) || [1 / 3, 1 / 3, 1 / 3]));
+    : (home0Forecast(analysis) || [1 / 3, 1 / 3, 1 / 3]);
+  updateWinnerOdds(initialProbabilities);
+  updateOdds(initialProbabilities);
   renderForecasts(analysis);
   $("medianBadge").textContent = analysis.median === null ? t().noRatings : `${t().median}: ${Math.round(analysis.median)} / 100`;
   $("teamGrid").replaceChildren(...analysis.teams.map((team) => renderTeamCard(team, analysis.teams.filter((item) => item.metrics.rating !== null))));
