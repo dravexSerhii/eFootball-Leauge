@@ -3792,13 +3792,37 @@ html[data-theme="halloween"] .topbar-right .global-link { background: linear-gra
 
 .friends-list { display: grid; gap: 10px; }
 .friend-row {
-  display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px;
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
   border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 12px;
-  background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 600 14px Inter, sans-serif;
 }
-.friend-row:hover, .friend-row:focus-visible, .friend-row[aria-pressed="true"] { outline: none; border-color: var(--lime); }
-.friend-row img { width: 40px; height: 40px; object-fit: contain; border-radius: 50%; }
-.friend-row small { margin-left: auto; color: var(--lime); font-weight: 700; }
+.friend-row small { color: var(--lime); font-weight: 700; }
+.friend-name {
+  flex: 1; min-width: 0; padding: 6px 4px; border: 0; background: transparent; color: var(--ink);
+  text-align: left; cursor: pointer; font: 700 14px Inter, sans-serif; overflow: hidden; text-overflow: ellipsis;
+}
+.friend-name:hover, .friend-name:focus-visible { outline: none; color: var(--lime); }
+.friend-row .button { min-height: 34px; padding: 0 12px; font-size: 12px; }
+.friends-empty, .friend-locked { margin: 6px 0; color: var(--muted, #9aa0ad); font: 500 13px Inter, sans-serif; }
+.friends-me { display: grid; gap: 6px; margin-bottom: 12px; }
+.friends-me small { color: var(--muted, #9aa0ad); font: 600 12px Inter, sans-serif; }
+.friends-nickname, .friends-search { display: flex; gap: 8px; flex-wrap: wrap; }
+.friends-nickname input, .friends-search input { flex: 1; min-width: 120px; }
+.friends-tabs { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
+.friends-tab {
+  padding: 8px 12px; border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 999px;
+  background: transparent; color: var(--ink); cursor: pointer; font: 600 12px Inter, sans-serif;
+}
+.friends-tab[aria-selected="true"] { border-color: var(--lime); color: var(--lime); }
+.friends-search { margin-bottom: 10px; }
+#friendsButton.has-requests::after { content: ""; width: 8px; height: 8px; margin-left: 8px; border-radius: 50%; background: var(--lime); }
+.friend-team { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 700 14px Inter, sans-serif; }
+.friend-team img { width: 28px; height: 28px; object-fit: contain; }
+.proposals-panel { padding: 16px; margin-bottom: 16px; }
+.proposals-panel h2 { margin: 0 0 10px; font-size: 15px; }
+.proposals-list { display: grid; gap: 8px; }
+.proposal-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 600 13px Inter, sans-serif; }
+.proposal-actions { display: flex; gap: 8px; }
+.friends-dialog [hidden], .lineup-dialog [hidden], .proposals-panel[hidden] { display: none !important; }
 .friend-profile { margin-top: 16px; }
 .friend-record { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
 .friend-record li { padding: 6px 10px; border-radius: 9px; background: rgba(255,255,255,.07); font: 600 12px Inter, sans-serif; }

@@ -40,7 +40,7 @@
                         <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
                     </nav>
                 </details>
-                <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>                <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
+                <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>
                 <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
                 <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="Halloween theme" aria-label="Halloween theme"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><radialGradient id="pkBody" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#f26a0f"/><stop offset="1" stop-color="#a73a00"/></radialGradient></defs><path d="M16 7c-2-3-1-5 1-6 0 2 1 3 2 3z" fill="#5a8f2a"/><path d="M16 8c-9-2-14 3-14 10s5 11 14 11 14-4 14-11S25 6 16 8z" fill="url(#pkBody)" stroke="#7a2400" stroke-width="1"/><path d="M16 8c-4 3-4 18 0 21M16 8c4 3 4 18 0 21" fill="none" stroke="#a73a00" stroke-width=".9" opacity=".7"/><path class="pk-eye" d="M7.5 15l4 1.2-3.2 3z M24.5 15l-4 1.2 3.2 3z M10 22l2 1.6 1.6-1.6 2.4 1.8 2.4-1.8 1.6 1.6 2-1.6-1 3.2-2.4.8-2.6-1.6-2.6 1.6-2.4-.8z" fill="#2a0d00"/></svg></button>
@@ -62,6 +62,11 @@
                     <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span
                             aria-hidden="true">＋</span> Add match</button>
                 </div>
+            </section>
+
+            <section class="panel proposals-panel" id="proposalsPanel" aria-live="polite" hidden>
+                <h2 data-i18n="proposalsTitle">Match results awaiting confirmation</h2>
+                <div class="proposals-list" id="proposalsList"></div>
             </section>
 
             <section class="hero-card" aria-label="League information">
@@ -521,6 +526,17 @@
                 </div>
                 <button class="close-button" type="button" data-close="friendsDialog" aria-label="Close">×</button>
             </div>
+            <div class="friends-me" id="friendsMe"></div>
+            <div class="friends-tabs" role="tablist">
+                <button type="button" class="friends-tab" data-tab="friends" data-i18n="friendsTabFriends">Friends</button>
+                <button type="button" class="friends-tab" data-tab="requests" data-i18n="friendsTabRequests">Requests</button>
+                <button type="button" class="friends-tab" data-tab="search" data-i18n="friendsTabSearch">Find players</button>
+            </div>
+            <form class="friends-search" id="friendSearchForm" hidden>
+                <input id="friendSearchInput" type="search" minlength="2" maxlength="24" autocomplete="off"
+                    data-i18n-placeholder="friendSearchPlaceholder" placeholder="Nickname">
+                <button class="button button-primary" type="submit" data-i18n="friendSearchButton">Search</button>
+            </form>
             <div class="friends-list" id="friendsList"></div>
             <div class="friend-profile" id="friendProfile" hidden></div>
         </div>

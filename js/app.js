@@ -21,6 +21,42 @@ const TRANSLATIONS = {
     youTag: "You",
     friendRecord: "Played {0} · W {1} · D {2} · L {3} · {4} pts",
     friendBadges: "Achievements {0}/{1}",
+    friendsTabFriends: "Friends",
+    friendsTabRequests: "Requests",
+    friendsTabSearch: "Find players",
+    friendSearchPlaceholder: "Nickname",
+    friendSearchButton: "Search",
+    friendsEmpty: "No friends yet. Use “Find players” to add some.",
+    requestsEmpty: "No pending requests.",
+    searchHint: "Type at least 2 characters of a nickname.",
+    searchEmpty: "Nobody found.",
+    friendsNeedSignIn: "Sign in to use friends",
+    addFriend: "Add",
+    requestSent: "Request sent",
+    acceptFriend: "Accept",
+    declineFriend: "Decline",
+    cancelRequest: "Cancel",
+    removeFriend: "Remove",
+    alreadyFriend: "Friends",
+    incomingTag: "wants to be friends",
+    myProfile: "My profile",
+    nicknameLabel: "Nickname",
+    saveNickname: "Save",
+    nicknameSaved: "Nickname saved",
+    profileLocked: "Team and achievements are visible to friends only. Send a friend request to see them.",
+    noTeamLinked: "No team linked",
+    mustBeInMatch: "You can only report matches of your own team",
+    needTeam: "This account is not linked to a team",
+    proposalsTitle: "Match results awaiting confirmation",
+    proposalSent: "Result sent. It will be published once {0} confirms it.",
+    proposalWaiting: "Waiting for {0} to confirm {1}",
+    proposalIncoming: "{0} reports: {1}",
+    proposalConfirm: "Confirm",
+    proposalReject: "Reject",
+    proposalCancel: "Cancel",
+    proposalConfirmed: "Result confirmed and published",
+    proposalRejected: "Result rejected",
+    onlyOwnTeam: "You can edit only your own team",
     siteMenu: "Explore",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
@@ -271,6 +307,42 @@ const TRANSLATIONS = {
     youTag: "Вы",
     friendRecord: "Матчей {0} · В {1} · Н {2} · П {3} · {4} очк.",
     friendBadges: "Достижения {0}/{1}",
+    friendsTabFriends: "Друзья",
+    friendsTabRequests: "Заявки",
+    friendsTabSearch: "Поиск игроков",
+    friendSearchPlaceholder: "Никнейм",
+    friendSearchButton: "Найти",
+    friendsEmpty: "Друзей пока нет. Найдите игроков во вкладке «Поиск игроков».",
+    requestsEmpty: "Заявок нет.",
+    searchHint: "Введите минимум 2 символа никнейма.",
+    searchEmpty: "Никого не найдено.",
+    friendsNeedSignIn: "Войдите, чтобы пользоваться друзьями",
+    addFriend: "Добавить",
+    requestSent: "Заявка отправлена",
+    acceptFriend: "Принять",
+    declineFriend: "Отклонить",
+    cancelRequest: "Отменить",
+    removeFriend: "Удалить",
+    alreadyFriend: "В друзьях",
+    incomingTag: "хочет дружить",
+    myProfile: "Мой профиль",
+    nicknameLabel: "Никнейм",
+    saveNickname: "Сохранить",
+    nicknameSaved: "Никнейм сохранён",
+    profileLocked: "Команда и достижения видны только друзьям. Отправьте заявку, чтобы увидеть их.",
+    noTeamLinked: "Команда не привязана",
+    mustBeInMatch: "Вы можете вносить только матчи своей команды",
+    needTeam: "Этот аккаунт не привязан к команде",
+    proposalsTitle: "Результаты матчей, ожидающие подтверждения",
+    proposalSent: "Результат отправлен. Он появится после подтверждения от {0}.",
+    proposalWaiting: "Ждём подтверждения от {0}: {1}",
+    proposalIncoming: "{0} вносит результат: {1}",
+    proposalConfirm: "Подтвердить",
+    proposalReject: "Отклонить",
+    proposalCancel: "Отменить",
+    proposalConfirmed: "Результат подтверждён и опубликован",
+    proposalRejected: "Результат отклонён",
+    onlyOwnTeam: "Вы можете редактировать только свою команду",
     siteMenu: "Разделы",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
@@ -527,6 +599,8 @@ let state = structuredClone(initialState);
 let session = null;
 let dataReady = false;
 let myTeamIndex = null;
+let myProfile = null;
+let pendingProposals = [];
 let sessionGeneration = 0;
 let realtimeChannel = null;
 let newsRealtimeChannel = null;
@@ -1233,7 +1307,7 @@ function renderSeasonInfo() {
       newSeasonBtn.style.display = "inline-flex";
     }
   } else {
-    matchButton.disabled = !configReady || !session || !dataReady;
+    matchButton.disabled = !configReady || !session || !dataReady || myTeamIndex === null;
     matchButton.textContent = t("addMatchBtn");
     if (newSeasonBtn) {
       newSeasonBtn.style.display = "none";
@@ -1986,6 +2060,7 @@ function applyLang() {
   });
   document.documentElement.lang = currentLang;
   render();
+  renderProposals();
 }
 
 function showToast(message) {
@@ -1997,7 +2072,7 @@ function showToast(message) {
 }
 
 function updateAuthUi() {
-  const enabled = configReady && Boolean(session) && dataReady;
+  const enabled = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
   matchButton.disabled = !enabled;
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
@@ -2016,48 +2091,11 @@ function updateAuthUi() {
     authButton.disabled = false;
   } else {
     authStatus.textContent = myTeamIndex !== null && state.teams[myTeamIndex]
-      ? `${session.user.email} · ${state.teams[myTeamIndex].name}`
-      : session.user.email;
+      ? state.teams[myTeamIndex].name
+      : t("noTeamLinked");
     authButton.textContent = t("signOut");
     authButton.disabled = false;
   }
-  updateAuthCoins();
-}
-
-// The local save mirrors the shared server wallet so the header can show its current balance.
-function packsSaveKey() {
-  return session ? `leaguePacks:${session.user.id}` : null;
-}
-
-function updateAuthCoins() {
-  const box = document.getElementById("authCoins");
-  const key = packsSaveKey();
-  box.hidden = !key;
-  if (!key) return;
-  let coins = 0;
-  try { coins = Number(JSON.parse(localStorage.getItem(key))?.coins) || 0; } catch { /* no save yet */ }
-  document.getElementById("authCoinsValue").textContent = coins.toLocaleString();
-}
-
-async function claimLeagueCoins() {
-  const key = packsSaveKey();
-  if (!key) return;
-  let save = null;
-  try { save = JSON.parse(localStorage.getItem(key)); } catch { /* start a new local mirror */ }
-  if (!save || typeof save.opened !== "number" || !save.owned) {
-    save = { opened: 0, owned: {}, coins: 0, bonusAt: 0 };
-  }
-  const { data, error } = await supabase.rpc("claim_league_coins", {
-    p_initial_balance: Number(save.coins) || 0,
-    p_initial_inventory: save.owned
-  });
-  if (error || !data) {
-    console.error("League coins claim failed:", error);
-    return;
-  }
-  save.coins = Number(data.balance) || 0;
-  localStorage.setItem(key, JSON.stringify(save));
-  updateAuthCoins();
 }
 
 function mapMatch(row) {
@@ -2135,18 +2173,21 @@ async function fetchServerState() {
     championships: settings.championships || { "0": 0, "1": 0 },
     lineups: settings.lineups && typeof settings.lineups === "object" ? settings.lineups : {}
   };
+  pendingProposals = [];
+  if (session) {
+    const proposals = await supabase.from("league_match_proposals").select("*").eq("status", "pending");
+    if (!proposals.error) pendingProposals = proposals.data || [];
+  }
   dataReady = true;
   render();
   updateAuthUi();
+  renderProposals();
 }
 
 async function refreshFromServer() {
   if (!configReady) return;
   try {
-    const previousLatestMatchId = state.matches[state.matches.length - 1]?.id;
     await fetchServerState();
-    const latestMatchId = state.matches[state.matches.length - 1]?.id;
-    if (session && latestMatchId !== previousLatestMatchId) await claimLeagueCoins();
     await refreshNews();
   } catch (error) {
     console.error("Failed to refresh the league from the server:", error);
@@ -2164,13 +2205,8 @@ function subscribeToChanges(generation) {
     .on("postgres_changes", { event: "*", schema: "public", table: "league_matches" }, () => {
       if (generation === sessionGeneration) void refreshFromServer();
     })
-    .on("postgres_changes", {
-      event: "UPDATE",
-      schema: "public",
-      table: "league_coin_wallets",
-      filter: `user_id=eq.${session?.user?.id ?? "00000000-0000-0000-0000-000000000000"}`
-    }, () => {
-      if (generation === sessionGeneration) void claimLeagueCoins();
+    .on("postgres_changes", { event: "*", schema: "public", table: "league_match_proposals" }, () => {
+      if (generation === sessionGeneration) void refreshFromServer();
     })
     .subscribe(status => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -2184,6 +2220,8 @@ async function handleSession(nextSession) {
   const generation = ++sessionGeneration;
   session = nextSession;
   myTeamIndex = null;
+  myProfile = null;
+  pendingProposals = [];
   dataReady = false;
   if (pollTimer) clearInterval(pollTimer);
   if (realtimeChannel) {
@@ -2203,9 +2241,12 @@ async function handleSession(nextSession) {
       const { data } = await supabase.rpc("get_my_team");
       if (generation !== sessionGeneration) return;
       myTeamIndex = Number.isInteger(data) ? data : null;
+      const profile = await supabase.rpc("ensure_my_profile");
+      myProfile = profile.error ? null : profile.data;
+      render();
       updateAuthUi();
+      renderProposals();
     }
-    void claimLeagueCoins();
     await refreshNews();
     subscribeToNews();
     subscribeToChanges(generation);
@@ -2233,7 +2274,9 @@ function populateTeamSelects() {
       select.append(option);
     });
   });
-  document.getElementById("awayTeam").value = "1";
+  const opponent = state.teams.findIndex((_, index) => index !== myTeamIndex);
+  document.getElementById("homeTeam").value = String(myTeamIndex ?? 0);
+  document.getElementById("awayTeam").value = String(opponent === -1 ? 1 : opponent);
   updateStatsTeamLabels();
 }
 
@@ -2957,26 +3000,82 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
     errorElement.textContent = t("seasonLimit");
     return;
   }
-  const { data, error } = await supabase.from("league_matches").insert({
-    home_team: home,
-    away_team: away,
-    home_goals: homeGoals,
-    away_goals: awayGoals,
-    stats,
-    season: currentSeason
-  }).select("id, home_team, away_team, home_goals, away_goals, played_at, stats, season").single();
+  if (home !== myTeamIndex && away !== myTeamIndex) {
+    errorElement.textContent = t("mustBeInMatch");
+    return;
+  }
+  const { error } = await supabase.rpc("propose_league_match", {
+    p_home: home,
+    p_away: away,
+    p_home_goals: homeGoals,
+    p_away_goals: awayGoals,
+    p_stats: stats,
+    p_season: currentSeason
+  });
   if (error) {
-    console.error("Failed to save the result to the server:", error);
+    console.error("Failed to send the result for confirmation:", error);
     errorElement.textContent = t("matchSaveError", error.message);
     return;
   }
-  state.matches.push(mapMatch(data));
-  state.matches.sort((a, b) => new Date(a.date) - new Date(b.date));
-  void claimLeagueCoins();
-  render();
+  await refreshFromServer();
   matchDialog.close();
-  showToast(t("matchSaved"));
+  showToast(t("proposalSent", state.teams[home === myTeamIndex ? away : home]?.name ?? ""));
 });
+
+function matchSummaryText(proposal) {
+  const home = state.teams[proposal.home_team]?.name ?? "?";
+  const away = state.teams[proposal.away_team]?.name ?? "?";
+  return `${home} ${proposal.home_goals}:${proposal.away_goals} ${away}`;
+}
+
+function renderProposals() {
+  const panel = document.getElementById("proposalsPanel");
+  const list = document.getElementById("proposalsList");
+  const mine = myTeamIndex === null ? [] : pendingProposals.filter(proposal =>
+    proposal.home_team === myTeamIndex || proposal.away_team === myTeamIndex);
+  panel.hidden = mine.length === 0;
+  list.replaceChildren();
+  mine.forEach(proposal => {
+    const row = document.createElement("div");
+    row.className = "proposal-row";
+    const summary = matchSummaryText(proposal);
+    const opponentIndex = proposal.home_team === myTeamIndex ? proposal.away_team : proposal.home_team;
+    const own = proposal.proposer_team === myTeamIndex;
+    const text = document.createElement("span");
+    text.textContent = own
+      ? t("proposalWaiting", state.teams[opponentIndex]?.name ?? "?", summary)
+      : t("proposalIncoming", state.teams[proposal.proposer_team]?.name ?? "?", summary);
+    const actions = document.createElement("div");
+    actions.className = "proposal-actions";
+    const decline = document.createElement("button");
+    decline.type = "button";
+    decline.className = "button button-quiet";
+    decline.textContent = t(own ? "proposalCancel" : "proposalReject");
+    decline.addEventListener("click", async () => {
+      const { error } = await supabase.rpc("decline_league_match", { p_id: proposal.id });
+      if (error) showToast(error.message);
+      else showToast(t("proposalRejected"));
+      await refreshFromServer();
+    });
+    if (!own) {
+      const confirm = document.createElement("button");
+      confirm.type = "button";
+      confirm.className = "button button-primary";
+      confirm.textContent = t("proposalConfirm");
+      confirm.addEventListener("click", async () => {
+        confirm.disabled = true;
+        const { error } = await supabase.rpc("confirm_league_match", { p_id: proposal.id });
+        if (error) showToast(error.message);
+        else showToast(t("proposalConfirmed"));
+        await refreshFromServer();
+      });
+      actions.append(confirm);
+    }
+    actions.append(decline);
+    row.append(text, actions);
+    list.append(row);
+  });
+}
 
 let teamsDraft = [];
 
@@ -2995,9 +3094,11 @@ function renderTeamsEditor() {
     name.placeholder = t("teamNamePlaceholder");
     name.setAttribute("aria-label", t("teamNamePlaceholder"));
     name.addEventListener("input", () => { team.name = name.value; });
+    name.disabled = index !== myTeamIndex;
     row.append(badge, name);
     if (index >= 2) {
       const logo = document.createElement("input");
+      logo.disabled = true;
       logo.type = "url";
       logo.maxLength = 300;
       logo.value = team.logo || "";
@@ -3006,22 +3107,9 @@ function renderTeamsEditor() {
       logo.addEventListener("input", () => { team.logo = logo.value.trim(); });
       row.append(logo);
     }
-    const used = state.matches.some(match => match.home === index || match.away === index);
-    if (index >= 2 && index === teamsDraft.length - 1 && !used) {
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "button button-quiet";
-      remove.textContent = "×";
-      remove.setAttribute("aria-label", t("removeTeam"));
-      remove.addEventListener("click", () => {
-        teamsDraft.pop();
-        renderTeamsEditor();
-      });
-      row.append(remove);
-    }
     list.append(row);
   });
-  document.getElementById("addTeamButton").disabled = teamsDraft.length >= MAX_TEAMS;
+  document.getElementById("addTeamButton").hidden = true;
 }
 
 document.getElementById("addTeamButton").addEventListener("click", () => {
@@ -3212,6 +3300,10 @@ function openLineup(teamIndex, mode = "view") {
     showToast(t("lineupNeedSignIn"));
     return;
   }
+  if (mode === "edit" && teamIndex !== myTeamIndex) {
+    showToast(t("onlyOwnTeam"));
+    mode = "view";
+  }
   lineupTeam = teamIndex;
   lineupMode = mode;
   lineupDraft = sanitizeLineup(state.lineups?.[teamIndex]);
@@ -3335,6 +3427,7 @@ function renderLineupTicker() {
 
 function renderLineupEditor() {
   lineupDialog.dataset.mode = lineupMode;
+  document.getElementById("lineupEdit").hidden = lineupTeam !== myTeamIndex;
   const isEdit = lineupMode === "edit";
   document.getElementById("lineupDialogTitle").textContent = t(isEdit ? "lineupTitle" : "teamLineup");
   document.getElementById("lineupDialogDesc").textContent = t(isEdit ? "lineupDesc" : "lineupViewDesc");
@@ -3724,16 +3817,59 @@ document.addEventListener("keydown", event => {
 const friendsDialog = document.getElementById("friendsDialog");
 const friendsList = document.getElementById("friendsList");
 const friendProfile = document.getElementById("friendProfile");
+const friendSearchForm = document.getElementById("friendSearchForm");
 let achievementsModule = null;
+let friendsTab = "friends";
 
-async function showFriendProfile(teamIndex) {
+async function callRpc(name, args) {
+  const { data, error } = await supabase.rpc(name, args);
+  if (error) {
+    showToast(error.message);
+    return { ok: false, data: null };
+  }
+  return { ok: true, data };
+}
+
+function friendButton(label, className, handler) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `button ${className}`;
+  button.textContent = label;
+  button.addEventListener("click", handler);
+  return button;
+}
+
+async function showProfile(userId) {
+  const { ok, data: profile } = await callRpc("get_league_profile", { p_user: userId });
+  if (!ok || !profile) return;
+  const title = document.createElement("h3");
+  title.textContent = profile.nickname;
+  const parts = [title];
+  const team = profile.team_index === null ? null : state.teams[profile.team_index];
+  if (!team) {
+    const locked = document.createElement("p");
+    locked.className = "friend-locked";
+    locked.textContent = t("profileLocked");
+    parts.push(locked);
+    friendProfile.replaceChildren(...parts);
+    friendProfile.hidden = false;
+    return;
+  }
   achievementsModule ??= await import("../global/achievements.js");
   const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
-  const row = getStandings().find(item => item.index === teamIndex);
-  const results = evaluateAchievements(state.matches, teamIndex);
+  const row = getStandings().find(item => item.index === profile.team_index);
+  const results = evaluateAchievements(state.matches, profile.team_index);
   const unlocked = results.filter(item => item.unlocked).length;
-  const title = document.createElement("h3");
-  title.textContent = state.teams[teamIndex].name;
+  const teamLine = document.createElement("p");
+  teamLine.className = "friend-team";
+  const photo = getTeamPhoto(profile.team_index);
+  if (photo) {
+    const img = document.createElement("img");
+    img.src = photo;
+    img.alt = "";
+    teamLine.append(img);
+  }
+  teamLine.append(team.name);
   const record = document.createElement("ul");
   record.className = "friend-record";
   [t("friendRecord", row.played, row.wins, row.draws, row.losses, row.points),
@@ -3753,41 +3889,144 @@ async function showFriendProfile(teamIndex) {
     badge.append(label);
     grid.append(badge);
   });
-  friendProfile.replaceChildren(title, record, grid);
+  friendProfile.replaceChildren(...parts, teamLine, record, grid);
   friendProfile.hidden = false;
-  friendsList.querySelectorAll(".friend-row").forEach(button => {
-    button.setAttribute("aria-pressed", String(Number(button.dataset.team) === teamIndex));
+}
+
+function renderFriendsMe() {
+  const box = document.getElementById("friendsMe");
+  box.replaceChildren();
+  if (!myProfile) return;
+  const form = document.createElement("form");
+  form.className = "friends-nickname";
+  const input = document.createElement("input");
+  input.value = myProfile.nickname;
+  input.minLength = 3;
+  input.maxLength = 24;
+  input.required = true;
+  input.setAttribute("aria-label", t("nicknameLabel"));
+  const save = document.createElement("button");
+  save.type = "submit";
+  save.className = "button button-quiet";
+  save.textContent = t("saveNickname");
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const { ok } = await callRpc("set_my_nickname", { p_nickname: input.value });
+    if (!ok) return;
+    myProfile.nickname = input.value.trim();
+    showToast(t("nicknameSaved"));
   });
+  const open = friendButton(t("myProfile"), "button-quiet", () => void showProfile(myProfile.user_id));
+  const label = document.createElement("small");
+  label.textContent = myTeamIndex !== null ? state.teams[myTeamIndex]?.name ?? "" : t("noTeamLinked");
+  form.append(input, save, open);
+  box.append(label, form);
+}
+
+function friendRow(person, actions) {
+  const row = document.createElement("div");
+  row.className = "friend-row";
+  const name = document.createElement("button");
+  name.type = "button";
+  name.className = "friend-name";
+  name.textContent = person.nickname;
+  name.addEventListener("click", () => void showProfile(person.user_id));
+  row.append(name, ...actions);
+  return row;
+}
+
+function setFriendsMessage(key) {
+  const message = document.createElement("p");
+  message.className = "friends-empty";
+  message.textContent = t(key);
+  friendsList.replaceChildren(message);
+}
+
+async function renderFriendsTab(searchResults = null) {
+  document.querySelectorAll(".friends-tab").forEach(tab => {
+    tab.setAttribute("aria-selected", String(tab.dataset.tab === friendsTab));
+  });
+  friendSearchForm.hidden = friendsTab !== "search";
+  const refresh = () => renderFriendsTab(searchResults);
+  if (friendsTab === "search") {
+    if (!searchResults) return setFriendsMessage("searchHint");
+    if (!searchResults.length) return setFriendsMessage("searchEmpty");
+    friendsList.replaceChildren(...searchResults.map(person => {
+      const actions = [];
+      if (person.relation === "none") {
+        actions.push(friendButton(t("addFriend"), "button-primary", async () => {
+          const { ok } = await callRpc("send_friend_request", { p_user: person.user_id });
+          if (ok) {
+            person.relation = "outgoing";
+            showToast(t("requestSent"));
+            void refresh();
+          }
+        }));
+      } else {
+        const tag = document.createElement("small");
+        tag.textContent = person.relation === "friend" ? t("alreadyFriend")
+          : person.relation === "outgoing" ? t("requestSent") : t("incomingTag");
+        actions.push(tag);
+      }
+      return friendRow(person, actions);
+    }));
+    return;
+  }
+  const { ok, data } = await callRpc("list_friends");
+  if (!ok) return;
+  const wanted = friendsTab === "friends" ? ["friend"] : ["incoming", "outgoing"];
+  const people = (data || []).filter(person => wanted.includes(person.relation));
+  const dot = document.getElementById("friendsButton");
+  dot.classList.toggle("has-requests", (data || []).some(person => person.relation === "incoming"));
+  if (!people.length) return setFriendsMessage(friendsTab === "friends" ? "friendsEmpty" : "requestsEmpty");
+  friendsList.replaceChildren(...people.map(person => {
+    const reload = () => renderFriendsTab();
+    if (person.relation === "friend") {
+      return friendRow(person, [friendButton(t("removeFriend"), "button-quiet", async () => {
+        if ((await callRpc("remove_friend", { p_user: person.user_id })).ok) void reload();
+      })]);
+    }
+    if (person.relation === "incoming") {
+      return friendRow(person, [
+        friendButton(t("acceptFriend"), "button-primary", async () => {
+          if ((await callRpc("respond_friend_request", { p_user: person.user_id, p_accept: true })).ok) void reload();
+        }),
+        friendButton(t("declineFriend"), "button-quiet", async () => {
+          if ((await callRpc("respond_friend_request", { p_user: person.user_id, p_accept: false })).ok) void reload();
+        })
+      ]);
+    }
+    return friendRow(person, [friendButton(t("cancelRequest"), "button-quiet", async () => {
+      if ((await callRpc("remove_friend", { p_user: person.user_id })).ok) void reload();
+    })]);
+  }));
 }
 
 function openFriends() {
-  friendsList.replaceChildren();
+  if (!session) {
+    showToast(t("friendsNeedSignIn"));
+    return;
+  }
+  friendsTab = "friends";
   friendProfile.hidden = true;
-  state.teams.slice(0, 2).forEach((team, index) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "friend-row";
-    button.dataset.team = String(index);
-    const photo = getTeamPhoto(index);
-    if (photo) {
-      const img = document.createElement("img");
-      img.src = photo;
-      img.alt = "";
-      button.append(img);
-    }
-    button.append(team.name);
-    if (index === myTeamIndex) {
-      const tag = document.createElement("small");
-      tag.textContent = t("youTag");
-      button.append(tag);
-    }
-    button.addEventListener("click", () => void showFriendProfile(index));
-    friendsList.append(button);
-  });
+  renderFriendsMe();
+  void renderFriendsTab();
   if (!friendsDialog.open) friendsDialog.showModal();
-  const first = myTeamIndex !== null ? 1 - myTeamIndex : 0;
-  void showFriendProfile(first);
 }
+
+document.querySelectorAll(".friends-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    friendsTab = tab.dataset.tab;
+    void renderFriendsTab();
+  });
+});
+friendSearchForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  const query = document.getElementById("friendSearchInput").value.trim();
+  if (query.length < 2) return setFriendsMessage("searchHint");
+  const { ok, data } = await callRpc("search_league_profiles", { p_query: query });
+  if (ok) void renderFriendsTab(data || []);
+});
 
 document.getElementById("friendsButton").addEventListener("click", () => {
   siteMenu.open = false;

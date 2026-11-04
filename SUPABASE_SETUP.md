@@ -35,7 +35,13 @@ To share one coin balance between the phone and computer, run `sql/supabase-migr
 
 To bind each account to its own team (Barcelona → promashkovsergey363@gmail.com, the second team →
 vladlionslav@gmail.com), run `sql/supabase-migration-profiles.sql` once. After sign-in the site shows your team, the
-Achievements section shows only your own badges, and the "Friends" menu item opens either player's profile.
+Achievements section shows only your own badges, and the "Friends" menu item opens the friends dialog.
+
+Then run `sql/supabase-migration-teams-friends.sql` once (after the profiles migration). It enforces that each
+account can edit only its own team name and lineup, replaces direct match inserts with a two-sided flow (one team
+submits a result, the other team confirms it before it is published), and adds nicknames, friend requests, and
+player search. A player's team and achievements are shown only to the owner and to accepted friends. Re-publish
+the site files together with this migration; the old site cannot add matches after it is applied.
 
 ## Team analytics
 
