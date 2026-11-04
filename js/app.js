@@ -13,9 +13,14 @@ const TRANSLATIONS = {
     authButton: "Sign in",
     eyebrow: "eFootball League",
     editTeams: "Teams",
-    packsLink: "Pack opening",
     dbLink: "Card database",
     globalLink: "Team analytics",
+    achievementsLink: "Achievements",
+    friendsLink: "Friends",
+    friendsDesc: "Open a player's profile",
+    youTag: "You",
+    friendRecord: "Played {0} · W {1} · D {2} · L {3} · {4} pts",
+    friendBadges: "Achievements {0}/{1}",
     siteMenu: "Explore",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
@@ -214,7 +219,6 @@ const TRANSLATIONS = {
     lineupsButton: "Lineups",
     lineupTitle: "Lineup settings",
     lineupNoSnapshot: "No lineup was saved with this match",
-    packsSoon: "Pack opening is live — open a pack",
     matchLineupTitle: "Match lineups",
     lineupMatchBtn: "Lineups",
     matchTabResult: "Result",
@@ -259,9 +263,14 @@ const TRANSLATIONS = {
     authButton: "Войти",
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
-    packsLink: "Открытие паков",
     dbLink: "База карточек",
     globalLink: "Аналитика команд",
+    achievementsLink: "Достижения",
+    friendsLink: "Друзья",
+    friendsDesc: "Откройте профиль игрока",
+    youTag: "Вы",
+    friendRecord: "Матчей {0} · В {1} · Н {2} · П {3} · {4} очк.",
+    friendBadges: "Достижения {0}/{1}",
     siteMenu: "Разделы",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
@@ -459,7 +468,6 @@ const TRANSLATIONS = {
     lineupsButton: "Составы",
     lineupTitle: "Настройки состава",
     lineupNoSnapshot: "Для этого матча состав не сохранялся",
-    packsSoon: "Открытие паков уже доступно — открыть пак",
     matchLineupTitle: "Составы на матч",
     lineupMatchBtn: "Составы",
     matchTabResult: "Результат",
@@ -518,6 +526,7 @@ const supabase = configReady ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : n
 let state = structuredClone(initialState);
 let session = null;
 let dataReady = false;
+let myTeamIndex = null;
 let sessionGeneration = 0;
 let realtimeChannel = null;
 let newsRealtimeChannel = null;
@@ -649,47 +658,6 @@ const RELEASE_NEWS = [
     }
   },
   {
-    id: "release-stats",
-    created_at: "2026-11-03T14:00:00+02:00",
-    image: "assets/card/ronaldo.png", imagePos: "50% 6%",
-    en: {
-      title: "Messi and Ronaldo cards: stats rebalanced for 96 OVR",
-      summary: "The **Messi** and **Ronaldo** cards were updated to match their **96 rating**: **new positions and pace**, plus stronger stats.",
-      body: [
-        "**Why**",
-        "• Both cards are **Phenomenon (96)**, but their stats were too low for that rating. Now they fit the top tier.",
-        "",
-        "**Messi** (CF, 96)",
-        "• **Before:** CAM · PAC 82 · SHO 92 · PAS 92 · DRI 96 · DEF 38 · PHY 66",
-        "• **Now:** **CF · PAC 94 · SHO 96 · PAS 96 · DRI 99 · DEF 40 · PHY 72**",
-        "",
-        "**Ronaldo** (LW, 96)",
-        "• **Before:** ST · PAC 90 · SHO 96 · PAS 82 · DRI 90 · DEF 38 · PHY 88",
-        "• **Now:** **LW · PAC 98 · SHO 99 · PAS 85 · DRI 92 · DEF 42 · PHY 92**",
-        "",
-        "• The update applies to **all cards, including ones you already own**."
-      ].join("\n")
-    },
-    ru: {
-      title: "Карточки Месси и Роналду: статы изменены под рейтинг 96",
-      summary: "Карточки **Месси** и **Роналду** обновлены под их **рейтинг 96**: **новые позиции и скорость**, а также усилены статы.",
-      body: [
-        "**Зачем**",
-        "• Обе карточки **Феномен (96)**, но статы были слишком низкими для такого рейтинга. Теперь они соответствуют высшему тиру.",
-        "",
-        "**Месси** (CF, 96)",
-        "• **Было:** CAM · PAC 82 · SHO 92 · PAS 92 · DRI 96 · DEF 38 · PHY 66",
-        "• **Стало:** **CF · PAC 94 · SHO 96 · PAS 96 · DRI 99 · DEF 40 · PHY 72**",
-        "",
-        "**Роналду** (LW, 96)",
-        "• **Было:** ST · PAC 90 · SHO 96 · PAS 82 · DRI 90 · DEF 38 · PHY 88",
-        "• **Стало:** **LW · PAC 98 · SHO 99 · PAS 85 · DRI 92 · DEF 42 · PHY 92**",
-        "",
-        "• Обновление касается **всех карточек, в том числе уже полученных**."
-      ].join("\n")
-    }
-  },
-  {
     id: "release-display",
     created_at: "2026-11-03T12:00:00+02:00",
     image: "assets/img/second-background.jpg",
@@ -701,10 +669,7 @@ const RELEASE_NEWS = [
         "• **Halloween theme** — press the pumpkin button next to the language switch. The whole site turns into a dark, spooky night: glowing orange accents, drifting fog, flying bats, rising embers, lightning flashes and a pulsing vignette. Headings switch to a horror font. Press it again to go back. **Your choice is remembered.**",
         "• **New league banner** — a night scene with a huge glowing moon, bats, fog, a cobweb, blinking red eyes in the dark and embers. The title is bright and readable.",
         "• **Bloody running line** — at the bottom of the banner **HAPPY HALLOWEEN** runs non-stop with dripping blood. It switches to Russian together with the site language.",
-        "• **Coins in your profile** — after you sign in, a gold badge with **your coin balance** appears next to your email in the top bar.",
-        "• **League coins** — your team earns coins for every league match: **win = 200, draw = 50, loss = 20**. Old matches count too, and every reward is paid **only once**. Accounts are linked to teams by email.",
-        "• **Daily bonus is now 100 coins** (once every 24 hours on the packs page).",
-        "• Pack opening ticker on top of the page now leads straight to the packs."
+        "• **Coins in your profile** — after you sign in, a gold badge with **your coin balance** appears next to your email in the top bar."
       ].join("\n")
     },
     ru: {
@@ -715,70 +680,10 @@ const RELEASE_NEWS = [
         "• **Хэллоуин-тема** — нажмите кнопку-тыкву рядом с переключателем языка. Весь сайт превращается в тёмную жуткую ночь: светящиеся оранжевые акценты, плывущий туман, летающие летучие мыши, поднимающиеся угольки, вспышки молний и пульсирующая виньетка. Заголовки меняют шрифт на хоррор. Повторное нажатие возвращает обычный вид. **Ваш выбор запоминается.**",
         "• **Новый баннер лиги** — ночная сцена с огромной светящейся луной, летучими мышами, туманом, паутиной, моргающими красными глазами в темноте и углями. Заголовок яркий и читаемый.",
         "• **Бегущая строка с кровью** — внизу баннера без остановки бежит **СЧАСТЛИВОГО ХЭЛЛОУИНА** с капающей кровью. Язык меняется вместе с языком сайта.",
-        "• **Монеты в профиле** — после входа в аккаунт в верхней панели рядом с почтой появляется золотой значок с **вашим количеством монет**.",
-        "• **Монеты лиги** — ваша команда получает монеты за каждый матч лиги: **победа = 200, ничья = 50, поражение = 20**. Старые матчи тоже считаются, а каждая награда выдаётся **только один раз**. Аккаунты привязаны к командам по почте.",
-        "• **Ежедневный бонус теперь 100 монет** (раз в 24 часа на странице паков).",
-        "• Лента «Pack opening is live» вверху страницы теперь ведёт прямо в паки."
+        "• **Монеты в профиле** — после входа в аккаунт в верхней панели рядом с почтой появляется золотой значок с **вашим количеством монет**."
       ].join("\n")
     }
   },
-  {
-    id: "release-packs",
-    created_at: "2026-11-02T12:00:00+02:00",
-    image: "assets/card/messi.webp", imagePos: "50% 24%",
-    en: {
-      title: "Pack opening is live: the Void Football Pack",
-      summary: "Open the **Void Football Pack** for **1000 coins** and pull one of **40 football legends**. Rare cards and a collection to keep.",
-      body: [
-        "**How it works**",
-        "• Open the **Packs** page from the top ticker or the **Pack opening** button.",
-        "• One **Void Football Pack costs 1000 coins**. Every pack gives **1 player card** with its own rating and stats (PAC, SHO, PAS, DRI, DEF, PHY).",
-        "• Guests start with **5000 coins**. Signed-in players earn coins for league matches (**win 200 / draw 50 / loss 20**) and can take a **daily bonus of 100 coins**.",
-        "• Every card lands in your **Collection** menu — you can open it any time and look at all the players you own.",
-        "• Duplicates and unwanted cards can be **sold for coins**: Gold 150, Rare 400, Epic 1000, Icon 2500, Phenomenon 5000.",
-        "",
-        "**Rarity and chances**",
-        "• **Gold** (up to 87) — 72%",
-        "• **Rare** (88–89) — 20%",
-        "• **Epic** (90–94, purple) — 7%",
-        "• **Icon** (95) — 1%",
-        "• **Phenomenon** (96, red-gold Ballon d'Or style) — **0.5%**",
-        "",
-        "**Players in the packs (40)**",
-        "• **Phenomenon (96):** **Messi, Ronaldo**",
-        "• **Icon (95):** **Pelé, Maradona, Ronaldinho, Buffon**",
-        "• **Epic (90–92):** Yamal, Kahn, Mbappé, Vinícius Jr, Bellingham, Rodri, Kane, Thuram, Courtois, Dembélé, Olise, Cannavaro, Neuer",
-        "• **Rare (88–89):** Kvaratskhelia, Raphinha, Pedri, Valverde, Lautaro Martínez, Neymar, Agüero, Saliba, Kimmich, Suárez, Trent",
-        "• **Gold (82–87):** B. Silva, Forlán, N. Mendes, Kounde, Kanté, Huijsen, Safonov, Zabarnyi, Cucurella, McKennie"
-      ].join("\n")
-    },
-    ru: {
-      title: "Паки открыты: Пустотный пак футбола",
-      summary: "Откройте **Пустотный пак футбола** за **1000 монет** и вытащите одного из **40 футбольных легенд**. Редкие карты и своя коллекция.",
-      body: [
-        "**Как это работает**",
-        "• Откройте страницу **Паки** через ленту сверху или кнопку **Pack opening**.",
-        "• Один **Пустотный пак футбола стоит 1000 монет**. Каждый пак даёт **1 карту игрока** со своим рейтингом и статами (PAC, SHO, PAS, DRI, DEF, PHY).",
-        "• Гости начинают с **5000 монет**. Вошедшие игроки получают монеты за матчи лиги (**победа 200 / ничья 50 / поражение 20**) и могут брать **ежедневный бонус 100 монет**.",
-        "• Каждая карта попадает в меню **Коллекция** — туда можно зайти в любой момент и посмотреть всех своих игроков.",
-        "• Повторки и ненужные карты можно **продать за монеты**: Gold 150, Rare 400, Epic 1000, Icon 2500, Феномен 5000.",
-        "",
-        "**Редкость и шансы**",
-        "• **Gold** (до 87) — 72%",
-        "• **Rare** (88–89) — 20%",
-        "• **Epic** (90–94, фиолетовый) — 7%",
-        "• **Icon** (95) — 1%",
-        "• **Феномен** (96, красно-золотой стиль «Золотого мяча») — **0,5%**",
-        "",
-        "**Игроки в паках (40)**",
-        "• **Феномен (96):** **Месси, Роналду**",
-        "• **Icon (95):** **Пеле, Марадона, Роналдиньо, Буффон**",
-        "• **Epic (90–92):** Ямаль, Кан, Мбаппе, Винисиус, Беллингем, Родри, Кейн, Тюрам, Куртуа, Дембеле, Олисе, Каннаваро, Нойер",
-        "• **Rare (88–89):** Кварацхелия, Рафинья, Педри, Вальверде, Лаутаро Мартинес, Неймар, Агуэро, Салиба, Киммих, Суарес, Трент",
-        "• **Gold (82–87):** Б. Силва, Форлан, Н. Мендес, Кунде, Канте, Хёйсен, Сафонов, Забарный, Кукурелья, Маккенни"
-      ].join("\n")
-    }
-  }
 ];
 
 // Renders "**bold**" segments as <strong> without using innerHTML.
@@ -2059,16 +1964,6 @@ function t(key, ...args) {
   return text;
 }
 
-function renderPromoTicker() {
-  const track = document.getElementById("promoTickerTrack");
-  track.replaceChildren();
-  for (let i = 0; i < 12; i += 1) {
-    const item = document.createElement("span");
-    item.textContent = t("packsSoon");
-    track.append(item);
-  }
-}
-
 function applyLang() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -2090,7 +1985,6 @@ function applyLang() {
     btn.classList.toggle("lang-active", btn.getAttribute("data-lang") === currentLang);
   });
   document.documentElement.lang = currentLang;
-  renderPromoTicker();
   render();
 }
 
@@ -2121,7 +2015,9 @@ function updateAuthUi() {
     authButton.textContent = t("retry");
     authButton.disabled = false;
   } else {
-    authStatus.textContent = session.user.email;
+    authStatus.textContent = myTeamIndex !== null && state.teams[myTeamIndex]
+      ? `${session.user.email} · ${state.teams[myTeamIndex].name}`
+      : session.user.email;
     authButton.textContent = t("signOut");
     authButton.disabled = false;
   }
@@ -2287,6 +2183,7 @@ function subscribeToChanges(generation) {
 async function handleSession(nextSession) {
   const generation = ++sessionGeneration;
   session = nextSession;
+  myTeamIndex = null;
   dataReady = false;
   if (pollTimer) clearInterval(pollTimer);
   if (realtimeChannel) {
@@ -2302,6 +2199,12 @@ async function handleSession(nextSession) {
   try {
     await fetchServerState();
     if (generation !== sessionGeneration) return;
+    if (session) {
+      const { data } = await supabase.rpc("get_my_team");
+      if (generation !== sessionGeneration) return;
+      myTeamIndex = Number.isInteger(data) ? data : null;
+      updateAuthUi();
+    }
     void claimLeagueCoins();
     await refreshNews();
     subscribeToNews();
@@ -3816,6 +3719,82 @@ document.addEventListener("keydown", event => {
     siteMenu.open = false;
     siteMenu.querySelector("summary").focus();
   }
+});
+
+const friendsDialog = document.getElementById("friendsDialog");
+const friendsList = document.getElementById("friendsList");
+const friendProfile = document.getElementById("friendProfile");
+let achievementsModule = null;
+
+async function showFriendProfile(teamIndex) {
+  achievementsModule ??= await import("../global/achievements.js");
+  const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
+  const row = getStandings().find(item => item.index === teamIndex);
+  const results = evaluateAchievements(state.matches, teamIndex);
+  const unlocked = results.filter(item => item.unlocked).length;
+  const title = document.createElement("h3");
+  title.textContent = state.teams[teamIndex].name;
+  const record = document.createElement("ul");
+  record.className = "friend-record";
+  [t("friendRecord", row.played, row.wins, row.draws, row.losses, row.points),
+    t("friendBadges", unlocked, ACHIEVEMENTS.length)].forEach(text => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    record.append(item);
+  });
+  const grid = document.createElement("div");
+  grid.className = "friend-badges";
+  ACHIEVEMENTS.forEach((achievement, i) => {
+    const badge = document.createElement("div");
+    badge.className = `friend-badge${results[i].unlocked ? " is-unlocked" : ""}`;
+    badge.innerHTML = achievement.icon;
+    const label = document.createElement("span");
+    label.textContent = (currentLang === "ru" ? achievement.ru : achievement.en)[0];
+    badge.append(label);
+    grid.append(badge);
+  });
+  friendProfile.replaceChildren(title, record, grid);
+  friendProfile.hidden = false;
+  friendsList.querySelectorAll(".friend-row").forEach(button => {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.team) === teamIndex));
+  });
+}
+
+function openFriends() {
+  friendsList.replaceChildren();
+  friendProfile.hidden = true;
+  state.teams.slice(0, 2).forEach((team, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "friend-row";
+    button.dataset.team = String(index);
+    const photo = getTeamPhoto(index);
+    if (photo) {
+      const img = document.createElement("img");
+      img.src = photo;
+      img.alt = "";
+      button.append(img);
+    }
+    button.append(team.name);
+    if (index === myTeamIndex) {
+      const tag = document.createElement("small");
+      tag.textContent = t("youTag");
+      button.append(tag);
+    }
+    button.addEventListener("click", () => void showFriendProfile(index));
+    friendsList.append(button);
+  });
+  if (!friendsDialog.open) friendsDialog.showModal();
+  const first = myTeamIndex !== null ? 1 - myTeamIndex : 0;
+  void showFriendProfile(first);
+}
+
+document.getElementById("friendsButton").addEventListener("click", () => {
+  siteMenu.open = false;
+  openFriends();
+});
+friendsDialog.addEventListener("click", event => {
+  if (event.target === friendsDialog) friendsDialog.close();
 });
 
 updateAuthUi();

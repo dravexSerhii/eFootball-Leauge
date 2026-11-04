@@ -24,9 +24,6 @@
         <i class="hw-ember" style="left:8%;--dur:9s;--dl:0s"></i><i class="hw-ember" style="left:22%;--dur:12s;--dl:3s"></i><i class="hw-ember" style="left:41%;--dur:10s;--dl:6s"></i><i class="hw-ember" style="left:57%;--dur:13s;--dl:1s"></i><i class="hw-ember" style="left:73%;--dur:11s;--dl:4s"></i><i class="hw-ember" style="left:90%;--dur:14s;--dl:7s"></i>
         <div class="hw-vignette"></div>
     </div>
-    <a class="promo-ticker" href="packs.html" aria-label="Open packs">
-        <div class="promo-ticker-track" id="promoTickerTrack"></div>
-    </a>
     <div class="page-shell">
         <header class="topbar">
             <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
@@ -39,6 +36,8 @@
                     <nav class="site-menu-panel" id="siteMenuLinks" aria-label="Explore" data-i18n-aria-label="siteMenu">
                         <a href="cards.html" data-i18n="dbLink">Card database</a>
                         <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
+                        <a href="global/global.html#achievements" data-i18n="achievementsLink">Achievements</a>
+                        <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
                     </nav>
                 </details>
                 <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>                <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
@@ -58,7 +57,6 @@
                     <p class="eyebrow" data-i18n="eyebrow">eFootball League</p>
                 </div>
                 <div class="actions">
-                    <a class="button packs-link" href="packs.html" data-i18n="packsLink">Pack opening</a>
                     <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
                     <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span
@@ -512,6 +510,19 @@
             <img id="newsViewImage" class="news-view-image" alt="News photo">
             <h3 id="newsViewTitle"></h3>
             <div id="newsViewDescription" class="news-view-description"></div>
+        </div>
+    </dialog>
+    <dialog id="friendsDialog" class="friends-dialog" aria-labelledby="friendsDialogTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div>
+                    <h2 id="friendsDialogTitle" data-i18n="friendsLink">Friends</h2>
+                    <p data-i18n="friendsDesc">Open a player's profile</p>
+                </div>
+                <button class="close-button" type="button" data-close="friendsDialog" aria-label="Close">×</button>
+            </div>
+            <div class="friends-list" id="friendsList"></div>
+            <div class="friend-profile" id="friendProfile" hidden></div>
         </div>
     </dialog>
     <dialog id="authDialog" aria-labelledby="authDialogTitle">

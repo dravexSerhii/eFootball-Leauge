@@ -7,7 +7,7 @@ Match results are stored in Supabase, separately from the website files, so rede
 3. In **Project Settings → API**, copy the Project URL and the public `anon` or `publishable` key. Add them to `js/supabase-config.js`. Never put your `service_role` key in this file.
 4. In **Authentication → Users**, create two accounts, one for you and one for your friend. Disable public sign-ups; the website has no sign-up form, so only accounts you create can sign in.
 5. In **Authentication → URL Configuration**, set the Site URL to `https://dravexserhii.github.io/eFootball-Leauge/` and add the same address under **Redirect URLs**. The production URL must be allow-listed so confirmation and authentication links return to GitHub Pages.
-6. Publish `index.html`, `packs.html`, `cards.html` and the `css/`, `js/` and `assets/` folders to GitHub Pages, preserving the folder structure.
+6. Publish `index.html`, `cards.html`, the `global/` folder and the `css/`, `js/` and `assets/` folders to GitHub Pages, preserving the folder structure.
 
 After signing in, both users will see the same matches and team names. Updates sync through Supabase Realtime. If Realtime is unavailable, the website refreshes the data approximately every 15 seconds.
 
@@ -32,6 +32,10 @@ Statistics can be left blank. If possession is entered, enter it for both teams 
 Run `sql/supabase-migration-coins.sql` once in the Supabase SQL Editor. It links each account e-mail to a team (`team_owners`: team 0 = first team in `league_settings.teams`, team 1 = second) and adds the `claim_league_coins()` function. Win = 200 coins, draw = 50, loss = 20. The packs page claims the coins that are not yet collected when a linked account opens it. To link another e-mail or change a team, edit the rows in `team_owners`.
 
 To share one coin balance between the phone and computer, run `sql/supabase-migration-shared-coins.sql` once after the coins migration. On each account, the first device that signs in after this migration seeds the shared wallet from that device's existing local balance and card collection; later devices use the server wallet. The migration also makes match rewards update the shared wallet, and handles pack purchases, duplicate sales, and the daily bonus on the server. Keep the same signed-in account on both devices.
+
+To bind each account to its own team (Barcelona → promashkovsergey363@gmail.com, the second team →
+vladlionslav@gmail.com), run `sql/supabase-migration-profiles.sql` once. After sign-in the site shows your team, the
+Achievements section shows only your own badges, and the "Friends" menu item opens either player's profile.
 
 ## Team analytics
 

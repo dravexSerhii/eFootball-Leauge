@@ -1639,6 +1639,17 @@ function updateWinnerOdds(probabilities, now = performance.now()) {
   });
 }
 
+let myTeamIndex = null;
+let signedIn = false;
+
+async function loadMyTeam() {
+  const { data: { session } } = await client.auth.getSession();
+  signedIn = Boolean(session);
+  if (!session) return;
+  const { data, error } = await client.rpc("get_my_team");
+  if (!error && Number.isInteger(data)) myTeamIndex = data;
+}
+
 function renderAchievements(analysis) {
   $("achievementsEyebrow").textContent = L("ЗНАЧКИ ЛИГИ", "LEAGUE BADGES");
   $("achievementsTitle").textContent = L("Достижения", "Achievements");
@@ -1646,7 +1657,15 @@ function renderAchievements(analysis) {
     "Считаются по всем сыгранным матчам. Значок загорается, когда условие выполнено.",
     "Based on all played matches. A badge lights up once its condition is met."
   );
-  const teams = analysis.teams;
+  const teams = analysis.teams.filter((team) => team.index === myTeamIndex);
+  if (!teams.length) {
+    $("achievementTotals").replaceChildren();
+    const note = node("p", "achievement-locked", myTeamIndex === null && signedIn
+      ? L("Этот аккаунт не привязан к команде.", "This account is not linked to a team.")
+      : L("Войдите в аккаунт на главной странице, чтобы увидеть свои достижения.", "Sign in on the main page to see your achievements."));
+    $("achievementGrid").replaceChildren(note);
+    return;
+  }
   const results = teams.map((team) => evaluateAchievements(state.matches, team.index));
   $("achievementTotals").replaceChildren(...teams.map((team, i) => {
     const chip = node("span", "achievement-total");
@@ -1815,6 +1834,7 @@ async function start() {
     ]);
     if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) throw new Error(t().noConfig);
     client = createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+    await loadMyTeam().catch(() => {});
     await loadData();
     if (probabilityAnimationFrame) window.cancelAnimationFrame(probabilityAnimationFrame);
     probabilityAnimationFrame = window.requestAnimationFrame(animateLiveProbabilities);
