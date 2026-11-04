@@ -3705,7 +3705,7 @@ html[data-theme="halloween"] .topbar-right .season-tag { border-color: rgba(255,
   .topbar-right #authStatus, .topbar-right .season-tag, .topbar-right .db-link { display: none; }
   .topbar-right .theme-toggle { width: 36px; height: 36px; }
   .topbar-right #authButton { padding: 0 12px; min-height: 36px; }
-  .page-shell > .topbar { gap: 6px; overflow: hidden; }
+  .page-shell > .topbar { gap: 6px; overflow: visible; }
   .topbar .brand { flex: 0 0 auto; }
   .topbar .brand > span:last-child { display: none; }
   .topbar-right { flex: 1 1 auto; min-width: 0; justify-content: flex-end; flex-wrap: nowrap; }
@@ -3734,3 +3734,108 @@ html[data-theme="halloween"] .topbar-right .db-link { background: linear-gradien
 .db-link-mobile { display: none; }
 @media (max-width: 640px) { .db-link-mobile { display: inline-flex; } }
 @media (max-width: 900px) and (min-width: 641px) { .topbar-right .db-link { padding: 0 10px; font-size: 12px; } }
+/* Live team analytics navigation */
+.topbar-right .global-link {
+  display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 13px;
+  text-decoration: none; font-weight: 800; font-size: 13px; color: #04200d; white-space: nowrap;
+  background: linear-gradient(135deg, #86efac, #22c55e); box-shadow: 0 6px 18px rgba(34, 197, 94, .24);
+  transition: transform .2s, box-shadow .2s;
+}
+.topbar-right .global-link:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(34, 197, 94, .4); }
+html[data-theme="halloween"] .topbar-right .global-link { background: linear-gradient(135deg, #bef264, #65a30d); }
+.global-link-mobile { display: none; }
+@media (max-width: 640px) {
+  .topbar-right .global-link { display: none; }
+  .global-link-mobile { display: inline-flex; }
+}
+
+.site-menu {
+  position: relative;
+  color: var(--ink);
+  font-family: Inter, sans-serif;
+}
+.site-menu summary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .055);
+  color: var(--ink);
+  cursor: pointer;
+  list-style: none;
+  font: 650 13px Inter, sans-serif;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.site-menu summary::-webkit-details-marker { display: none; }
+.site-menu summary:hover, .site-menu summary:focus-visible, .site-menu[open] summary {
+  border-color: rgba(211, 255, 87, .52);
+  background: rgba(211, 255, 87, .1);
+  color: var(--lime);
+}
+.site-menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+.site-menu-icon { display: grid; width: 18px; gap: 4px; }
+.site-menu-icon i {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform .18s ease, opacity .18s ease, width .18s ease;
+}
+.site-menu-icon i:nth-child(2) { width: 13px; }
+.site-menu[open] .site-menu-icon i:first-child { transform: translateY(6px) rotate(45deg); }
+.site-menu[open] .site-menu-icon i:nth-child(2) { opacity: 0; }
+.site-menu[open] .site-menu-icon i:last-child { transform: translateY(-6px) rotate(-45deg); }
+.site-menu-panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 9px);
+  right: 0;
+  display: grid;
+  width: 248px;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #211e2c, #17151f);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+.site-menu-panel a {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: var(--ink);
+  text-decoration: none;
+  font: 600 13px Inter, sans-serif;
+  transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+}
+.site-menu-panel a:hover, .site-menu-panel a:focus-visible {
+  outline: none;
+  border-color: rgba(211, 255, 87, .2);
+  background: rgba(211, 255, 87, .1);
+  color: var(--lime);
+  transform: translateX(2px);
+}
+
+@media (max-width: 640px) {
+  .site-menu summary { min-height: 38px; gap: 8px; padding: 0 10px; }
+  .site-menu-label { font-size: 12px; }
+  .site-menu-panel { width: min(248px, calc(100vw - 32px)); }
+}
+
+main > .hero-card,
+main > .championship-race,
+main > .upcoming-match,
+main > .five-match-forecast,
+main > .season-panel,
+main > .tip,
+main > .news-section,
+.promo-ticker { display: none !important; }

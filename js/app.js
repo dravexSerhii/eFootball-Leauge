@@ -15,6 +15,8 @@ const TRANSLATIONS = {
     editTeams: "Teams",
     packsLink: "Pack opening",
     dbLink: "Card database",
+    globalLink: "Team analytics",
+    siteMenu: "Explore",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
     liveSimulation: "LIVE SIMULATION",
@@ -259,6 +261,8 @@ const TRANSLATIONS = {
     editTeams: "Команды",
     packsLink: "Открытие паков",
     dbLink: "База карточек",
+    globalLink: "Аналитика команд",
+    siteMenu: "Разделы",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
     liveSimulation: "ЖИВАЯ СИМУЛЯЦИЯ",
@@ -3785,6 +3789,19 @@ document.querySelectorAll("[data-close]").forEach(button => {
 });
 
 newsDialog.addEventListener("close", clearNewsPreview);
+const siteMenu = document.getElementById("siteMenu");
+siteMenu.addEventListener("click", event => {
+  if (event.target.closest("a")) siteMenu.open = false;
+});
+document.addEventListener("click", event => {
+  if (!siteMenu.contains(event.target)) siteMenu.open = false;
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && siteMenu.open) {
+    siteMenu.open = false;
+    siteMenu.querySelector("summary").focus();
+  }
+});
 
 updateAuthUi();
 try {

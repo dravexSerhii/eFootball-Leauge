@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#111019">
     <title>eFootball League</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;600;700;800&family=Oswald:wght@500;600;700&display=swap">
     <script>try { if (localStorage.getItem("leagueTheme") === "halloween") document.documentElement.dataset.theme = "halloween"; } catch (e) { }</script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -31,7 +31,16 @@
         <header class="topbar">
             <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
             <div class="topbar-right">
-                <a class="db-link" href="cards.html" data-i18n="dbLink">Card database</a>
+                <details class="site-menu" id="siteMenu">
+                    <summary aria-controls="siteMenuLinks" data-i18n-aria-label="siteMenu" aria-label="Explore">
+                        <span class="site-menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="site-menu-label" data-i18n="siteMenu">Explore</span>
+                    </summary>
+                    <nav class="site-menu-panel" id="siteMenuLinks" aria-label="Explore" data-i18n-aria-label="siteMenu">
+                        <a href="cards.html" data-i18n="dbLink">Card database</a>
+                        <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
+                    </nav>
+                </details>
                 <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>                <span class="auth-coins" id="authCoins" hidden title="Coins"><i class="coin" aria-hidden="true"></i><b id="authCoinsValue">0</b></span>
                 <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
@@ -50,7 +59,6 @@
                 </div>
                 <div class="actions">
                     <a class="button packs-link" href="packs.html" data-i18n="packsLink">Pack opening</a>
-                    <a class="button db-link-mobile" href="cards.html" data-i18n="dbLink">Card database</a>
                     <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
                     <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span

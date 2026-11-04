@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#07130e">
+    <title>eFootball League — Team Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="global.css">
+</head>
+
+<body>
+    <header class="ga-top">
+        <a class="ga-back" href="../index.html" id="backLink">← League</a>
+        <h1 id="pageTitle">Team Analytics</h1>
+        <label class="ga-season-label">
+            <span id="seasonLabel">Season</span>
+            <select id="seasonSelect" aria-label="Season"></select>
+        </label>
+        <div class="ga-lang" role="group" aria-label="Language">
+            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="ru">RU</button>
+        </div>
+    </header>
+
+    <main class="ga-main">
+        <section class="ga-intro">
+            <div>
+                <p class="ga-eyebrow" id="eyebrow">LIVE LEAGUE INTELLIGENCE</p>
+                <h2 id="heroTitle">Team form, strength &amp; match outlook</h2>
+                <p class="ga-subtitle" id="heroSubtitle">Ratings are calculated from the league's saved results and update live.</p>
+            </div>
+            <div class="ga-live"><i></i><span id="liveLabel">LIVE DATA</span></div>
+        </section>
+        <div class="live-ticker" role="status" aria-label="Live results">
+            <span class="ticker-live-tag"><i></i><b id="tickerLabel">LIVE RESULTS</b></span>
+            <div class="ticker-window"><div class="ticker-track" id="liveTickerTrack"></div></div>
+        </div>
+
+        <div class="ga-status" id="status" role="status"></div>
+        <section class="ga-summary" id="summary"></section>
+        <section class="ga-cardiograms" aria-label="Live league points chart">
+            <article class="panel forecast-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="ga-eyebrow" id="cardiogramEyebrow">LIVE MATCH DATA</p>
+                        <h2 id="cardiogramTitle">League points trend</h2>
+                        <p class="chart-description" id="cardiogramDescription">Both teams start at zero · win 3 points, draw 1</p>
+                    </div>
+                </div>
+                <div class="trend-chart-host" id="standingsPointsChart"></div>
+            </article>
+        </section>
+        <section class="ga-favorite panel">
+            <div class="section-head">
+                <div>
+                    <p class="ga-eyebrow" id="favoriteEyebrow">MATCH OUTLOOK</p>
+                    <h2 id="favoriteTitle">Current favorite</h2>
+                </div>
+                <span class="sample-badge" id="sampleBadge"></span>
+            </div>
+            <div id="favoriteContent"></div>
+            <div class="favorite-probability-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="ga-eyebrow" id="matchTrendEyebrow">LIVE MODEL · 1 SECOND</p>
+                        <h3 id="matchTrendTitle">Match probability trend</h3>
+                        <p class="chart-description" id="matchTrendDescription"></p>
+                    </div>
+                </div>
+                <p class="ga-eyebrow probability-heading" id="currentProbabilityTitle">CURRENT MATCH PROBABILITIES</p>
+                <div class="current-probabilities" id="currentMatchProbabilities" aria-live="off"></div>
+                <div class="trend-chart-host" id="matchTrendChart"></div>
+                <section class="probability-model-method" aria-labelledby="modelMethodTitle">
+                    <h4 id="modelMethodTitle">How the model calculates probabilities</h4>
+                    <p id="modelMethodText"></p>
+                </section>
+                <section class="recent-probability-matches" aria-labelledby="recentProbabilityTitle">
+                    <h4 id="recentProbabilityTitle">Last 5 matches used by the model</h4>
+                    <div class="recent-probability-grid" id="recentProbabilityMatches"></div>
+                </section>
+                <aside class="forecast-explanation" id="forecastExplanation" aria-live="polite"></aside>
+            </div>
+        </section>
+        <section class="strengths-panel panel" aria-labelledby="strengthsTitle">
+            <div class="section-head">
+                <div>
+                    <p class="ga-eyebrow" id="strengthsEyebrow">SQUAD RATINGS</p>
+                    <h2 id="strengthsTitle">Team strengths</h2>
+                    <p class="chart-description" id="strengthsDescription"></p>
+                </div>
+            </div>
+            <div class="strengths-report-grid" id="strengthsGrid"></div>
+        </section>
+        <section class="ga-forecasts" aria-label="Match predictions">
+            <article class="panel forecast-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="ga-eyebrow" id="forecastEyebrow">SEASON OUTLOOK</p>
+                        <h2 id="championshipTitle">Championship estimate</h2>
+                    </div>
+                </div>
+                <div id="championshipList" class="championship-list"></div>
+                <p class="forecast-note" id="forecastNote"></p>
+            </article>
+            <article class="panel forecast-panel">
+                <div class="section-head">
+                    <div>
+                        <p class="ga-eyebrow" id="matchForecastEyebrow">MATCH PREDICTIONS</p>
+                        <h2 id="matchForecastTitle">Next 5 fixtures</h2>
+                    </div>
+                </div>
+                <div id="fixtureForecastList" class="fixture-forecast-list" aria-live="polite"></div>
+            </article>
+        </section>
+        <section class="ga-team-section">
+            <div class="section-head">
+                <div>
+                    <p class="ga-eyebrow" id="teamsEyebrow">PERFORMANCE REPORT</p>
+                    <h2 id="teamsTitle">Team ratings &amp; strengths</h2>
+                </div>
+                <span class="median-badge" id="medianBadge"></span>
+            </div>
+            <div class="ga-team-grid" id="teamGrid"></div>
+        </section>
+        <p class="ga-method panel" id="method"></p>
+        <aside class="mobile-scale panel">
+            <h2 id="mobileScaleTitle">Mobile-game rating scale</h2>
+            <p id="mobileScale"></p>
+        </aside>
+    </main>
+
+    <script type="module" src="global.js"></script>
+</body>
+
+</html>
