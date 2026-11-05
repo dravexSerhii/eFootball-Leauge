@@ -4125,6 +4125,17 @@ async function resizeAvatar(file) {
   });
 }
 
+function getProfileTeamIndex(profile) {
+  const value = profile?.is_self && myTeamIndex !== null
+    ? myTeamIndex
+    : profile?.team_index;
+  if (value === null || value === undefined || value === "") return null;
+  const teamIndex = Number(value);
+  return Number.isInteger(teamIndex) && teamIndex >= 0 && teamIndex < state.teams.length
+    ? teamIndex
+    : null;
+}
+
 async function showProfile(userId) {
   setCommunityView("profile");
   const { ok, data: profile } = await callRpc("get_league_profile", { p_user: userId });
@@ -4132,16 +4143,17 @@ async function showProfile(userId) {
   achievementsModule ??= await import("../global/achievements.js");
   const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
   const cards = await loadCardCatalog();
-  const results = evaluateAchievements(state.matches, profile.team_index);
-  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i]?.unlocked).map(a => a.id));
+  const teamIndex = getProfileTeamIndex(profile);
+  const results = evaluateAchievements(state.matches, teamIndex);
+  const unlockedIds = new Set(results.filter(result => result.unlocked).map(result => result.id));
   const head = document.createElement("div");
   head.className = "profile-head";
   const title = document.createElement("h3");
   title.textContent = profile.nickname;
   head.append(avatarEl(profile.avatar_path, profile.nickname, "avatar-lg"), title);
   const parts = [head];
-  const team = profile.team_index === null ? null : state.teams[profile.team_index];
-  if (!team) {
+  const team = teamIndex === null ? null : state.teams[teamIndex];
+  if (teamIndex === null || !team) {
     const locked = document.createElement("p");
     locked.className = "friend-locked";
     locked.textContent = t("profileLocked");
@@ -4149,7 +4161,7 @@ async function showProfile(userId) {
     friendProfile.hidden = false;
     return;
   }
-  const row = getStandings().find(item => item.index === profile.team_index);
+  const row = getStandings().find(item => item.index === teamIndex);
   const actions = document.createElement("div");
   actions.className = "profile-actions";
   if (profile.is_self) {
@@ -4381,8 +4393,8 @@ async function showProfileEditor(userId) {
   achievementsModule ??= await import("../global/achievements.js");
   const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
   const cards = await loadCardCatalog();
-  const results = evaluateAchievements(state.matches, profile.team_index);
-  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i]?.unlocked).map(a => a.id));
+  const results = evaluateAchievements(state.matches, getProfileTeamIndex(profile));
+  const unlockedIds = new Set(results.filter(result => result.unlocked).map(result => result.id));
   const content = document.getElementById("communityEditContent");
   const heading = document.createElement("div");
   heading.className = "community-page-heading";

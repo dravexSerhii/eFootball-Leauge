@@ -137,7 +137,12 @@ function teamRows(matches, teamIndex) {
 }
 
 export function evaluateAchievements(matches, teamIndex) {
-  const rows = teamRows(matches, teamIndex);
+  const normalizedTeamIndex = teamIndex === null || teamIndex === undefined || teamIndex === ""
+    ? NaN
+    : Number(teamIndex);
+  const rows = Number.isInteger(normalizedTeamIndex)
+    ? teamRows(matches, normalizedTeamIndex)
+    : [];
   return ACHIEVEMENTS.map((achievement) => {
     const value = achievement.measure(rows);
     return {
