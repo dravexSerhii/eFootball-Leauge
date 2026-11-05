@@ -3721,10 +3721,15 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   background: linear-gradient(120deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .018));
 }
 .analyst-notice.is-unread { border-color: rgba(211, 255, 87, .26); }
+.analyst-notice.is-archived { opacity: .84; }
 .analyst-notice-meta { display: flex; align-items: center; gap: 9px; }
 .analyst-notice-meta strong { color: var(--ink); font-size: 12px; }
 .analyst-notice-meta > span { color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
 .analyst-notice-meta .analyst-dismiss { margin-left: auto; }
+.analyst-archive { margin-top: 6px; border-top: 1px solid rgba(255, 255, 255, .09); }
+.analyst-archive > summary { padding: 14px 2px 6px; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 750; }
+.analyst-archive > summary:hover { color: var(--lime); }
+.analyst-archive-list { display: grid; gap: 10px; padding-top: 10px; }
 .analyst-tension { display: grid; gap: 8px; padding: 16px 0 2px; }
 .analyst-tension-label { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .analyst-tension-label strong { color: var(--ink); font-size: 10px; }

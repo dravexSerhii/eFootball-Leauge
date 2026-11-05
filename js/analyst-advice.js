@@ -180,3 +180,7 @@ export function getAnalystAdviceCopy(advice, language) {
   const [message, signoff] = language === "ru" ? advice.ru : advice.en;
   return { id: advice.id, message, signoff };
 }
+
+export function getAnalystAdviceById(id) {
+  return analystAdvice.find(advice => advice.id === id) || null;
+}

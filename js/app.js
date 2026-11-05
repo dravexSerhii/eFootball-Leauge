@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
-import { evaluateAnalystAdvice, getAnalystAdviceCopy } from "./analyst-advice.js";
+import { evaluateAnalystAdvice, getAnalystAdviceById, getAnalystAdviceCopy } from "./analyst-advice.js";
 import { ANALYST_DIALOGUES } from "./analyst-dialogues.js";
 
 const initialState = {
@@ -20,6 +20,9 @@ const TRANSLATIONS = {
     analystTitle: "The analyst room",
     analystSubtitle: "One focused recommendation, based on your recent matches.",
     analystEmpty: "The staff has no urgent recommendations right now. Keep the good work going.",
+    analystArchive: "Previous messages",
+    analystArchived: "ARCHIVED",
+    analystHistoryUnavailable: "This older conversation history could not be restored.",
     analystClose: "Hide this recommendation",
     analystView: "Open briefing",
     hideNotice: "Dismiss",
@@ -363,6 +366,9 @@ const TRANSLATIONS = {
     analystTitle: "Аналитический штаб",
     analystSubtitle: "Один точный совет на основе последних матчей.",
     analystEmpty: "Срочных рекомендаций пока нет. Продолжайте в том же духе.",
+    analystArchive: "Предыдущие сообщения",
+    analystArchived: "В АРХИВЕ",
+    analystHistoryUnavailable: "Историю старого разговора восстановить не удалось.",
     analystClose: "Скрыть эту рекомендацию",
     analystView: "Открыть штаб",
     hideNotice: "Скрыть",
@@ -2263,7 +2269,7 @@ function renderWelcomeBanner() {
   teamName.textContent = t("welcomeTeam", team.name);
 }
 
-const ANALYST_STATE_VERSION = 3;
+const ANALYST_STATE_VERSION = 4;
 const ANALYST_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
 
 function getAnalystStorageKey() {
@@ -2281,27 +2287,51 @@ function readAnalystNoticeState() {
     tension: 50
   };
   const saved = JSON.parse(raw);
-  if (![1, 2, ANALYST_STATE_VERSION].includes(saved?.version) ||
+  if (![1, 2, 3, ANALYST_STATE_VERSION].includes(saved?.version) ||
       !Array.isArray(saved.delivered) ||
       !Array.isArray(saved.notices) ||
       !Number.isFinite(saved.lastDeliveredAt) ||
-      (saved.version === ANALYST_STATE_VERSION &&
+      (saved.version >= 3 &&
         (!Number.isInteger(saved.tension) || saved.tension < 0 || saved.tension > 100)) ||
       !saved.notices.every(notice =>
         notice && typeof notice.id === "string" &&
         Number.isFinite(notice.createdAt) && typeof notice.read === "boolean" &&
+        (notice.dismissed === undefined || typeof notice.dismissed === "boolean") &&
+        (notice.conversationUnavailable === undefined || typeof notice.conversationUnavailable === "boolean") &&
         notice.en && typeof notice.en.message === "string" && typeof notice.en.signoff === "string" &&
         notice.ru && typeof notice.ru.message === "string" && typeof notice.ru.signoff === "string" &&
         (notice.replyChoice === undefined ||
           Number.isInteger(notice.replyChoice) && [0, 1].includes(notice.replyChoice)))) {
     throw new Error("Unrecognized analyst notification data");
   }
-  return {
+  const notices = saved.notices.map(notice => ({ ...notice, dismissed: notice.dismissed === true }));
+  const existingNoticeIds = new Set(notices.map(notice => notice.id));
+  let migrated = saved.version !== ANALYST_STATE_VERSION;
+  for (const id of new Set(saved.delivered)) {
+    if (existingNoticeIds.has(id)) continue;
+    const advice = getAnalystAdviceById(id);
+    if (!advice) continue;
+    notices.push({
+      id,
+      createdAt: saved.lastDeliveredAt,
+      read: true,
+      dismissed: true,
+      conversationUnavailable: true,
+      en: getAnalystAdviceCopy(advice, "en"),
+      ru: getAnalystAdviceCopy(advice, "ru")
+    });
+    existingNoticeIds.add(id);
+    migrated = true;
+  }
+  const result = {
     ...saved,
     version: ANALYST_STATE_VERSION,
+    notices,
     welcomeDelivered: saved.version === 1 ? false : saved.welcomeDelivered === true,
-    tension: saved.version === ANALYST_STATE_VERSION ? saved.tension : 50
+    tension: saved.version >= 3 ? saved.tension : 50
   };
+  if (migrated) localStorage.setItem(getAnalystStorageKey(), JSON.stringify(result));
+  return result;
 }
 
 function saveAnalystNoticeState() {
@@ -2447,11 +2477,13 @@ function renderAnalystNotifications() {
 
   renderAnalystStaffIdentity();
   renderAnalystTension();
-  const unread = analystNoticeState.notices.filter(notice => !notice.read).length;
+  const unread = analystNoticeState.notices.filter(notice => !notice.read && !notice.dismissed).length;
   analystNotificationCount.hidden = unread === 0;
   analystNotificationCount.textContent = unread > 9 ? "9+" : String(unread);
-  const visibleNotices = analystNoticeState.notices.slice().sort((a, b) => b.createdAt - a.createdAt);
-  if (!visibleNotices.length) {
+  const orderedNotices = analystNoticeState.notices.slice().sort((a, b) => b.createdAt - a.createdAt);
+  const activeNotices = orderedNotices.filter(notice => !notice.dismissed);
+  const archivedNotices = orderedNotices.filter(notice => notice.dismissed);
+  if (!activeNotices.length && !archivedNotices.length) {
     const empty = document.createElement("p");
     empty.className = "analyst-empty";
     empty.textContent = t("analystEmpty");
@@ -2459,11 +2491,11 @@ function renderAnalystNotifications() {
     return;
   }
 
-  const cards = visibleNotices.map(notice => {
+  const renderNotice = (notice, archived) => {
     const copy = notice[currentLang] || notice.en;
     if (!copy) return null;
     const article = document.createElement("article");
-    article.className = `analyst-notice${notice.read ? "" : " is-unread"}`;
+    article.className = `analyst-notice${notice.read ? "" : " is-unread"}${archived ? " is-archived" : ""}`;
     const identity = document.createElement("div");
     identity.className = "analyst-staff-avatar-wrap";
     const avatar = document.createElement("img");
@@ -2476,14 +2508,17 @@ function renderAnalystNotifications() {
     const head = document.createElement("div");
     head.className = "analyst-notice-meta";
     const label = document.createElement("span");
-    label.textContent = t("analystVoice");
-    const dismiss = document.createElement("button");
-    dismiss.className = "analyst-dismiss";
-    dismiss.type = "button";
-    dismiss.textContent = "×";
-    dismiss.setAttribute("aria-label", t("analystClose"));
-    dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
-    head.append(label, dismiss);
+    label.textContent = archived ? t("analystArchived") : t("analystVoice");
+    head.append(label);
+    if (!archived) {
+      const dismiss = document.createElement("button");
+      dismiss.className = "analyst-dismiss";
+      dismiss.type = "button";
+      dismiss.textContent = "×";
+      dismiss.setAttribute("aria-label", t("analystClose"));
+      dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
+      head.append(dismiss);
+    }
     article.append(identity, head);
     const chat = document.createElement("div");
     chat.className = "analyst-chat";
@@ -2502,7 +2537,13 @@ function renderAnalystNotifications() {
       chat.append(ended);
     }
     article.append(chat);
-    if (dialogue && notice.replyChoice === undefined) {
+    if (notice.conversationUnavailable) {
+      const historyNote = document.createElement("small");
+      historyNote.className = "analyst-chat-ended";
+      historyNote.textContent = t("analystHistoryUnavailable");
+      article.append(historyNote);
+    }
+    if (dialogue && notice.replyChoice === undefined && !notice.conversationUnavailable) {
       const localized = dialogue[currentLang] || dialogue.en;
       const choices = document.createElement("div");
       choices.className = "analyst-chat-choices";
@@ -2516,8 +2557,26 @@ function renderAnalystNotifications() {
       article.append(choices);
     }
     return article;
-  }).filter(Boolean);
-  analystNoticeList.replaceChildren(...cards);
+  };
+  const content = activeNotices.map(notice => renderNotice(notice, false)).filter(Boolean);
+  if (!activeNotices.length) {
+    const empty = document.createElement("p");
+    empty.className = "analyst-empty";
+    empty.textContent = t("analystEmpty");
+    content.push(empty);
+  }
+  if (archivedNotices.length) {
+    const archive = document.createElement("details");
+    archive.className = "analyst-archive";
+    const summary = document.createElement("summary");
+    summary.textContent = `${t("analystArchive")} · ${archivedNotices.length}`;
+    const archivedList = document.createElement("div");
+    archivedList.className = "analyst-archive-list";
+    archivedList.append(...archivedNotices.map(notice => renderNotice(notice, true)).filter(Boolean));
+    archive.append(summary, archivedList);
+    content.push(archive);
+  }
+  analystNoticeList.replaceChildren(...content);
   renderAnalystTension();
 }
 
@@ -2538,7 +2597,10 @@ function setAnalystBriefingOpen(open) {
 
 function dismissAnalystNotice(noticeId) {
   if (!analystNoticeState) return;
-  analystNoticeState.notices = analystNoticeState.notices.filter(notice => notice.id !== noticeId);
+  const notice = analystNoticeState.notices.find(item => item.id === noticeId);
+  if (!notice) return;
+  notice.dismissed = true;
+  notice.read = true;
   saveAnalystNoticeState();
   if (analystToastNoticeId === noticeId) clearAnalystToast();
   renderAnalystNotifications();
@@ -2553,6 +2615,17 @@ async function refreshAnalystBriefing() {
   try {
     if (!analystNoticeState) analystNoticeState = readAnalystNoticeState();
     const now = Date.now();
+    if (analystNoticeState.welcomeDelivered &&
+        !analystNoticeState.notices.some(notice => notice.id === "welcome-message")) {
+      const welcome = makeWelcomeNotice(analystNoticeState.lastDeliveredAt || now);
+      if (welcome) {
+        welcome.read = true;
+        welcome.dismissed = true;
+        welcome.conversationUnavailable = true;
+        analystNoticeState.notices.push(welcome);
+        saveAnalystNoticeState();
+      }
+    }
     if (!analystNoticeState.welcomeDelivered) {
       const welcome = makeWelcomeNotice(now);
       if (welcome) {
@@ -2563,7 +2636,7 @@ async function refreshAnalystBriefing() {
         showAnalystToast(welcome);
       }
     }
-    const hasVisibleNotice = analystNoticeState.notices.length > 0;
+    const hasVisibleNotice = analystNoticeState.notices.some(notice => !notice.dismissed);
     if (analystNoticeState.welcomeDelivered && !hasVisibleNotice &&
         now - analystNoticeState.lastDeliveredAt >= ANALYST_COOLDOWN_MS) {
       const advice = evaluateAnalystAdvice(state.matches, myTeamIndex)
