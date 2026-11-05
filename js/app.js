@@ -180,6 +180,11 @@ const TRANSLATIONS = {
     colL: "L",
     colGD: "GD",
     colPts: "Pts",
+    currentStreak: "Current streak: {0}",
+    streakWin: "{0} wins in a row",
+    streakDraw: "{0} draws in a row",
+    streakLoss: "{0} losses in a row",
+    unbeatenStreak: "Unbeaten for {0} matches",
     tableFooter: "Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points",
     latestMatches: "Latest matches",
     tipText: "A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.",
@@ -529,6 +534,11 @@ const TRANSLATIONS = {
     colL: "П",
     colGD: "РМ",
     colPts: "О",
+    currentStreak: "Текущая серия: {0}",
+    streakWin: "Побед подряд: {0}",
+    streakDraw: "Ничьих подряд: {0}",
+    streakLoss: "Поражений подряд: {0}",
+    unbeatenStreak: "Не проигрывает {0} матчей подряд",
     tableFooter: "Форма: последние 5 матчей (зелёный — победа · серый — ничья · красный — поражение) · И — сыграно · В — победы · Н — ничьи · П — поражения · РМ — разница мячей · О — очки",
     latestMatches: "Последние матчи",
     tipText: "Победа приносит <strong>3 очка</strong>; ничья приносит <strong>1</strong>. Войдите, чтобы сохранять результаты в общей лиге и синхронизировать их.",
@@ -1932,6 +1942,21 @@ function renderStandings() {
           formList.append(marker);
         });
         cell.append(formList);
+        const streak = getTeamStreak(value.form);
+        if (streak && streak.count >= 2) {
+          const streakText = t(`streak${streak.outcome[0].toUpperCase()}${streak.outcome.slice(1)}`, streak.count);
+          const streakLabel = document.createElement("span");
+          streakLabel.className = `team-streak streak-${streak.outcome}`;
+          streakLabel.textContent = streakText;
+          streakLabel.setAttribute("aria-label", t("currentStreak", streakText));
+          cell.append(streakLabel);
+        }
+        if (streak && streak.unbeatenCount >= 5) {
+          const unbeatenLabel = document.createElement("span");
+          unbeatenLabel.className = "team-streak streak-unbeaten";
+          unbeatenLabel.textContent = t("unbeatenStreak", streak.unbeatenCount);
+          cell.append(unbeatenLabel);
+        }
       } else {
         cell.textContent = value.text;
         if (value.className) cell.className = value.className;
@@ -1955,6 +1980,27 @@ function getTeamForm(teamIndex) {
         ? { outcome: "win", symbol: "✓", label: "Win" }
         : { outcome: "loss", symbol: "×", label: "Loss" };
     });
+}
+
+function getTeamStreak(teamIndex) {
+  const recentMatches = state.matches
+    .filter(match => match.home === teamIndex || match.away === teamIndex)
+    .reverse();
+  if (!recentMatches.length) return null;
+
+  const resultFor = match => {
+    const teamGoals = match.home === teamIndex ? match.homeGoals : match.awayGoals;
+    const opponentGoals = match.home === teamIndex ? match.awayGoals : match.homeGoals;
+    return teamGoals === opponentGoals ? "draw" : teamGoals > opponentGoals ? "win" : "loss";
+  };
+  const outcome = resultFor(recentMatches[0]);
+  let count = 1;
+  while (count < recentMatches.length && resultFor(recentMatches[count]) === outcome) count++;
+  let unbeatenCount = 0;
+  while (unbeatenCount < recentMatches.length && resultFor(recentMatches[unbeatenCount]) !== "loss") {
+    unbeatenCount++;
+  }
+  return { outcome, count, unbeatenCount };
 }
 
 function renderMatches() {
