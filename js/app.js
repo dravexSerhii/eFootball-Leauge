@@ -11,6 +11,8 @@ const TRANSLATIONS = {
   en: {
     authStatus: "Connecting to database…",
     authButton: "Sign in",
+    welcomeBack: "Welcome back, {0}",
+    welcomeTeam: "Your team · {0}",
     eyebrow: "eFootball League",
     editTeams: "Teams",
     dbLink: "Card database",
@@ -334,6 +336,8 @@ const TRANSLATIONS = {
   ru: {
     authStatus: "Подключение к базе данных…",
     authButton: "Войти",
+    welcomeBack: "Добро пожаловать назад, {0}",
+    welcomeTeam: "Ваша команда · {0}",
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
     dbLink: "База карточек",
@@ -2128,6 +2132,7 @@ function applyLang() {
     el.setAttribute("aria-label", t(el.getAttribute("data-i18n-aria-label")));
   });
   document.getElementById("authStatus").textContent = t("authStatus");
+  renderWelcomeBanner();
   const langBtns = document.querySelectorAll(".lang-btn");
   langBtns.forEach(btn => {
     btn.classList.toggle("lang-active", btn.getAttribute("data-lang") === currentLang);
@@ -2174,6 +2179,36 @@ function updateAuthUi() {
     authButton.textContent = t("signOut");
     authButton.disabled = false;
   }
+  renderWelcomeBanner();
+}
+
+function renderWelcomeBanner() {
+  const banner = document.getElementById("welcomeBanner");
+  const badge = document.getElementById("welcomeTeamBadge");
+  const greeting = document.getElementById("welcomeGreeting");
+  const teamName = document.getElementById("welcomeTeamName");
+  const team = Number.isInteger(myTeamIndex) ? state.teams[myTeamIndex] : null;
+  const nickname = myProfile?.nickname;
+  banner.hidden = !session || !nickname || !team;
+  if (banner.hidden) return;
+
+  const signature = `${myTeamIndex}:${team.name}:${getTeamPhoto(myTeamIndex) || ""}`;
+  if (banner.dataset.signature !== signature) {
+    badge.replaceChildren();
+    const photo = getTeamPhoto(myTeamIndex);
+    if (photo) {
+      const image = document.createElement("img");
+      image.src = photo;
+      image.alt = "";
+      image.className = "welcome-team-image";
+      badge.append(image);
+    } else {
+      badge.textContent = getTeamInitials(team.name);
+    }
+    banner.dataset.signature = signature;
+  }
+  greeting.textContent = t("welcomeBack", nickname);
+  teamName.textContent = t("welcomeTeam", team.name);
 }
 
 function mapMatch(row) {
@@ -4348,6 +4383,7 @@ function buildProfileEditor(profile, achievements, unlockedIds, cards) {
       if (uploadedPath && profile.avatar_path) await supabase.storage.from("avatars").remove([profile.avatar_path]);
       const refreshed = await supabase.rpc("ensure_my_profile");
       if (!refreshed.error) myProfile = refreshed.data;
+      renderWelcomeBanner();
       showToast(t("profileSaved"));
       renderFriendsMe();
       setCommunityView("profile");

@@ -3589,6 +3589,56 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
 
 .topbar-right { gap: 10px; }
 
+.welcome-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 18px 0 0;
+  padding: 16px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(211, 255, 87, .22);
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 0 50%, rgba(156, 120, 255, .18), transparent 55%),
+    linear-gradient(110deg, rgba(33, 30, 45, .96), rgba(23, 22, 32, .88));
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: welcome-enter .45s cubic-bezier(.2, .75, .3, 1) both;
+}
+
+.welcome-banner[hidden] { display: none; }
+.welcome-team-badge {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(211, 255, 87, .38);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(211, 255, 87, .16), rgba(156, 120, 255, .13));
+  color: var(--lime);
+  font: 850 14px Inter, sans-serif;
+}
+.welcome-team-image { width: 100%; height: 100%; padding: 7px; object-fit: contain; }
+.welcome-copy { display: grid; min-width: 0; gap: 5px; }
+.welcome-copy p {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font: 750 clamp(16px, 2.4vw, 22px) Inter, sans-serif;
+  letter-spacing: -.035em;
+}
+.welcome-copy > span {
+  color: var(--muted);
+  font: 650 11px Inter, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+@keyframes welcome-enter {
+  from { opacity: 0; transform: translateY(-7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .topbar-right #authStatus {
   display: inline-flex;
   align-items: center;
@@ -3660,6 +3710,9 @@ html[data-theme="halloween"] .topbar-right .season-tag { border-color: rgba(255,
 }
 @media (max-width: 640px) {
   .page-shell > .topbar { height: 58px; top: 32px; border-radius: 16px; padding: 0 8px 0 10px; }
+  .welcome-banner { gap: 12px; margin-top: 12px; padding: 13px 15px; border-radius: 16px; }
+  .welcome-team-badge { flex-basis: 48px; width: 48px; height: 48px; border-radius: 14px; }
+  .welcome-copy > span { font-size: 9px; }
   .topbar-right { gap: 6px; }
   .topbar-right #authStatus, .topbar-right .season-tag, .topbar-right .db-link { display: none; }
   .topbar-right .theme-toggle { width: 36px; height: 36px; }
