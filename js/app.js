@@ -185,6 +185,13 @@ const TRANSLATIONS = {
     streakDraw: "{0} draws in a row",
     streakLoss: "{0} losses in a row",
     unbeatenStreak: "Unbeaten for {0} matches",
+    teamMomentumTitle: "Team momentum",
+    teamMomentumSubtitle: "Streaks and strengths",
+    teamStrengths: "Strong points",
+    strengthAttack: "Attack · {0} goals / match",
+    strengthDefense: "Defense · {0} conceded / match",
+    momentumNoStreak: "No active streak",
+    momentumNoMatches: "Play a match to see team stats.",
     tableFooter: "Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points",
     latestMatches: "Latest matches",
     tipText: "A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.",
@@ -539,6 +546,13 @@ const TRANSLATIONS = {
     streakDraw: "Ничьих подряд: {0}",
     streakLoss: "Поражений подряд: {0}",
     unbeatenStreak: "Не проигрывает {0} матчей подряд",
+    teamMomentumTitle: "Форма команд",
+    teamMomentumSubtitle: "Серии и сильные стороны",
+    teamStrengths: "Сильные стороны",
+    strengthAttack: "Атака · {0} гола за матч",
+    strengthDefense: "Оборона · {0} пропущено за матч",
+    momentumNoStreak: "Сейчас нет серии",
+    momentumNoMatches: "Сыграйте матч, чтобы увидеть статистику команды.",
     tableFooter: "Форма: последние 5 матчей (зелёный — победа · серый — ничья · красный — поражение) · И — сыграно · В — победы · Н — ничьи · П — поражения · РМ — разница мячей · О — очки",
     latestMatches: "Последние матчи",
     tipText: "Победа приносит <strong>3 очка</strong>; ничья приносит <strong>1</strong>. Войдите, чтобы сохранять результаты в общей лиге и синхронизировать их.",
@@ -806,6 +820,7 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 
 function render() {
   renderStandings();
+  renderTeamMomentum();
   renderMatches();
   renderLastMatch();
   renderNews();
@@ -1942,21 +1957,6 @@ function renderStandings() {
           formList.append(marker);
         });
         cell.append(formList);
-        const streak = getTeamStreak(value.form);
-        if (streak && streak.count >= 2) {
-          const streakText = t(`streak${streak.outcome[0].toUpperCase()}${streak.outcome.slice(1)}`, streak.count);
-          const streakLabel = document.createElement("span");
-          streakLabel.className = `team-streak streak-${streak.outcome}`;
-          streakLabel.textContent = streakText;
-          streakLabel.setAttribute("aria-label", t("currentStreak", streakText));
-          cell.append(streakLabel);
-        }
-        if (streak && streak.unbeatenCount >= 5) {
-          const unbeatenLabel = document.createElement("span");
-          unbeatenLabel.className = "team-streak streak-unbeaten";
-          unbeatenLabel.textContent = t("unbeatenStreak", streak.unbeatenCount);
-          cell.append(unbeatenLabel);
-        }
       } else {
         cell.textContent = value.text;
         if (value.className) cell.className = value.className;
@@ -1966,6 +1966,95 @@ function renderStandings() {
     });
     standingsBody.append(row);
   });
+}
+
+function renderTeamMomentum() {
+  const list = document.getElementById("teamMomentumList");
+  if (!list) return;
+  const cards = state.teams.map((team, teamIndex) => {
+    const matches = state.matches.filter(match =>
+      match.home === teamIndex || match.away === teamIndex);
+    const goals = matches.reduce((totals, match) => {
+      if (match.home === teamIndex) {
+        totals.scored += match.homeGoals;
+        totals.conceded += match.awayGoals;
+      } else {
+        totals.scored += match.awayGoals;
+        totals.conceded += match.homeGoals;
+      }
+      return totals;
+    }, { scored: 0, conceded: 0 });
+    const card = document.createElement("article");
+    card.className = `team-momentum-card team-momentum-${teamTone(teamIndex)}`;
+
+    const header = document.createElement("div");
+    header.className = "team-momentum-header";
+    const badge = document.createElement("span");
+    badge.className = `team-momentum-badge team-badge ${teamTone(teamIndex)}`;
+    const photo = getTeamPhoto(teamIndex);
+    if (photo) {
+      const image = document.createElement("img");
+      image.className = "team-badge-image";
+      image.src = photo;
+      image.alt = "";
+      image.width = 52;
+      image.height = 52;
+      badge.append(image);
+    } else {
+      badge.textContent = getTeamInitials(team.name);
+    }
+    const name = document.createElement("h3");
+    name.textContent = team.name;
+    header.append(badge, name);
+    card.append(header);
+
+    const streak = getTeamStreak(teamIndex);
+    const indicators = document.createElement("div");
+    indicators.className = "team-momentum-streaks";
+    if (streak && streak.count >= 2) {
+      const streakText = t(`streak${streak.outcome[0].toUpperCase()}${streak.outcome.slice(1)}`, streak.count);
+      const streakLabel = document.createElement("span");
+      streakLabel.className = `team-momentum-chip streak-${streak.outcome}`;
+      streakLabel.textContent = streakText;
+      indicators.append(streakLabel);
+    }
+    if (streak && streak.unbeatenCount >= 5) {
+      const unbeatenLabel = document.createElement("span");
+      unbeatenLabel.className = "team-momentum-chip streak-unbeaten";
+      unbeatenLabel.textContent = t("unbeatenStreak", streak.unbeatenCount);
+      indicators.append(unbeatenLabel);
+    }
+    if (!indicators.childElementCount) {
+      const status = document.createElement("span");
+      status.className = "team-momentum-neutral";
+      status.textContent = matches.length ? t("momentumNoStreak") : t("momentumNoMatches");
+      indicators.append(status);
+    }
+    card.append(indicators);
+
+    const strengths = document.createElement("div");
+    strengths.className = "team-momentum-strengths";
+    const title = document.createElement("h4");
+    title.textContent = t("teamStrengths");
+    strengths.append(title);
+    if (matches.length) {
+      const formatter = new Intl.NumberFormat(currentLang === "ru" ? "ru-RU" : "en-GB", {
+        maximumFractionDigits: 1
+      });
+      const attack = document.createElement("p");
+      attack.textContent = t("strengthAttack", formatter.format(goals.scored / matches.length));
+      const defense = document.createElement("p");
+      defense.textContent = t("strengthDefense", formatter.format(goals.conceded / matches.length));
+      strengths.append(attack, defense);
+    } else {
+      const empty = document.createElement("p");
+      empty.textContent = t("momentumNoMatches");
+      strengths.append(empty);
+    }
+    card.append(strengths);
+    return card;
+  });
+  list.replaceChildren(...cards);
 }
 
 function getTeamForm(teamIndex) {
