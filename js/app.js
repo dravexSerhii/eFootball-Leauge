@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
 import { evaluateAnalystAdvice, getAnalystAdviceCopy } from "./analyst-advice.js";
+import { ANALYST_DIALOGUES } from "./analyst-dialogues.js";
 
 const initialState = {
   teams: [{ name: "FC Promashkov" }, { name: "FC Lionslav" }],
@@ -25,6 +26,13 @@ const TRANSLATIONS = {
     closeAnalystPanel: "Close briefing",
     analystVoice: "ANALYST STAFF",
     analystStorageError: "Could not save your team briefing on this device.",
+    analystTension: "Dressing-room tension",
+    tensionCalm: "Calm",
+    tensionSteady: "Focused",
+    tensionHigh: "Tense",
+    tensionCritical: "On edge",
+    analystYourReply: "You",
+    analystConversationEnded: "The staff has wrapped up this conversation.",
     eyebrow: "eFootball League",
     editTeams: "Teams",
     dbLink: "Card database",
@@ -361,6 +369,13 @@ const TRANSLATIONS = {
     closeAnalystPanel: "Закрыть штаб",
     analystVoice: "АНАЛИТИЧЕСКИЙ ШТАБ",
     analystStorageError: "Не удалось сохранить уведомления штаба на этом устройстве.",
+    analystTension: "Напряжение в команде",
+    tensionCalm: "Спокойно",
+    tensionSteady: "Собранно",
+    tensionHigh: "Напряжённо",
+    tensionCritical: "На пределе",
+    analystYourReply: "Вы",
+    analystConversationEnded: "Штаб завершил этот разговор.",
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
     dbLink: "База карточек",
@@ -2248,7 +2263,7 @@ function renderWelcomeBanner() {
   teamName.textContent = t("welcomeTeam", team.name);
 }
 
-const ANALYST_STATE_VERSION = 2;
+const ANALYST_STATE_VERSION = 3;
 const ANALYST_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
 
 function getAnalystStorageKey() {
@@ -2262,24 +2277,30 @@ function readAnalystNoticeState() {
     delivered: [],
     notices: [],
     lastDeliveredAt: 0,
-    welcomeDelivered: false
+    welcomeDelivered: false,
+    tension: 50
   };
   const saved = JSON.parse(raw);
-  if (![1, ANALYST_STATE_VERSION].includes(saved?.version) ||
+  if (![1, 2, ANALYST_STATE_VERSION].includes(saved?.version) ||
       !Array.isArray(saved.delivered) ||
       !Array.isArray(saved.notices) ||
       !Number.isFinite(saved.lastDeliveredAt) ||
+      (saved.version === ANALYST_STATE_VERSION &&
+        (!Number.isInteger(saved.tension) || saved.tension < 0 || saved.tension > 100)) ||
       !saved.notices.every(notice =>
         notice && typeof notice.id === "string" &&
         Number.isFinite(notice.createdAt) && typeof notice.read === "boolean" &&
         notice.en && typeof notice.en.message === "string" && typeof notice.en.signoff === "string" &&
-        notice.ru && typeof notice.ru.message === "string" && typeof notice.ru.signoff === "string")) {
+        notice.ru && typeof notice.ru.message === "string" && typeof notice.ru.signoff === "string" &&
+        (notice.replyChoice === undefined ||
+          Number.isInteger(notice.replyChoice) && [0, 1].includes(notice.replyChoice)))) {
     throw new Error("Unrecognized analyst notification data");
   }
   return {
     ...saved,
     version: ANALYST_STATE_VERSION,
-    welcomeDelivered: saved.version === 1 ? false : saved.welcomeDelivered === true
+    welcomeDelivered: saved.version === 1 ? false : saved.welcomeDelivered === true,
+    tension: saved.version === ANALYST_STATE_VERSION ? saved.tension : 50
   };
 }
 
@@ -2361,6 +2382,58 @@ function renderAnalystStaffIdentity() {
   document.getElementById("analystBriefingAuthor").textContent = author;
 }
 
+function getTensionDescription(value) {
+  if (value < 26) return t("tensionCalm");
+  if (value < 51) return t("tensionSteady");
+  if (value < 76) return t("tensionHigh");
+  return t("tensionCritical");
+}
+
+function renderAnalystTension() {
+  if (!analystNoticeState) return;
+  const value = analystNoticeState.tension;
+  const track = document.getElementById("analystTensionTrack");
+  track.setAttribute("aria-valuenow", String(value));
+  track.setAttribute("aria-label", `${t("analystTension")}: ${value}%`);
+  document.getElementById("analystTensionState").textContent =
+    `${getTensionDescription(value)} · ${value}%`;
+  document.getElementById("analystTensionFill").style.width = `${value}%`;
+  track.dataset.level = value < 26 ? "calm" : value < 51 ? "steady" : value < 76 ? "high" : "critical";
+}
+
+function analystChatBubble(kind, author, message) {
+  const row = document.createElement("div");
+  row.className = `analyst-chat-row is-${kind}`;
+  if (kind === "staff") {
+    const avatar = document.createElement("img");
+    avatar.className = "analyst-chat-avatar";
+    avatar.src = getAnalystAvatar(myTeamIndex);
+    avatar.alt = "";
+    row.append(avatar);
+  }
+  const bubble = document.createElement("div");
+  bubble.className = "analyst-chat-bubble";
+  const name = document.createElement("strong");
+  name.textContent = author;
+  const text = document.createElement("p");
+  text.textContent = message;
+  bubble.append(name, text);
+  row.append(bubble);
+  return row;
+}
+
+function answerAnalystNotice(notice, choiceIndex) {
+  if (notice.replyChoice !== undefined) return;
+  const dialogue = ANALYST_DIALOGUES[notice.id];
+  if (!dialogue || ![0, 1].includes(choiceIndex)) return;
+  const tensionChange = dialogue.tensionChanges[choiceIndex];
+  notice.replyChoice = choiceIndex;
+  analystNoticeState.tension = Math.max(0, Math.min(100, analystNoticeState.tension + tensionChange));
+  notice.tensionAfterReply = analystNoticeState.tension;
+  saveAnalystNoticeState();
+  renderAnalystNotifications();
+}
+
 function renderAnalystNotifications() {
   const hasTeam = Number.isInteger(myTeamIndex) && Boolean(state.teams[myTeamIndex]);
   analystNotificationsButton.hidden = !session || !hasTeam;
@@ -2373,6 +2446,7 @@ function renderAnalystNotifications() {
   }
 
   renderAnalystStaffIdentity();
+  renderAnalystTension();
   const unread = analystNoticeState.notices.filter(notice => !notice.read).length;
   analystNotificationCount.hidden = unread === 0;
   analystNotificationCount.textContent = unread > 9 ? "9+" : String(unread);
@@ -2410,14 +2484,41 @@ function renderAnalystNotifications() {
     dismiss.setAttribute("aria-label", t("analystClose"));
     dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
     head.append(label, dismiss);
-    const message = document.createElement("p");
-    message.textContent = copy.message;
-    const signoff = document.createElement("blockquote");
-    signoff.textContent = copy.signoff;
-    article.append(identity, head, message, signoff);
+    article.append(identity, head);
+    const chat = document.createElement("div");
+    chat.className = "analyst-chat";
+    chat.append(analystChatBubble("staff", getAnalystAuthor(myTeamIndex), `${copy.message} ${copy.signoff}`));
+    const dialogue = ANALYST_DIALOGUES[notice.id];
+    if (notice.replyChoice !== undefined && dialogue) {
+      const localized = dialogue[currentLang] || dialogue.en;
+      const choiceIndex = notice.replyChoice;
+      chat.append(
+        analystChatBubble("player", t("analystYourReply"), localized.choices[choiceIndex]),
+        analystChatBubble("staff", getAnalystAuthor(myTeamIndex), localized.replies[choiceIndex])
+      );
+      const ended = document.createElement("small");
+      ended.className = "analyst-chat-ended";
+      ended.textContent = t("analystConversationEnded");
+      chat.append(ended);
+    }
+    article.append(chat);
+    if (dialogue && notice.replyChoice === undefined) {
+      const localized = dialogue[currentLang] || dialogue.en;
+      const choices = document.createElement("div");
+      choices.className = "analyst-chat-choices";
+      localized.choices.forEach((choice, index) => {
+        const button = friendButton(choice, index === 0 ? "button-primary" : "button-quiet", () => {
+          answerAnalystNotice(notice, index);
+        });
+        button.classList.add("analyst-choice");
+        choices.append(button);
+      });
+      article.append(choices);
+    }
     return article;
   }).filter(Boolean);
   analystNoticeList.replaceChildren(...cards);
+  renderAnalystTension();
 }
 
 function setAnalystBriefingOpen(open) {

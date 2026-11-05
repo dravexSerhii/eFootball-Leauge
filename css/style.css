@@ -3725,15 +3725,27 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
 .analyst-notice-meta strong { color: var(--ink); font-size: 12px; }
 .analyst-notice-meta > span { color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: .1em; }
 .analyst-notice-meta .analyst-dismiss { margin-left: auto; }
-.analyst-notice > p { max-width: 780px; margin: 13px 0; color: #e8e6ee; font-size: 13px; line-height: 1.7; }
-.analyst-notice blockquote {
-  margin: 0;
-  padding: 10px 13px;
-  border-left: 2px solid var(--lime);
-  background: rgba(211, 255, 87, .045);
-  color: #c8c5d1;
-  font: italic 600 12px/1.6 Inter, sans-serif;
-}
+.analyst-tension { display: grid; gap: 8px; padding: 16px 0 2px; }
+.analyst-tension-label { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.analyst-tension-label strong { color: var(--ink); font-size: 10px; }
+.analyst-tension-track { height: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 99px; background: rgba(255,255,255,.07); }
+.analyst-tension-track > span { display: block; width: 50%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #72df9b, #d3ff57); transition: width .45s ease, background .3s ease; }
+.analyst-tension-track[data-level="high"] > span { background: linear-gradient(90deg, #f8cb55, #ff914d); }
+.analyst-tension-track[data-level="critical"] > span { background: linear-gradient(90deg, #ff914d, #ff5968); }
+.analyst-chat { display: grid; gap: 10px; padding-top: 15px; }
+.analyst-chat-row { display: flex; align-items: flex-end; gap: 8px; }
+.analyst-chat-row.is-player { justify-content: flex-end; }
+.analyst-chat-avatar { flex: 0 0 28px; width: 28px; height: 28px; border: 1px solid rgba(211,255,87,.3); border-radius: 50%; object-fit: cover; }
+.analyst-chat-bubble { max-width: min(680px, 88%); padding: 11px 13px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px 14px 14px 4px; background: rgba(255,255,255,.045); }
+.analyst-chat-row.is-player .analyst-chat-bubble { border-color: rgba(156,120,255,.24); border-radius: 14px 14px 4px 14px; background: rgba(156,120,255,.1); }
+.analyst-chat-bubble strong { display: block; margin-bottom: 5px; color: var(--lime); font-size: 10px; }
+.analyst-chat-row.is-player .analyst-chat-bubble strong { color: #c3adff; text-align: right; }
+.analyst-chat-bubble p { margin: 0; color: #e8e6ee; font-size: 12px; line-height: 1.65; }
+.analyst-chat-ended { justify-self: center; padding: 3px 8px; color: var(--muted); font-size: 10px; }
+.analyst-chat-choices { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.analyst-chat-choices .analyst-choice { max-width: 100%; min-height: 38px; padding: 8px 13px; border-radius: 12px; font-size: 11px; line-height: 1.4; text-align: left; }
+.analyst-chat-choices .analyst-choice.button-quiet { border: 1px solid rgba(255,255,255,.12); }
+.analyst-chat-choices .analyst-choice.button-primary { border-color: rgba(211,255,87,.42); background: rgba(211,255,87,.13); color: var(--lime); }
 .analyst-empty { margin: 0; padding: 12px 0 3px; color: var(--muted); font-size: 13px; }
 .analyst-toast {
   position: fixed;
@@ -3856,8 +3868,12 @@ html[data-theme="halloween"] .topbar-right .season-tag { border-color: rgba(255,
   .welcome-team-badge { flex-basis: 48px; width: 48px; height: 48px; border-radius: 14px; }
   .welcome-copy > span { font-size: 9px; }
   .analyst-briefing { margin-top: -15px; padding-right: 14px; padding-left: 14px; }
+  .analyst-briefing-head { flex-wrap: wrap; gap: 10px; }
+  .analyst-briefing-head > div:first-child { flex: 1 1 100%; }
   .analyst-notice { padding: 13px; }
   .analyst-toast { right: 12px; bottom: 12px; width: calc(100vw - 24px); }
+  .analyst-chat-choices { justify-content: stretch; }
+  .analyst-chat-choices .analyst-choice { flex: 1 1 100%; }
   .topbar-right { gap: 6px; }
   .topbar-right #authStatus, .topbar-right .season-tag, .topbar-right .db-link { display: none; }
   .topbar-right .theme-toggle { width: 36px; height: 36px; }

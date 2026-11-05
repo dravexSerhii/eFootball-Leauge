@@ -89,6 +89,15 @@
                     </div>
                     <button class="analyst-panel-close" id="analystPanelClose" type="button" data-i18n-aria-label="closeAnalystPanel" aria-label="Close briefing">×</button>
                 </header>
+                <div class="analyst-tension" aria-label="Dressing-room tension">
+                    <div class="analyst-tension-label">
+                        <span data-i18n="analystTension">Dressing-room tension</span>
+                        <strong id="analystTensionState"></strong>
+                    </div>
+                    <div class="analyst-tension-track" id="analystTensionTrack" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                        <span id="analystTensionFill"></span>
+                    </div>
+                </div>
                 <div class="analyst-notice-list" id="analystNoticeList" aria-live="polite"></div>
             </section>
 
