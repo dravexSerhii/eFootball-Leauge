@@ -21,6 +21,16 @@ const TRANSLATIONS = {
     youTag: "You",
     friendRecord: "Played {0} · W {1} · D {2} · L {3} · {4} pts",
     friendBadges: "Achievements {0}/{1}",
+    editProfile: "Edit profile",
+    avatarUpload: "Avatar",
+    pinBadges: "Pinned badges",
+    pinLimit: "You can pin up to 3 badges",
+    noBadgesYet: "Earn achievements to pin them here.",
+    favoritePlayer: "Favorite player",
+    noFavorite: "— none —",
+    saveProfile: "Save profile",
+    profileSaved: "Profile saved",
+    nicknameFailed: "This nickname is taken or invalid",
     friendsTabFriends: "Friends",
     friendsTabRequests: "Requests",
     friendsTabSearch: "Find players",
@@ -307,6 +317,16 @@ const TRANSLATIONS = {
     youTag: "Вы",
     friendRecord: "Матчей {0} · В {1} · Н {2} · П {3} · {4} очк.",
     friendBadges: "Достижения {0}/{1}",
+    editProfile: "Редактировать профиль",
+    avatarUpload: "Аватарка",
+    pinBadges: "Закреплённые значки",
+    pinLimit: "Можно закрепить до 3 значков",
+    noBadgesYet: "Получите достижения, чтобы закрепить их здесь.",
+    favoritePlayer: "Любимый игрок",
+    noFavorite: "— не выбран —",
+    saveProfile: "Сохранить профиль",
+    profileSaved: "Профиль сохранён",
+    nicknameFailed: "Этот никнейм занят или некорректен",
     friendsTabFriends: "Друзья",
     friendsTabRequests: "Заявки",
     friendsTabSearch: "Поиск игроков",
@@ -3839,27 +3859,110 @@ function friendButton(label, className, handler) {
   return button;
 }
 
+const avatarUrl = path => path
+  ? supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl
+  : null;
+
+function avatarEl(path, nickname, className = "") {
+  const box = document.createElement("span");
+  box.className = `avatar ${className}`.trim();
+  const url = avatarUrl(path);
+  if (url) {
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "";
+    img.loading = "lazy";
+    box.append(img);
+  } else {
+    box.textContent = getTeamInitials(nickname);
+  }
+  return box;
+}
+
+let cardCatalog = null;
+async function loadCardCatalog() {
+  if (cardCatalog) return cardCatalog;
+  const map = new Map((window.EF_CARDS || []).map(card => [card.id, { ...card }]));
+  const { data } = await supabase.from("efootball_cards").select("id,data,photo_path");
+  (data || []).forEach(row => {
+    const merged = { ...(map.get(row.id) || {}), ...row.data, id: row.id };
+    if (row.photo_path) merged.photo = supabase.storage.from("card-images").getPublicUrl(row.photo_path).data.publicUrl;
+    map.set(row.id, merged);
+  });
+  cardCatalog = [...map.values()].filter(card => !card.deleted && card.name)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  return cardCatalog;
+}
+
+function achievementBadge(achievement, unlocked, extra = "") {
+  const badge = document.createElement("div");
+  badge.className = `friend-badge tier-${achievement.tier}${unlocked ? " is-unlocked" : ""} ${extra}`.trim();
+  const icon = document.createElement("span");
+  icon.className = "friend-badge-icon";
+  icon.innerHTML = achievement.icon;
+  const label = document.createElement("span");
+  label.textContent = (currentLang === "ru" ? achievement.ru : achievement.en)[0];
+  badge.append(icon, label);
+  return badge;
+}
+
+function favoriteCardEl(card) {
+  const box = document.createElement("div");
+  box.className = "friend-favorite";
+  if (card.photo) {
+    const img = document.createElement("img");
+    img.src = card.photo;
+    img.alt = "";
+    box.append(img);
+  }
+  const info = document.createElement("div");
+  const name = document.createElement("b");
+  name.textContent = card.name;
+  const meta = document.createElement("span");
+  meta.textContent = [card.rating, card.pos, card.club].filter(Boolean).join(" · ");
+  info.append(name, meta);
+  box.append(info);
+  return box;
+}
+
+async function resizeAvatar(file) {
+  const bitmap = await createImageBitmap(file);
+  const size = 256;
+  const side = Math.min(bitmap.width, bitmap.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  canvas.getContext("2d").drawImage(
+    bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, size, size
+  );
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Image error")), "image/webp", 0.85);
+  });
+}
+
 async function showProfile(userId) {
   const { ok, data: profile } = await callRpc("get_league_profile", { p_user: userId });
   if (!ok || !profile) return;
+  achievementsModule ??= await import("../global/achievements.js");
+  const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
+  const cards = await loadCardCatalog();
+  const head = document.createElement("div");
+  head.className = "profile-head";
   const title = document.createElement("h3");
   title.textContent = profile.nickname;
-  const parts = [title];
+  head.append(avatarEl(profile.avatar_path, profile.nickname, "avatar-lg"), title);
+  const parts = [head];
   const team = profile.team_index === null ? null : state.teams[profile.team_index];
   if (!team) {
     const locked = document.createElement("p");
     locked.className = "friend-locked";
     locked.textContent = t("profileLocked");
-    parts.push(locked);
-    friendProfile.replaceChildren(...parts);
+    friendProfile.replaceChildren(...parts, locked);
     friendProfile.hidden = false;
     return;
   }
-  achievementsModule ??= await import("../global/achievements.js");
-  const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
   const row = getStandings().find(item => item.index === profile.team_index);
   const results = evaluateAchievements(state.matches, profile.team_index);
-  const unlocked = results.filter(item => item.unlocked).length;
+  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i].unlocked).map(a => a.id));
   const teamLine = document.createElement("p");
   teamLine.className = "friend-team";
   const photo = getTeamPhoto(profile.team_index);
@@ -3870,57 +3973,192 @@ async function showProfile(userId) {
     teamLine.append(img);
   }
   teamLine.append(team.name);
+  parts.push(teamLine);
+
+  const pinned = (profile.featured_badges || [])
+    .filter(id => unlockedIds.has(id))
+    .map(id => ACHIEVEMENTS.find(a => a.id === id));
+  if (pinned.length) {
+    const strip = document.createElement("div");
+    strip.className = "friend-pinned";
+    pinned.forEach(achievement => strip.append(achievementBadge(achievement, true, "is-pinned")));
+    parts.push(strip);
+  }
+  const favorite = cards.find(card => card.id === profile.favorite_card);
+  if (favorite) parts.push(favoriteCardEl(favorite));
+
   const record = document.createElement("ul");
   record.className = "friend-record";
   [t("friendRecord", row.played, row.wins, row.draws, row.losses, row.points),
-    t("friendBadges", unlocked, ACHIEVEMENTS.length)].forEach(text => {
+    t("friendBadges", unlockedIds.size, ACHIEVEMENTS.length)].forEach(text => {
     const item = document.createElement("li");
     item.textContent = text;
     record.append(item);
   });
   const grid = document.createElement("div");
   grid.className = "friend-badges";
-  ACHIEVEMENTS.forEach((achievement, i) => {
-    const badge = document.createElement("div");
-    badge.className = `friend-badge${results[i].unlocked ? " is-unlocked" : ""}`;
-    badge.innerHTML = achievement.icon;
-    const label = document.createElement("span");
-    label.textContent = (currentLang === "ru" ? achievement.ru : achievement.en)[0];
-    badge.append(label);
-    grid.append(badge);
-  });
-  friendProfile.replaceChildren(...parts, teamLine, record, grid);
+  [...ACHIEVEMENTS]
+    .sort((a, b) => Number(unlockedIds.has(b.id)) - Number(unlockedIds.has(a.id)))
+    .forEach(achievement => grid.append(achievementBadge(achievement, unlockedIds.has(achievement.id))));
+  parts.push(record, grid);
+  if (profile.is_self) parts.push(buildProfileEditor(profile, ACHIEVEMENTS, unlockedIds, cards));
+  friendProfile.replaceChildren(...parts);
   friendProfile.hidden = false;
+}
+
+function buildProfileEditor(profile, achievements, unlockedIds, cards) {
+  const form = document.createElement("form");
+  form.className = "profile-editor";
+  const heading = document.createElement("h4");
+  heading.textContent = t("editProfile");
+  const draft = {
+    avatarPath: profile.avatar_path || null,
+    badges: (profile.featured_badges || []).filter(id => unlockedIds.has(id)).slice(0, 3),
+    card: profile.favorite_card || "",
+    file: null
+  };
+
+  const nickLabel = document.createElement("label");
+  nickLabel.textContent = t("nicknameLabel");
+  const nick = document.createElement("input");
+  nick.value = profile.nickname;
+  nick.minLength = 3;
+  nick.maxLength = 24;
+  nick.required = true;
+  nickLabel.append(nick);
+
+  const avatarRow = document.createElement("div");
+  avatarRow.className = "profile-avatar-row";
+  let preview = avatarEl(draft.avatarPath, profile.nickname, "avatar-lg");
+  const file = document.createElement("input");
+  file.type = "file";
+  file.accept = "image/png,image/jpeg,image/webp";
+  file.setAttribute("aria-label", t("avatarUpload"));
+  file.addEventListener("change", () => {
+    const picked = file.files?.[0];
+    if (!picked) return;
+    draft.file = picked;
+    const next = document.createElement("span");
+    next.className = "avatar avatar-lg";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(picked);
+    img.alt = "";
+    next.append(img);
+    preview.replaceWith(next);
+    preview = next;
+  });
+  avatarRow.append(preview, file);
+
+  const badgesTitle = document.createElement("p");
+  badgesTitle.className = "profile-label";
+  const badgePicker = document.createElement("div");
+  badgePicker.className = "friend-badges badge-picker";
+  const updateBadgesTitle = () => {
+    badgesTitle.textContent = `${t("pinBadges")} (${draft.badges.length}/3)`;
+  };
+  const unlockedList = achievements.filter(a => unlockedIds.has(a.id));
+  if (!unlockedList.length) {
+    const none = document.createElement("p");
+    none.className = "friends-empty";
+    none.textContent = t("noBadgesYet");
+    badgePicker.append(none);
+  }
+  unlockedList.forEach(achievement => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "badge-choice";
+    const sync = () => button.setAttribute("aria-pressed", String(draft.badges.includes(achievement.id)));
+    button.append(achievementBadge(achievement, true));
+    button.addEventListener("click", () => {
+      if (draft.badges.includes(achievement.id)) draft.badges = draft.badges.filter(id => id !== achievement.id);
+      else if (draft.badges.length < 3) draft.badges.push(achievement.id);
+      else showToast(t("pinLimit"));
+      badgePicker.querySelectorAll(".badge-choice").forEach(item => item.dispatchEvent(new Event("sync")));
+      updateBadgesTitle();
+    });
+    button.addEventListener("sync", sync);
+    sync();
+    badgePicker.append(button);
+  });
+  updateBadgesTitle();
+
+  const cardLabel = document.createElement("label");
+  cardLabel.textContent = t("favoritePlayer");
+  const cardSelect = document.createElement("select");
+  const none = document.createElement("option");
+  none.value = "";
+  none.textContent = t("noFavorite");
+  cardSelect.append(none);
+  cards.forEach(card => {
+    const option = document.createElement("option");
+    option.value = card.id;
+    option.textContent = `${card.name} · ${card.rating ?? ""} ${card.pos ?? ""}`.trim();
+    cardSelect.append(option);
+  });
+  cardSelect.value = draft.card;
+  cardLabel.append(cardSelect);
+
+  const save = document.createElement("button");
+  save.type = "submit";
+  save.className = "button button-primary";
+  save.textContent = t("saveProfile");
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    save.disabled = true;
+    try {
+      let avatarPath = draft.avatarPath;
+      let uploadedPath = null;
+      if (draft.file) {
+        const blob = await resizeAvatar(draft.file);
+        uploadedPath = `${session.user.id}/avatar-${Date.now()}.webp`;
+        const { error } = await supabase.storage.from("avatars")
+          .upload(uploadedPath, blob, { contentType: "image/webp", cacheControl: "31536000" });
+        if (error) throw error;
+        avatarPath = uploadedPath;
+      }
+      if (nick.value.trim() !== profile.nickname) {
+        const renamed = await callRpc("set_my_nickname", { p_nickname: nick.value });
+        if (!renamed.ok) throw new Error(t("nicknameFailed"));
+      }
+      const { error } = await supabase.rpc("update_my_profile", {
+        p_avatar_path: avatarPath, p_badges: draft.badges, p_card: cardSelect.value || null
+      });
+      if (error) {
+        if (uploadedPath) await supabase.storage.from("avatars").remove([uploadedPath]);
+        throw error;
+      }
+      if (uploadedPath && profile.avatar_path) await supabase.storage.from("avatars").remove([profile.avatar_path]);
+      const refreshed = await supabase.rpc("ensure_my_profile");
+      if (!refreshed.error) myProfile = refreshed.data;
+      showToast(t("profileSaved"));
+      renderFriendsMe();
+      await showProfile(profile.user_id);
+    } catch (error) {
+      showToast(error.message || String(error));
+    } finally {
+      save.disabled = false;
+    }
+  });
+  form.append(heading, nickLabel, avatarRow, badgesTitle, badgePicker, cardLabel, save);
+  return form;
 }
 
 function renderFriendsMe() {
   const box = document.getElementById("friendsMe");
   box.replaceChildren();
   if (!myProfile) return;
-  const form = document.createElement("form");
-  form.className = "friends-nickname";
-  const input = document.createElement("input");
-  input.value = myProfile.nickname;
-  input.minLength = 3;
-  input.maxLength = 24;
-  input.required = true;
-  input.setAttribute("aria-label", t("nicknameLabel"));
-  const save = document.createElement("button");
-  save.type = "submit";
-  save.className = "button button-quiet";
-  save.textContent = t("saveNickname");
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
-    const { ok } = await callRpc("set_my_nickname", { p_nickname: input.value });
-    if (!ok) return;
-    myProfile.nickname = input.value.trim();
-    showToast(t("nicknameSaved"));
-  });
-  const open = friendButton(t("myProfile"), "button-quiet", () => void showProfile(myProfile.user_id));
+  const info = document.createElement("div");
+  info.className = "friends-me-info";
+  const text = document.createElement("div");
+  const name = document.createElement("b");
+  name.textContent = myProfile.nickname;
   const label = document.createElement("small");
   label.textContent = myTeamIndex !== null ? state.teams[myTeamIndex]?.name ?? "" : t("noTeamLinked");
-  form.append(input, save, open);
-  box.append(label, form);
+  text.append(name, label);
+  info.append(avatarEl(myProfile.avatar_path, myProfile.nickname), text,
+    friendButton(t("myProfile"), "button-quiet", () => void showProfile(myProfile.user_id)));
+  box.append(info);
 }
 
 function friendRow(person, actions) {
@@ -3931,7 +4169,7 @@ function friendRow(person, actions) {
   name.className = "friend-name";
   name.textContent = person.nickname;
   name.addEventListener("click", () => void showProfile(person.user_id));
-  row.append(name, ...actions);
+  row.append(avatarEl(person.avatar_path, person.nickname), name, ...actions);
   return row;
 }
 

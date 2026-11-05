@@ -3827,9 +3827,33 @@ html[data-theme="halloween"] .topbar-right .global-link { background: linear-gra
 .friend-record { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
 .friend-record li { padding: 6px 10px; border-radius: 9px; background: rgba(255,255,255,.07); font: 600 12px Inter, sans-serif; }
 .friend-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 10px; }
-.friend-badge { display: grid; justify-items: center; gap: 6px; padding: 10px 6px; border-radius: 12px; background: rgba(255,255,255,.05); text-align: center; font: 600 11px Inter, sans-serif; opacity: .4; }
-.friend-badge.is-unlocked { opacity: 1; background: rgba(211,255,87,.1); }
-.friend-badge svg { width: 38px; height: 38px; }
+.friend-badge { --tier: #d99a5b; display: grid; justify-items: center; gap: 8px; padding: 12px 6px; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: rgba(255,255,255,.04); color: var(--ink); text-align: center; font: 600 11px Inter, sans-serif; }
+.friend-badge.tier-silver { --tier: #c4d2dc; }
+.friend-badge.tier-gold { --tier: #facc15; }
+.friend-badge-icon { display: grid; width: 52px; height: 52px; place-items: center; border: 2px solid rgba(255,255,255,.1); border-radius: 16px; color: rgba(255,255,255,.28); filter: grayscale(1); }
+.friend-badge:not(.is-unlocked) { opacity: .55; }
+.friend-badge.is-unlocked { border-color: color-mix(in srgb, var(--tier) 60%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--tier) 16%, transparent), rgba(255,255,255,.03)); }
+.friend-badge.is-unlocked .friend-badge-icon { border-color: var(--tier); color: var(--tier); background: color-mix(in srgb, var(--tier) 14%, #05210f); box-shadow: 0 0 18px color-mix(in srgb, var(--tier) 40%, transparent); filter: none; }
+.friend-badge svg { width: 30px; height: 30px; }
+.friend-pinned { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 14px; }
+.friend-favorite { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; padding: 10px; border: 1px solid var(--lime); border-radius: 14px; background: rgba(211,255,87,.06); }
+.friend-favorite img { width: 64px; height: 84px; object-fit: contain; }
+.friend-favorite b { display: block; font: 800 15px Inter, sans-serif; }
+.friend-favorite span { color: var(--muted, #9aa0ad); font: 600 12px Inter, sans-serif; }
+.avatar { display: inline-grid; flex: 0 0 auto; width: 36px; height: 36px; place-items: center; overflow: hidden; border-radius: 50%; background: rgba(255,255,255,.1); color: var(--ink); font: 800 12px Inter, sans-serif; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-lg { width: 72px; height: 72px; font-size: 22px; }
+.profile-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.profile-head h3 { margin: 0; }
+.friends-me-info { display: flex; align-items: center; gap: 10px; }
+.friends-me-info > div { display: grid; flex: 1; min-width: 0; }
+.profile-editor { display: grid; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); }
+.profile-editor h4 { margin: 0; font-size: 15px; }
+.profile-editor label, .profile-label { display: grid; gap: 6px; margin: 0; font: 600 12px Inter, sans-serif; }
+.profile-avatar-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.badge-choice { padding: 0; border: 2px solid transparent; border-radius: 16px; background: transparent; color: inherit; cursor: pointer; }
+.badge-choice[aria-pressed="true"] { border-color: var(--lime); }
+.badge-choice .friend-badge { height: 100%; }
 .friends-dialog .dialog-inner { max-height: 85vh; overflow-y: auto; }
 
 @media (max-width: 640px) {
