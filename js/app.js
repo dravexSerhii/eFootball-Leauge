@@ -4210,7 +4210,7 @@ async function showProfile(userId) {
   parts.push(record, grid);
   friendProfile.replaceChildren(...parts);
   friendProfile.hidden = false;
-  renderCommunitySideUser();
+  renderFriendsMe();
 }
 
 function buildProfileEditor(profile, achievements, unlockedIds, cards) {
