@@ -3635,15 +3635,26 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   text-transform: uppercase;
 }
 .analyst-tab {
-  position: relative;
+  position: fixed;
+  right: 24px;
+  bottom: 22px;
+  z-index: 41;
   gap: 9px;
+  min-height: 54px;
+  padding: 0 19px;
+  border-radius: 999px;
   border-color: rgba(211, 255, 87, .3);
   background: linear-gradient(145deg, rgba(211, 255, 87, .12), rgba(156, 120, 255, .1));
   color: var(--lime);
   font-weight: 800;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .38), 0 0 24px rgba(211, 255, 87, .1);
+  backdrop-filter: blur(16px);
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 .analyst-tab[hidden] { display: none; }
-.analyst-tab > span:first-child { font-size: 19px; line-height: 1; }
+.analyst-tab:hover { transform: translateY(-3px); box-shadow: 0 16px 38px rgba(0, 0, 0, .46), 0 0 28px rgba(211, 255, 87, .16); }
+.analyst-tab::before { position: absolute; top: 8px; right: 10px; width: 7px; height: 7px; border: 2px solid #191923; border-radius: 50%; background: #71df91; content: ""; }
+.analyst-launcher-icon { width: 21px; height: 21px; flex: 0 0 auto; }
 .analyst-tab > b {
   display: grid;
   min-width: 20px;
@@ -3657,9 +3668,17 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
 }
 .analyst-tab > b[hidden] { display: none; }
 .analyst-briefing {
-  position: relative;
-  margin: -12px 0 24px;
-  padding: 0 22px 18px;
+  position: fixed;
+  right: 24px;
+  bottom: 88px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 48px));
+  max-height: min(680px, calc(100dvh - 120px));
+  margin: 0;
+  padding: 0 18px 16px;
+  overflow: hidden;
   border-color: rgba(211, 255, 87, .2);
   background:
     radial-gradient(ellipse at 100% 0, rgba(156, 120, 255, .13), transparent 42%),
@@ -3672,7 +3691,8 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 20px 0 15px;
+  flex: 0 0 auto;
+  padding: 17px 0 13px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 .analyst-briefing-head h2 { margin: 0 0 6px; font-size: 19px; letter-spacing: -.03em; }
@@ -3685,6 +3705,11 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   letter-spacing: .16em;
 }
 .analyst-staff-avatar-wrap { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; color: var(--ink); font-size: 12px; font-weight: 800; }
+.analyst-staff-meta { display: grid; gap: 4px; }
+.analyst-presence { position: relative; padding-left: 11px; color: var(--muted); font-size: 10px; font-weight: 600; }
+.analyst-presence::before { position: absolute; top: 50%; left: 0; width: 6px; height: 6px; border-radius: 50%; background: #89909d; content: ""; transform: translateY(-50%); }
+.analyst-presence[data-online="true"] { color: #8ee6a9; }
+.analyst-presence[data-online="true"]::before { background: #71df91; box-shadow: 0 0 9px rgba(113, 223, 145, .7); }
 .analyst-staff-avatar {
   display: block;
   flex: 0 0 42px;
@@ -3713,7 +3738,7 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   font-size: 20px;
 }
 .analyst-panel-close:hover, .analyst-dismiss:hover { border-color: var(--lime); color: var(--lime); }
-.analyst-notice-list { display: grid; gap: 10px; padding-top: 14px; }
+.analyst-notice-list { display: grid; gap: 10px; min-height: 0; padding-top: 14px; overflow-y: auto; overscroll-behavior: contain; scrollbar-color: rgba(211, 255, 87, .35) transparent; scrollbar-width: thin; }
 .analyst-notice {
   padding: 16px 18px 14px;
   border: 1px solid rgba(255, 255, 255, .09);
@@ -3730,7 +3755,7 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
 .analyst-archive > summary { padding: 14px 2px 6px; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 750; }
 .analyst-archive > summary:hover { color: var(--lime); }
 .analyst-archive-list { display: grid; gap: 10px; padding-top: 10px; }
-.analyst-tension { display: grid; gap: 8px; padding: 16px 0 2px; }
+.analyst-tension { display: grid; flex: 0 0 auto; gap: 8px; padding: 13px 0 2px; }
 .analyst-tension-label { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .analyst-tension-label strong { color: var(--ink); font-size: 10px; }
 .analyst-tension-track { height: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); border-radius: 99px; background: rgba(255,255,255,.07); }
@@ -3872,7 +3897,8 @@ html[data-theme="halloween"] .topbar-right .season-tag { border-color: rgba(255,
   .welcome-banner { gap: 12px; margin-top: 12px; padding: 13px 15px; border-radius: 16px; }
   .welcome-team-badge { flex-basis: 48px; width: 48px; height: 48px; border-radius: 14px; }
   .welcome-copy > span { font-size: 9px; }
-  .analyst-briefing { margin-top: -15px; padding-right: 14px; padding-left: 14px; }
+  .analyst-briefing { right: 12px; bottom: 76px; width: calc(100vw - 24px); max-height: min(72dvh, 640px); padding-right: 14px; padding-left: 14px; }
+  .analyst-tab { right: 14px; bottom: 14px; min-height: 50px; padding: 0 16px; }
   .analyst-briefing-head { flex-wrap: wrap; gap: 10px; }
   .analyst-briefing-head > div:first-child { flex: 1 1 100%; }
   .analyst-notice { padding: 13px; }

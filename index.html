@@ -66,8 +66,8 @@
                     <p class="eyebrow" data-i18n="eyebrow">eFootball League</p>
                 </div>
                 <div class="actions">
-                    <button class="button analyst-tab" id="analystNotificationsButton" type="button" aria-controls="analystBriefing" aria-expanded="false" hidden>
-                        <span aria-hidden="true">♧</span><span data-i18n="analystTab">Staff</span><b id="analystNotificationCount" hidden></b>
+                    <button class="button analyst-tab" id="analystNotificationsButton" type="button" aria-controls="analystBriefing" aria-expanded="false" data-i18n-aria-label="analystTab" aria-label="Staff" hidden>
+                        <svg class="analyst-launcher-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.76L4 20l1.48-4.1A7.47 7.47 0 0 1 5 12a7.5 7.5 0 1 1 15 .5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span data-i18n="analystTab">Staff</span><b id="analystNotificationCount" hidden></b>
                     </button>
                     <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
@@ -85,7 +85,10 @@
                     </div>
                     <div class="analyst-staff-avatar-wrap">
                         <img id="analystBriefingAvatar" class="analyst-staff-avatar" alt="">
-                        <span id="analystBriefingAuthor"></span>
+                        <div class="analyst-staff-meta">
+                            <span id="analystBriefingAuthor"></span>
+                            <small id="analystPresence" class="analyst-presence" role="status"></small>
+                        </div>
                     </div>
                     <button class="analyst-panel-close" id="analystPanelClose" type="button" data-i18n-aria-label="closeAnalystPanel" aria-label="Close briefing">×</button>
                 </header>

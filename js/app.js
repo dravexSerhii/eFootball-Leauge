@@ -19,6 +19,9 @@ const TRANSLATIONS = {
     analystKicker: "PRIVATE TEAM BRIEFING",
     analystTitle: "The analyst room",
     analystSubtitle: "One focused recommendation, based on your recent matches.",
+    analystOnline: "Online now",
+    analystLastSeen: "Last seen {0}",
+    analystNeverSeen: "Not recently active",
     analystEmpty: "The staff has no urgent recommendations right now. Keep the good work going.",
     analystArchive: "Previous messages",
     analystArchived: "ARCHIVED",
@@ -365,6 +368,9 @@ const TRANSLATIONS = {
     analystKicker: "ЗАКРЫТЫЙ РАЗБОР КОМАНДЫ",
     analystTitle: "Аналитический штаб",
     analystSubtitle: "Один точный совет на основе последних матчей.",
+    analystOnline: "В сети сейчас",
+    analystLastSeen: "Был(а) в сети {0}",
+    analystNeverSeen: "Давно не был(а) в сети",
     analystEmpty: "Срочных рекомендаций пока нет. Продолжайте в том же духе.",
     analystArchive: "Предыдущие сообщения",
     analystArchived: "В АРХИВЕ",
@@ -727,6 +733,7 @@ let analystNoticeState = null;
 let analystToastNoticeId = null;
 let analystToastTimer = null;
 let analystStorageFailureReported = false;
+let analystPresenceTimer = null;
 let sessionGeneration = 0;
 let realtimeChannel = null;
 let newsRealtimeChannel = null;
@@ -2410,6 +2417,34 @@ function renderAnalystStaffIdentity() {
   avatar.src = avatarPath;
   avatar.alt = author;
   document.getElementById("analystBriefingAuthor").textContent = author;
+  renderAnalystPresence();
+}
+
+function formatAnalystLastSeen(timestamp) {
+  if (!Number.isFinite(timestamp) || timestamp <= 0) return t("analystNeverSeen");
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+  if (elapsedMinutes === 0) return t("analystLastSeen", currentLang === "ru" ? "только что" : "just now");
+  const unit = elapsedMinutes < 60 ? "minute" :
+    elapsedMinutes < 24 * 60 ? "hour" : "day";
+  const amount = unit === "minute" ? elapsedMinutes :
+    unit === "hour" ? Math.floor(elapsedMinutes / 60) : Math.floor(elapsedMinutes / (24 * 60));
+  const relative = new Intl.RelativeTimeFormat(currentLang === "ru" ? "ru" : "en", {
+    numeric: "auto",
+    style: "short"
+  }).format(-amount, unit);
+  return t("analystLastSeen", relative);
+}
+
+function renderAnalystPresence() {
+  const presence = document.getElementById("analystPresence");
+  if (!presence || !Number.isInteger(myTeamIndex)) return;
+  const online = document.visibilityState === "visible";
+  const staffId = myTeamIndex === 0 ? "dario" : "iniesta";
+  const storageKey = `league-analyst-last-seen:${staffId}`;
+  if (online) localStorage.setItem(storageKey, String(Date.now()));
+  const lastSeen = Number(localStorage.getItem(storageKey));
+  presence.textContent = online ? t("analystOnline") : formatAnalystLastSeen(lastSeen);
+  presence.dataset.online = String(online);
 }
 
 function getTensionDescription(value) {
@@ -2472,10 +2507,15 @@ function renderAnalystNotifications() {
     analystNotificationsButton.setAttribute("aria-expanded", "false");
     analystNoticeList.replaceChildren();
     analystNotificationCount.hidden = true;
+    if (analystPresenceTimer) clearInterval(analystPresenceTimer);
+    analystPresenceTimer = null;
     return;
   }
 
   renderAnalystStaffIdentity();
+  if (!analystPresenceTimer) {
+    analystPresenceTimer = setInterval(renderAnalystPresence, 60000);
+  }
   renderAnalystTension();
   const unread = analystNoticeState.notices.filter(notice => !notice.read && !notice.dismissed).length;
   analystNotificationCount.hidden = unread === 0;
@@ -2679,6 +2719,7 @@ document.getElementById("analystToastView").addEventListener("click", () => {
 document.getElementById("analystToastHide").addEventListener("click", () => {
   if (analystToastNoticeId) dismissAnalystNotice(analystToastNoticeId);
 });
+document.addEventListener("visibilitychange", renderAnalystPresence);
 
 function mapMatch(row) {
   return {
