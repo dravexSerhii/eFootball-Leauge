@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
+import { evaluateAnalystAdvice, getAnalystAdviceCopy } from "./analyst-advice.js";
 
 const initialState = {
   teams: [{ name: "FC Promashkov" }, { name: "FC Lionslav" }],
@@ -13,6 +14,17 @@ const TRANSLATIONS = {
     authButton: "Sign in",
     welcomeBack: "Welcome back, {0}",
     welcomeTeam: "Your team · {0}",
+    analystTab: "Staff",
+    analystKicker: "PRIVATE TEAM BRIEFING",
+    analystTitle: "The analyst room",
+    analystSubtitle: "One focused recommendation, based on your recent matches.",
+    analystEmpty: "The staff has no urgent recommendations right now. Keep the good work going.",
+    analystClose: "Hide this recommendation",
+    analystView: "Open briefing",
+    hideNotice: "Dismiss",
+    closeAnalystPanel: "Close briefing",
+    analystVoice: "ANALYST STAFF",
+    analystStorageError: "Could not save your team briefing on this device.",
     eyebrow: "eFootball League",
     editTeams: "Teams",
     dbLink: "Card database",
@@ -338,6 +350,17 @@ const TRANSLATIONS = {
     authButton: "Войти",
     welcomeBack: "Добро пожаловать назад, {0}",
     welcomeTeam: "Ваша команда · {0}",
+    analystTab: "Штаб",
+    analystKicker: "ЗАКРЫТЫЙ РАЗБОР КОМАНДЫ",
+    analystTitle: "Аналитический штаб",
+    analystSubtitle: "Один точный совет на основе последних матчей.",
+    analystEmpty: "Срочных рекомендаций пока нет. Продолжайте в том же духе.",
+    analystClose: "Скрыть эту рекомендацию",
+    analystView: "Открыть штаб",
+    hideNotice: "Скрыть",
+    closeAnalystPanel: "Закрыть штаб",
+    analystVoice: "АНАЛИТИЧЕСКИЙ ШТАБ",
+    analystStorageError: "Не удалось сохранить уведомления штаба на этом устройстве.",
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
     dbLink: "База карточек",
@@ -679,6 +702,10 @@ let dataReady = false;
 let myTeamIndex = null;
 let myProfile = null;
 let pendingProposals = [];
+let analystNoticeState = null;
+let analystToastNoticeId = null;
+let analystToastTimer = null;
+let analystStorageFailureReported = false;
 let sessionGeneration = 0;
 let realtimeChannel = null;
 let newsRealtimeChannel = null;
@@ -698,6 +725,10 @@ const teamsDialog = document.getElementById("teamsDialog");
 const authDialog = document.getElementById("authDialog");
 const authButton = document.getElementById("authButton");
 const authStatus = document.getElementById("authStatus");
+const analystNotificationsButton = document.getElementById("analystNotificationsButton");
+const analystNotificationCount = document.getElementById("analystNotificationCount");
+const analystBriefing = document.getElementById("analystBriefing");
+const analystNoticeList = document.getElementById("analystNoticeList");
 const matchButton = document.getElementById("addMatchButton");
 const editTeamsButton = document.getElementById("editTeamsButton");
 const addNewsButton = document.getElementById("addNewsButton");
@@ -2144,6 +2175,11 @@ function applyLang() {
     renderFriendsMe();
   }
   renderProposals();
+  renderAnalystNotifications();
+  if (analystToastNoticeId && analystNoticeState) {
+    const notice = analystNoticeState.notices.find(item => item.id === analystToastNoticeId);
+    if (notice) showAnalystToast(notice);
+  }
 }
 
 function showToast(message) {
@@ -2180,6 +2216,7 @@ function updateAuthUi() {
     authButton.disabled = false;
   }
   renderWelcomeBanner();
+  renderAnalystNotifications();
 }
 
 function renderWelcomeBanner() {
@@ -2210,6 +2247,237 @@ function renderWelcomeBanner() {
   greeting.textContent = t("welcomeBack", nickname);
   teamName.textContent = t("welcomeTeam", team.name);
 }
+
+const ANALYST_STATE_VERSION = 2;
+const ANALYST_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+
+function getAnalystStorageKey() {
+  return `league-analyst-notices:${session?.user?.id || "signed-out"}`;
+}
+
+function readAnalystNoticeState() {
+  const raw = localStorage.getItem(getAnalystStorageKey());
+  if (!raw) return {
+    version: ANALYST_STATE_VERSION,
+    delivered: [],
+    notices: [],
+    lastDeliveredAt: 0,
+    welcomeDelivered: false
+  };
+  const saved = JSON.parse(raw);
+  if (![1, ANALYST_STATE_VERSION].includes(saved?.version) ||
+      !Array.isArray(saved.delivered) ||
+      !Array.isArray(saved.notices) ||
+      !Number.isFinite(saved.lastDeliveredAt) ||
+      !saved.notices.every(notice =>
+        notice && typeof notice.id === "string" &&
+        Number.isFinite(notice.createdAt) && typeof notice.read === "boolean" &&
+        notice.en && typeof notice.en.message === "string" && typeof notice.en.signoff === "string" &&
+        notice.ru && typeof notice.ru.message === "string" && typeof notice.ru.signoff === "string")) {
+    throw new Error("Unrecognized analyst notification data");
+  }
+  return {
+    ...saved,
+    version: ANALYST_STATE_VERSION,
+    welcomeDelivered: saved.version === 1 ? false : saved.welcomeDelivered === true
+  };
+}
+
+function saveAnalystNoticeState() {
+  try {
+    localStorage.setItem(getAnalystStorageKey(), JSON.stringify(analystNoticeState));
+    analystStorageFailureReported = false;
+    return true;
+  } catch (error) {
+    console.error("Could not save analyst notifications:", error);
+    if (!analystStorageFailureReported) showToast(t("analystStorageError"));
+    analystStorageFailureReported = true;
+    return false;
+  }
+}
+
+function getAnalystAuthor(teamIndex) {
+  const name = state.teams[teamIndex]?.name?.toLowerCase() || "";
+  if (name.includes("barcelona")) return "Andrés Iniesta";
+  if (name.includes("shakhtar") || name.includes("shaktar")) return "Dario Srna";
+  return teamIndex === 1 ? "Andrés Iniesta" : "Dario Srna";
+}
+
+function makeWelcomeNotice(now) {
+  const nickname = myProfile?.nickname;
+  if (!nickname) return null;
+  const name = nickname.trim();
+  return {
+    id: "welcome-message",
+    createdAt: now,
+    read: false,
+    en: {
+      message: `Welcome to the team, ${name}! The staff is here to help you read the matches, sharpen the plan, and make this club stronger. We are glad to have you with us.`,
+      signoff: "Your story with this club starts now. We will be right here for every match."
+    },
+    ru: {
+      message: `Добро пожаловать в команду, ${name}! Штаб поможет разбирать матчи, находить верные решения и становиться сильнее. Рады, что ты с нами.`,
+      signoff: "Твоя история в этом клубе начинается. Штаб будет рядом в каждом матче."
+    }
+  };
+}
+
+function clearAnalystToast() {
+  if (analystToastTimer) clearTimeout(analystToastTimer);
+  analystToastTimer = null;
+  analystToastNoticeId = null;
+  document.getElementById("analystToast").hidden = true;
+}
+
+function showAnalystToast(notice) {
+  const copy = notice[currentLang] || notice.en;
+  if (!copy) return;
+  analystToastNoticeId = notice.id;
+  document.getElementById("analystToastAuthor").textContent =
+    `${getAnalystAuthor(myTeamIndex)} · ${t("analystVoice")}`;
+  document.getElementById("analystToastMessage").textContent = copy.message;
+  const toast = document.getElementById("analystToast");
+  toast.hidden = false;
+  if (analystToastTimer) clearTimeout(analystToastTimer);
+  analystToastTimer = setTimeout(clearAnalystToast, 12000);
+}
+
+function renderAnalystNotifications() {
+  const hasTeam = Number.isInteger(myTeamIndex) && Boolean(state.teams[myTeamIndex]);
+  analystNotificationsButton.hidden = !session || !hasTeam;
+  if (!session || !hasTeam || !analystNoticeState) {
+    analystBriefing.hidden = true;
+    analystNotificationsButton.setAttribute("aria-expanded", "false");
+    analystNoticeList.replaceChildren();
+    analystNotificationCount.hidden = true;
+    return;
+  }
+
+  const unread = analystNoticeState.notices.filter(notice => !notice.read).length;
+  analystNotificationCount.hidden = unread === 0;
+  analystNotificationCount.textContent = unread > 9 ? "9+" : String(unread);
+  const visibleNotices = analystNoticeState.notices.slice().sort((a, b) => b.createdAt - a.createdAt);
+  if (!visibleNotices.length) {
+    const empty = document.createElement("p");
+    empty.className = "analyst-empty";
+    empty.textContent = t("analystEmpty");
+    analystNoticeList.replaceChildren(empty);
+    return;
+  }
+
+  const cards = visibleNotices.map(notice => {
+    const copy = notice[currentLang] || notice.en;
+    if (!copy) return null;
+    const article = document.createElement("article");
+    article.className = `analyst-notice${notice.read ? "" : " is-unread"}`;
+    const head = document.createElement("div");
+    head.className = "analyst-notice-meta";
+    const author = document.createElement("strong");
+    author.textContent = getAnalystAuthor(myTeamIndex);
+    const label = document.createElement("span");
+    label.textContent = t("analystVoice");
+    const dismiss = document.createElement("button");
+    dismiss.className = "analyst-dismiss";
+    dismiss.type = "button";
+    dismiss.textContent = "×";
+    dismiss.setAttribute("aria-label", t("analystClose"));
+    dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
+    head.append(author, label, dismiss);
+    const message = document.createElement("p");
+    message.textContent = copy.message;
+    const signoff = document.createElement("blockquote");
+    signoff.textContent = copy.signoff;
+    article.append(head, message, signoff);
+    return article;
+  }).filter(Boolean);
+  analystNoticeList.replaceChildren(...cards);
+}
+
+function setAnalystBriefingOpen(open) {
+  analystBriefing.hidden = !open;
+  analystNotificationsButton.setAttribute("aria-expanded", String(open));
+  if (!open || !analystNoticeState) return;
+  let changed = false;
+  analystNoticeState.notices.forEach(notice => {
+    if (!notice.read) {
+      notice.read = true;
+      changed = true;
+    }
+  });
+  if (changed) saveAnalystNoticeState();
+  renderAnalystNotifications();
+}
+
+function dismissAnalystNotice(noticeId) {
+  if (!analystNoticeState) return;
+  analystNoticeState.notices = analystNoticeState.notices.filter(notice => notice.id !== noticeId);
+  saveAnalystNoticeState();
+  if (analystToastNoticeId === noticeId) clearAnalystToast();
+  renderAnalystNotifications();
+  void refreshAnalystBriefing();
+}
+
+async function refreshAnalystBriefing() {
+  if (!session || !dataReady || myTeamIndex === null || !state.teams[myTeamIndex]) {
+    renderAnalystNotifications();
+    return;
+  }
+  try {
+    if (!analystNoticeState) analystNoticeState = readAnalystNoticeState();
+    const now = Date.now();
+    if (!analystNoticeState.welcomeDelivered) {
+      const welcome = makeWelcomeNotice(now);
+      if (welcome) {
+        analystNoticeState.welcomeDelivered = true;
+        analystNoticeState.notices.push(welcome);
+        analystNoticeState.lastDeliveredAt = now;
+        saveAnalystNoticeState();
+        showAnalystToast(welcome);
+      }
+    }
+    const hasVisibleNotice = analystNoticeState.notices.length > 0;
+    if (analystNoticeState.welcomeDelivered && !hasVisibleNotice &&
+        now - analystNoticeState.lastDeliveredAt >= ANALYST_COOLDOWN_MS) {
+      const advice = evaluateAnalystAdvice(state.matches, myTeamIndex)
+        .find(item => !analystNoticeState.delivered.includes(item.id));
+      if (advice) {
+        const notice = {
+          id: advice.id,
+          createdAt: now,
+          read: false,
+          en: getAnalystAdviceCopy(advice, "en"),
+          ru: getAnalystAdviceCopy(advice, "ru")
+        };
+        analystNoticeState.delivered.push(advice.id);
+        analystNoticeState.notices.push(notice);
+        analystNoticeState.lastDeliveredAt = now;
+        saveAnalystNoticeState();
+        showAnalystToast(notice);
+      }
+    }
+    renderAnalystNotifications();
+  } catch (error) {
+    console.error("Could not load or save analyst notifications:", error);
+    if (!analystStorageFailureReported) showToast(t("analystStorageError"));
+    analystStorageFailureReported = true;
+    analystNotificationsButton.hidden = true;
+    analystBriefing.hidden = true;
+  }
+}
+
+analystNotificationsButton.addEventListener("click", () => {
+  setAnalystBriefingOpen(analystBriefing.hidden);
+});
+document.getElementById("analystPanelClose").addEventListener("click", () => {
+  setAnalystBriefingOpen(false);
+});
+document.getElementById("analystToastView").addEventListener("click", () => {
+  clearAnalystToast();
+  setAnalystBriefingOpen(true);
+});
+document.getElementById("analystToastHide").addEventListener("click", () => {
+  if (analystToastNoticeId) dismissAnalystNotice(analystToastNoticeId);
+});
 
 function mapMatch(row) {
   return {
@@ -2303,6 +2571,7 @@ async function refreshFromServer() {
   if (!configReady) return;
   try {
     await fetchServerState();
+    await refreshAnalystBriefing();
     await refreshNews();
   } catch (error) {
     console.error("Failed to refresh the league from the server:", error);
@@ -2336,6 +2605,10 @@ async function handleSession(nextSession) {
   session = nextSession;
   myTeamIndex = null;
   myProfile = null;
+  analystNoticeState = null;
+  clearAnalystToast();
+  analystBriefing.hidden = true;
+  analystNotificationsButton.hidden = true;
   pendingProposals = [];
   if (messageRefreshTimer) clearInterval(messageRefreshTimer);
   messageRefreshTimer = null;
@@ -2362,6 +2635,7 @@ async function handleSession(nextSession) {
       myProfile = profile.error ? null : profile.data;
       render();
       updateAuthUi();
+      await refreshAnalystBriefing();
       renderProposals();
       renderFriendsMe();
     }

@@ -66,11 +66,26 @@
                     <p class="eyebrow" data-i18n="eyebrow">eFootball League</p>
                 </div>
                 <div class="actions">
+                    <button class="button analyst-tab" id="analystNotificationsButton" type="button" aria-controls="analystBriefing" aria-expanded="false" hidden>
+                        <span aria-hidden="true">♧</span><span data-i18n="analystTab">Staff</span><b id="analystNotificationCount" hidden></b>
+                    </button>
                     <button class="button" id="editTeamsButton" type="button" data-i18n="editTeams"><span aria-hidden="true">✎</span>
                         Teams</button>
                     <button class="button button-primary" id="addMatchButton" type="button" data-i18n="addMatch"><span
                             aria-hidden="true">＋</span> Add match</button>
                 </div>
+            </section>
+
+            <section class="panel analyst-briefing" id="analystBriefing" aria-labelledby="analystBriefingTitle" hidden>
+                <header class="analyst-briefing-head">
+                    <div>
+                        <p class="analyst-kicker" data-i18n="analystKicker">PRIVATE TEAM BRIEFING</p>
+                        <h2 id="analystBriefingTitle" data-i18n="analystTitle">The analyst room</h2>
+                        <p data-i18n="analystSubtitle">One focused recommendation, based on your recent matches.</p>
+                    </div>
+                    <button class="analyst-panel-close" id="analystPanelClose" type="button" data-i18n-aria-label="closeAnalystPanel" aria-label="Close briefing">×</button>
+                </header>
+                <div class="analyst-notice-list" id="analystNoticeList" aria-live="polite"></div>
             </section>
 
             <section class="panel proposals-panel" id="proposalsPanel" aria-live="polite" hidden>
@@ -602,6 +617,17 @@
         </div>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <aside class="analyst-toast" id="analystToast" aria-live="polite" hidden>
+        <div class="analyst-toast-mark" aria-hidden="true">◈</div>
+        <div class="analyst-toast-copy">
+            <small id="analystToastAuthor"></small>
+            <p id="analystToastMessage"></p>
+            <div class="analyst-toast-actions">
+                <button type="button" id="analystToastView" data-i18n="analystView">Open briefing</button>
+                <button type="button" id="analystToastHide" data-i18n="hideNotice">Dismiss</button>
+            </div>
+        </div>
+    </aside>
 
     <script>
         (function () {
