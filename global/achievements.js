@@ -107,17 +107,27 @@ export const ACHIEVEMENTS = [
 const stat = (value) => Number.isFinite(value) ? value : null;
 
 function teamRows(matches, teamIndex) {
-  return matches
+  const rows = Array.isArray(matches) ? matches : [];
+  return rows
     .map((match, index) => ({ match, index }))
-    .filter(({ match }) => match.home_team === teamIndex || match.away_team === teamIndex)
-    .sort((a, b) => new Date(a.match.played_at) - new Date(b.match.played_at) || a.index - b.index)
+    .filter(({ match }) => {
+      const home = match.home_team ?? match.home;
+      const away = match.away_team ?? match.away;
+      return home === teamIndex || away === teamIndex;
+    })
+    .sort((a, b) =>
+      new Date(a.match.played_at ?? a.match.date) - new Date(b.match.played_at ?? b.match.date) ||
+      a.index - b.index
+    )
     .map(({ match }) => {
-      const home = match.home_team === teamIndex;
+      const homeTeam = match.home_team ?? match.home;
+      const awayTeam = match.away_team ?? match.away;
+      const home = homeTeam === teamIndex;
       const own = match.stats?.[home ? "home" : "away"] || {};
       const opp = match.stats?.[home ? "away" : "home"] || {};
       return {
-        gf: Number(home ? match.home_goals : match.away_goals) || 0,
-        ga: Number(home ? match.away_goals : match.home_goals) || 0,
+        gf: Number(home ? (match.home_goals ?? match.homeGoals) : (match.away_goals ?? match.awayGoals)) || 0,
+        ga: Number(home ? (match.away_goals ?? match.awayGoals) : (match.home_goals ?? match.homeGoals)) || 0,
         shots: stat(own.shots),
         possession: stat(own.possession),
         passes: stat(own.passes),

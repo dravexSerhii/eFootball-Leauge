@@ -4414,10 +4414,18 @@ async function renderAllAchievements() {
   heading.append(title, description);
   const grid = document.createElement("div");
   grid.className = "friend-badges profile-achievements-grid";
-  ACHIEVEMENTS.forEach(achievement => {
-    const result = results.find(item => item.id === achievement.id);
-    if (result) grid.append(achievementBadge(achievement, result.unlocked, "", result));
-  });
+  [...ACHIEVEMENTS]
+    .sort((a, b) => {
+      const aResult = results.find(item => item.id === a.id);
+      const bResult = results.find(item => item.id === b.id);
+      return Number(bResult?.unlocked) - Number(aResult?.unlocked) ||
+        (bResult?.value ?? 0) / (bResult?.target ?? 1) -
+        (aResult?.value ?? 0) / (aResult?.target ?? 1);
+    })
+    .forEach(achievement => {
+      const result = results.find(item => item.id === achievement.id);
+      if (result) grid.append(achievementBadge(achievement, result.unlocked, "", result));
+    });
   communityAchievementsView.replaceChildren(heading, grid);
 }
 
