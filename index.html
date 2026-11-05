@@ -83,6 +83,10 @@
                         <h2 id="analystBriefingTitle" data-i18n="analystTitle">The analyst room</h2>
                         <p data-i18n="analystSubtitle">One focused recommendation, based on your recent matches.</p>
                     </div>
+                    <div class="analyst-staff-avatar-wrap">
+                        <img id="analystBriefingAvatar" class="analyst-staff-avatar" alt="">
+                        <span id="analystBriefingAuthor"></span>
+                    </div>
                     <button class="analyst-panel-close" id="analystPanelClose" type="button" data-i18n-aria-label="closeAnalystPanel" aria-label="Close briefing">×</button>
                 </header>
                 <div class="analyst-notice-list" id="analystNoticeList" aria-live="polite"></div>
@@ -620,7 +624,10 @@
     <aside class="analyst-toast" id="analystToast" aria-live="polite" hidden>
         <div class="analyst-toast-mark" aria-hidden="true">◈</div>
         <div class="analyst-toast-copy">
-            <small id="analystToastAuthor"></small>
+            <div class="analyst-toast-heading">
+                <img id="analystToastAvatar" class="analyst-staff-avatar" alt="">
+                <small id="analystToastAuthor"></small>
+            </div>
             <p id="analystToastMessage"></p>
             <div class="analyst-toast-actions">
                 <button type="button" id="analystToastView" data-i18n="analystView">Open briefing</button>

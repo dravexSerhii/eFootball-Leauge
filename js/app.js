@@ -2303,6 +2303,13 @@ function getAnalystAuthor(teamIndex) {
   return teamIndex === 1 ? "Andrés Iniesta" : "Dario Srna";
 }
 
+function getAnalystAvatar(teamIndex) {
+  const name = state.teams[teamIndex]?.name?.toLowerCase() || "";
+  if (name.includes("barcelona")) return "msg/iniesta.webp";
+  if (name.includes("shakhtar") || name.includes("shaktar")) return "msg/dario.png";
+  return teamIndex === 1 ? "msg/iniesta.webp" : "msg/dario.png";
+}
+
 function makeWelcomeNotice(now) {
   const nickname = myProfile?.nickname;
   if (!nickname) return null;
@@ -2333,6 +2340,9 @@ function showAnalystToast(notice) {
   const copy = notice[currentLang] || notice.en;
   if (!copy) return;
   analystToastNoticeId = notice.id;
+  const avatar = document.getElementById("analystToastAvatar");
+  avatar.src = getAnalystAvatar(myTeamIndex);
+  avatar.alt = getAnalystAuthor(myTeamIndex);
   document.getElementById("analystToastAuthor").textContent =
     `${getAnalystAuthor(myTeamIndex)} · ${t("analystVoice")}`;
   document.getElementById("analystToastMessage").textContent = copy.message;
@@ -2340,6 +2350,15 @@ function showAnalystToast(notice) {
   toast.hidden = false;
   if (analystToastTimer) clearTimeout(analystToastTimer);
   analystToastTimer = setTimeout(clearAnalystToast, 12000);
+}
+
+function renderAnalystStaffIdentity() {
+  const author = getAnalystAuthor(myTeamIndex);
+  const avatarPath = getAnalystAvatar(myTeamIndex);
+  const avatar = document.getElementById("analystBriefingAvatar");
+  avatar.src = avatarPath;
+  avatar.alt = author;
+  document.getElementById("analystBriefingAuthor").textContent = author;
 }
 
 function renderAnalystNotifications() {
@@ -2353,6 +2372,7 @@ function renderAnalystNotifications() {
     return;
   }
 
+  renderAnalystStaffIdentity();
   const unread = analystNoticeState.notices.filter(notice => !notice.read).length;
   analystNotificationCount.hidden = unread === 0;
   analystNotificationCount.textContent = unread > 9 ? "9+" : String(unread);
@@ -2370,10 +2390,17 @@ function renderAnalystNotifications() {
     if (!copy) return null;
     const article = document.createElement("article");
     article.className = `analyst-notice${notice.read ? "" : " is-unread"}`;
+    const identity = document.createElement("div");
+    identity.className = "analyst-staff-avatar-wrap";
+    const avatar = document.createElement("img");
+    avatar.className = "analyst-staff-avatar";
+    avatar.src = getAnalystAvatar(myTeamIndex);
+    avatar.alt = getAnalystAuthor(myTeamIndex);
+    const authorName = document.createElement("span");
+    authorName.textContent = getAnalystAuthor(myTeamIndex);
+    identity.append(avatar, authorName);
     const head = document.createElement("div");
     head.className = "analyst-notice-meta";
-    const author = document.createElement("strong");
-    author.textContent = getAnalystAuthor(myTeamIndex);
     const label = document.createElement("span");
     label.textContent = t("analystVoice");
     const dismiss = document.createElement("button");
@@ -2382,12 +2409,12 @@ function renderAnalystNotifications() {
     dismiss.textContent = "×";
     dismiss.setAttribute("aria-label", t("analystClose"));
     dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
-    head.append(author, label, dismiss);
+    head.append(label, dismiss);
     const message = document.createElement("p");
     message.textContent = copy.message;
     const signoff = document.createElement("blockquote");
     signoff.textContent = copy.signoff;
-    article.append(head, message, signoff);
+    article.append(identity, head, message, signoff);
     return article;
   }).filter(Boolean);
   analystNoticeList.replaceChildren(...cards);

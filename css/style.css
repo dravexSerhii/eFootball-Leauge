@@ -3669,7 +3669,7 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
 .analyst-briefing[hidden] { display: none; }
 .analyst-briefing-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   padding: 20px 0 15px;
@@ -3684,6 +3684,21 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   font-weight: 850;
   letter-spacing: .16em;
 }
+.analyst-staff-avatar-wrap { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; color: var(--ink); font-size: 12px; font-weight: 800; }
+.analyst-staff-avatar {
+  display: block;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(211, 255, 87, .3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .07);
+  object-fit: cover;
+}
+.analyst-notice .analyst-staff-avatar-wrap { margin-bottom: 12px; }
+.analyst-toast-heading { display: flex; align-items: center; gap: 8px; }
+.analyst-toast-heading .analyst-staff-avatar { flex-basis: 30px; width: 30px; height: 30px; }
+.analyst-toast-heading > small { color: var(--lime); font-size: 9px; font-weight: 850; letter-spacing: .1em; }
 .analyst-panel-close, .analyst-dismiss {
   display: grid;
   flex: 0 0 34px;
@@ -3750,7 +3765,6 @@ html[data-theme="halloween"] .topbar { border-bottom: 1px solid transparent; bor
   font-size: 22px;
 }
 .analyst-toast-copy { min-width: 0; flex: 1; }
-.analyst-toast-copy > small { color: var(--lime); font-size: 9px; font-weight: 850; letter-spacing: .1em; }
 .analyst-toast-copy > p { margin: 7px 0 11px; color: var(--ink); font-size: 12px; line-height: 1.55; }
 .analyst-toast-actions { display: flex; gap: 14px; }
 .analyst-toast-actions button {
