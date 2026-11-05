@@ -37,6 +37,7 @@
                         <a href="cards.html" data-i18n="dbLink">Card database</a>
                         <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
                         <a href="global/global.html#achievements" data-i18n="achievementsLink">Achievements</a>
+                        <button type="button" id="myProfileButton" data-i18n="myProfile">My profile</button>
                         <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
                     </nav>
                 </details>
@@ -317,6 +318,55 @@
                     <p class="news-empty" data-i18n="loadingNews">Loading news…</p>
                 </div>
             </section>
+            <section class="community-section" id="communitySection" aria-labelledby="communityTitle" hidden>
+                <aside class="community-sidebar" aria-label="Community navigation">
+                    <a class="community-brand" href="index.html#community/profile"><span class="brand-mark">E</span><span>eFootball<br>Community</span></a>
+                    <div class="community-side-user" id="communitySideUser"></div>
+                    <nav class="community-side-nav">
+                        <button type="button" data-community-page="profile"><span aria-hidden="true">⌂</span><span data-i18n="myProfile">My profile</span></button>
+                        <button type="button" data-community-page="friends"><span aria-hidden="true">♧</span><span data-i18n="friendsLink">Friends</span></button>
+                        <button type="button" data-community-page="messages"><span aria-hidden="true">✉</span><span data-i18n="messagesLink">Messages</span><b id="messageUnread" hidden></b></button>
+                        <button type="button" data-community-page="achievements"><span aria-hidden="true">◇</span><span data-i18n="achievementsLink">Achievements</span></button>
+                        <button type="button" data-community-page="edit"><span aria-hidden="true">⚙</span><span data-i18n="editProfile">Edit profile</span></button>
+                    </nav>
+                    <a class="community-back" href="index.html" data-i18n="backToLeague">← Back to league</a>
+                </aside>
+                <div class="community-main">
+                    <header class="community-topbar">
+                        <div>
+                            <p class="eyebrow" data-i18n="communityEyebrow">LEAGUE COMMUNITY</p>
+                            <h1 id="communityTitle" data-i18n="myProfile">My profile</h1>
+                        </div>
+                        <div class="community-top-actions">
+                            <button type="button" class="community-icon-button" data-community-page="messages" aria-label="Messages">✉<b id="messageUnreadTop" hidden></b></button>
+                        </div>
+                    </header>
+                    <div class="community-screen" id="communityProfileView"><div class="friend-profile" id="friendProfile"></div></div>
+                    <div class="community-screen" id="communityEditView" hidden><div id="communityEditContent"></div></div>
+                    <div class="community-screen" id="communityFriendsView" hidden>
+                        <div class="community-page-heading"><h2 data-i18n="friendsLink">Friends</h2><p data-i18n="friendsPageDesc">Your football circle</p></div>
+                        <div class="friends-tabs" role="tablist">
+                            <button type="button" class="friends-tab" data-tab="friends" data-i18n="friendsTabFriends">Friends</button>
+                            <button type="button" class="friends-tab" data-tab="requests" data-i18n="friendsTabRequests">Requests</button>
+                            <button type="button" class="friends-tab" data-tab="search" data-i18n="friendsTabSearch">Find players</button>
+                        </div>
+                        <form class="friends-search" id="friendSearchForm" hidden>
+                            <input id="friendSearchInput" type="search" minlength="2" maxlength="24" autocomplete="off"
+                                data-i18n-placeholder="friendSearchPlaceholder" placeholder="Nickname">
+                            <button class="button button-primary" type="submit" data-i18n="friendSearchButton">Search</button>
+                        </form>
+                        <div class="friends-list" id="friendsList"></div>
+                    </div>
+                    <div class="community-screen" id="communityAchievementsView" hidden></div>
+                    <div class="community-screen" id="communityMessagesView" hidden>
+                        <div class="community-page-heading"><h2 data-i18n="messagesLink">Messages</h2><p data-i18n="messagesDesc">Private conversations with friends</p></div>
+                        <div class="messages-layout">
+                            <div class="messages-people" id="messagesPeople"></div>
+                            <div class="messages-chat" id="messagesChat"><p class="friends-empty" data-i18n="chooseConversation">Choose a friend to start chatting.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
         <footer><span data-i18n="footer1">eFOOTBALL LEAGUE · YOUR CHAMPIONSHIP</span><span data-i18n="footer2">Every match counts.</span></footer>
     </div>
@@ -517,30 +567,6 @@
             <div id="newsViewDescription" class="news-view-description"></div>
         </div>
     </dialog>
-    <dialog id="friendsDialog" class="friends-dialog" aria-labelledby="friendsDialogTitle">
-        <div class="dialog-inner">
-            <div class="dialog-header">
-                <div>
-                    <h2 id="friendsDialogTitle" data-i18n="friendsLink">Friends</h2>
-                    <p data-i18n="friendsDesc">Open a player's profile</p>
-                </div>
-                <button class="close-button" type="button" data-close="friendsDialog" aria-label="Close">×</button>
-            </div>
-            <div class="friends-me" id="friendsMe"></div>
-            <div class="friends-tabs" role="tablist">
-                <button type="button" class="friends-tab" data-tab="friends" data-i18n="friendsTabFriends">Friends</button>
-                <button type="button" class="friends-tab" data-tab="requests" data-i18n="friendsTabRequests">Requests</button>
-                <button type="button" class="friends-tab" data-tab="search" data-i18n="friendsTabSearch">Find players</button>
-            </div>
-            <form class="friends-search" id="friendSearchForm" hidden>
-                <input id="friendSearchInput" type="search" minlength="2" maxlength="24" autocomplete="off"
-                    data-i18n-placeholder="friendSearchPlaceholder" placeholder="Nickname">
-                <button class="button button-primary" type="submit" data-i18n="friendSearchButton">Search</button>
-            </form>
-            <div class="friends-list" id="friendsList"></div>
-            <div class="friend-profile" id="friendProfile" hidden></div>
-        </div>
-    </dialog>
     <dialog id="authDialog" aria-labelledby="authDialogTitle">
         <form class="dialog-inner" id="authForm">
             <div class="dialog-header">
@@ -557,6 +583,15 @@
             <p class="form-error" id="authError" role="alert"></p>
             <div class="dialog-actions"><button class="button button-primary" type="submit" data-i18n="signIn">Sign in</button></div>
         </form>
+    </dialog>
+    <dialog id="achievementDialog" class="achievement-dialog" aria-labelledby="achievementDialogTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div><p class="eyebrow" data-i18n="achievementDetails">ACHIEVEMENT DETAILS</p><h2 id="achievementDialogTitle"></h2></div>
+                <button class="close-button" type="button" data-close="achievementDialog" aria-label="Close">×</button>
+            </div>
+            <div id="achievementDialogContent"></div>
+        </div>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 

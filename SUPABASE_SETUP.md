@@ -35,7 +35,7 @@ To share one coin balance between the phone and computer, run `sql/supabase-migr
 
 To bind each account to its own team (Barcelona → promashkovsergey363@gmail.com, the second team →
 vladlionslav@gmail.com), run `sql/supabase-migration-profiles.sql` once. After sign-in the site shows your team, the
-Achievements section shows only your own badges, and the "Friends" menu item opens the friends dialog.
+Achievements are scoped to your account, and the main menu opens the league community.
 
 Then run `sql/supabase-migration-teams-friends.sql` once (after the profiles migration). It enforces that each
 account can edit only its own team name and lineup, replaces direct match inserts with a two-sided flow (one team
@@ -45,6 +45,12 @@ the site files together with this migration; the old site cannot add matches aft
 
 Finally run `sql/supabase-migration-profile-extras.sql`. It adds avatars (public `avatars` bucket, every user can write
 only into their own folder), up to 3 pinned achievement badges and a favourite player from the card database.
+
+The community is opened from the main menu as a separate social workspace with its own profile, friends,
+achievements, and edit-page screens. To enable private messages between accepted friends, run
+`sql/supabase-migration-messages.sql` after `sql/supabase-migration-teams-friends.sql` and
+`sql/supabase-migration-profile-extras.sql`. The messaging SQL creates the private message table and the
+send/read functions; messages can only be sent to accepted friends.
 
 ## Team analytics
 

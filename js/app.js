@@ -16,12 +16,39 @@ const TRANSLATIONS = {
     dbLink: "Card database",
     globalLink: "Team analytics",
     achievementsLink: "Achievements",
-    friendsLink: "Friends",
+    communityEyebrow: "LEAGUE COMMUNITY",
+    communityTitle: "Community",
+    communityDesc: "Your profile, achievements and friends",
+    communitySignIn: "Sign in to see your profile, achievements and friends.",
+    messagesLink: "Messages",
+    messagesDesc: "Private conversations with friends",
+    friendsPageDesc: "Your football circle",
+    chooseConversation: "Choose a friend to start chatting.",
+    messagePlaceholder: "Write a message…",
+    sendMessage: "Send",
+    noMessagesYet: "No messages yet. Say hello!",
+    messagesNeedMigration: "Messaging is not set up yet. Run the social messaging migration.",
+    messagesEmptyFriends: "Add friends to start a conversation.",
+    unreadMessages: "Unread messages",
+    backToLeague: "← Back to league",
+    achievementDetails: "ACHIEVEMENT DETAILS",
+    progressLabel: "Progress",
+    achievementTier: "Tier",
+    bronzeTier: "Bronze",
+    silverTier: "Silver",
+    goldTier: "Gold",
+    unlockedLabel: "Unlocked",
+    notUnlockedLabel: "In progress",
+    editPage: "Edit page",
+    editPageDesc: "Make this page feel like yours.",
+    profileBack: "Back to my page",
+    achievementPageDesc: "{0} of {1} achievements unlocked. Select a badge to see what it takes.",
+    friendsLink: "My friends",
     friendsDesc: "Open a player's profile",
     youTag: "You",
     friendRecord: "Played {0} · W {1} · D {2} · L {3} · {4} pts",
     friendBadges: "Achievements {0}/{1}",
-    editProfile: "Edit profile",
+    editProfile: "Edit page",
     avatarUpload: "Avatar",
     pinBadges: "Pinned badges",
     pinLimit: "You can pin up to 3 badges",
@@ -49,7 +76,7 @@ const TRANSLATIONS = {
     removeFriend: "Remove",
     alreadyFriend: "Friends",
     incomingTag: "wants to be friends",
-    myProfile: "My profile",
+    myProfile: "My page",
     nicknameLabel: "Nickname",
     saveNickname: "Save",
     nicknameSaved: "Nickname saved",
@@ -312,12 +339,39 @@ const TRANSLATIONS = {
     dbLink: "База карточек",
     globalLink: "Аналитика команд",
     achievementsLink: "Достижения",
-    friendsLink: "Друзья",
+    communityEyebrow: "СООБЩЕСТВО ЛИГИ",
+    communityTitle: "Сообщество",
+    communityDesc: "Ваш профиль, достижения и друзья",
+    communitySignIn: "Войдите, чтобы увидеть свой профиль, достижения и друзей.",
+    messagesLink: "Мои сообщения",
+    messagesDesc: "Личные беседы с друзьями",
+    friendsPageDesc: "Ваш круг футбольных друзей",
+    chooseConversation: "Выберите друга, чтобы начать переписку.",
+    messagePlaceholder: "Напишите сообщение…",
+    sendMessage: "Отправить",
+    noMessagesYet: "Сообщений пока нет. Напишите первым!",
+    messagesNeedMigration: "Сообщения ещё не настроены. Выполните SQL-миграцию сообщений.",
+    messagesEmptyFriends: "Добавьте друзей, чтобы начать переписку.",
+    unreadMessages: "Непрочитанные сообщения",
+    backToLeague: "← Назад в лигу",
+    achievementDetails: "О ДОСТИЖЕНИИ",
+    progressLabel: "Прогресс",
+    achievementTier: "Уровень",
+    bronzeTier: "Бронза",
+    silverTier: "Серебро",
+    goldTier: "Золото",
+    unlockedLabel: "Получено",
+    notUnlockedLabel: "В процессе",
+    editPage: "Редактировать страницу",
+    editPageDesc: "Сделайте эту страницу по-настоящему своей.",
+    profileBack: "Назад к моей странице",
+    achievementPageDesc: "Получено достижений: {0} из {1}. Нажмите на значок, чтобы узнать условие.",
+    friendsLink: "Мои друзья",
     friendsDesc: "Откройте профиль игрока",
     youTag: "Вы",
     friendRecord: "Матчей {0} · В {1} · Н {2} · П {3} · {4} очк.",
     friendBadges: "Достижения {0}/{1}",
-    editProfile: "Редактировать профиль",
+    editProfile: "Редактировать страницу",
     avatarUpload: "Аватарка",
     pinBadges: "Закреплённые значки",
     pinLimit: "Можно закрепить до 3 значков",
@@ -345,7 +399,7 @@ const TRANSLATIONS = {
     removeFriend: "Удалить",
     alreadyFriend: "В друзьях",
     incomingTag: "хочет дружить",
-    myProfile: "Мой профиль",
+    myProfile: "Моя страница",
     nicknameLabel: "Никнейм",
     saveNickname: "Сохранить",
     nicknameSaved: "Никнейм сохранён",
@@ -2080,6 +2134,10 @@ function applyLang() {
   });
   document.documentElement.lang = currentLang;
   render();
+  if (document.body.classList.contains("community-mode")) {
+    setCommunityView(communityPage, false);
+    renderFriendsMe();
+  }
   renderProposals();
 }
 
@@ -2194,6 +2252,8 @@ async function fetchServerState() {
     lineups: settings.lineups && typeof settings.lineups === "object" ? settings.lineups : {}
   };
   pendingProposals = [];
+  messagesUnavailable = false;
+  activeMessageFriend = null;
   if (session) {
     const proposals = await supabase.from("league_match_proposals").select("*").eq("status", "pending");
     if (!proposals.error) pendingProposals = proposals.data || [];
@@ -2242,6 +2302,8 @@ async function handleSession(nextSession) {
   myTeamIndex = null;
   myProfile = null;
   pendingProposals = [];
+  if (messageRefreshTimer) clearInterval(messageRefreshTimer);
+  messageRefreshTimer = null;
   dataReady = false;
   if (pollTimer) clearInterval(pollTimer);
   if (realtimeChannel) {
@@ -2266,6 +2328,11 @@ async function handleSession(nextSession) {
       render();
       updateAuthUi();
       renderProposals();
+      renderFriendsMe();
+    }
+    renderFriendsMe();
+    if (document.body.classList.contains("community-mode")) {
+      await openCommunityPage(communityPage, false);
     }
     await refreshNews();
     subscribeToNews();
@@ -3834,12 +3901,87 @@ document.addEventListener("keydown", event => {
   }
 });
 
-const friendsDialog = document.getElementById("friendsDialog");
 const friendsList = document.getElementById("friendsList");
 const friendProfile = document.getElementById("friendProfile");
 const friendSearchForm = document.getElementById("friendSearchForm");
+const communitySection = document.getElementById("communitySection");
+const communityProfileView = document.getElementById("communityProfileView");
+const communityFriendsView = document.getElementById("communityFriendsView");
+const communityEditView = document.getElementById("communityEditView");
+const communityAchievementsView = document.getElementById("communityAchievementsView");
+const communityMessagesView = document.getElementById("communityMessagesView");
+const messagesPeople = document.getElementById("messagesPeople");
+const messagesChat = document.getElementById("messagesChat");
 let achievementsModule = null;
 let friendsTab = "friends";
+let communityPage = "profile";
+let activeMessageFriend = null;
+let messageRefreshTimer = null;
+
+function setCommunityView(view, updateHash = true) {
+  const allowed = ["profile", "friends", "messages", "achievements", "edit"];
+  communityPage = allowed.includes(view) ? view : "profile";
+  communitySection.hidden = false;
+  document.body.classList.add("community-mode");
+  communityProfileView.hidden = communityPage !== "profile";
+  communityFriendsView.hidden = communityPage !== "friends";
+  communityMessagesView.hidden = communityPage !== "messages";
+  communityAchievementsView.hidden = communityPage !== "achievements";
+  communityEditView.hidden = communityPage !== "edit";
+  const titles = {
+    profile: t("myProfile"),
+    friends: t("friendsLink"),
+    messages: t("messagesLink"),
+    achievements: t("achievementsLink"),
+    edit: t("editPage")
+  };
+  document.getElementById("communityTitle").textContent = titles[communityPage];
+  document.querySelectorAll(".community-side-nav [data-community-page]").forEach(button => {
+    button.classList.toggle("is-active", button.dataset.communityPage === communityPage);
+    button.setAttribute("aria-current", button.dataset.communityPage === communityPage ? "page" : "false");
+  });
+  if (messageRefreshTimer) {
+    clearInterval(messageRefreshTimer);
+    messageRefreshTimer = null;
+  }
+  if (updateHash && location.hash !== `#community/${communityPage}`) {
+    history.pushState(null, "", `#community/${communityPage}`);
+  }
+}
+
+async function openCommunityPage(page, updateHash = true) {
+  setCommunityView(page, updateHash);
+  renderFriendsMe();
+  if (!session) {
+    const prompt = document.createElement("div");
+    prompt.className = "community-signin-card";
+    prompt.append(document.createTextNode(t("communitySignIn")),
+      friendButton(t("signIn"), "button-primary", () => authDialog.showModal()));
+    if (page === "profile") communityProfileView.replaceChildren(prompt);
+    if (page === "friends") friendsList.replaceChildren(prompt);
+    if (page === "messages") {
+      messagesPeople.replaceChildren(prompt);
+      messagesChat.replaceChildren();
+    }
+    if (page === "achievements") communityAchievementsView.replaceChildren(prompt);
+    if (page === "edit") document.getElementById("communityEditContent").replaceChildren(prompt);
+    return;
+  }
+  if (page === "profile" || page === "achievements") {
+    if (page === "profile" && myProfile) await showProfile(myProfile.user_id);
+    if (page === "achievements") {
+      await renderAllAchievements();
+      setCommunityView("achievements", false);
+    }
+  } else if (page === "friends") {
+    void renderFriendsTab();
+  } else if (page === "edit" && myProfile) {
+    await showProfileEditor(myProfile.user_id);
+  } else if (page === "messages") {
+    void loadMessageInbox();
+    if (!messageRefreshTimer) messageRefreshTimer = setInterval(() => void loadMessageInbox(), 12000);
+  }
+}
 
 async function callRpc(name, args) {
   const { data, error } = await supabase.rpc(name, args);
@@ -3894,9 +4036,14 @@ async function loadCardCatalog() {
   return cardCatalog;
 }
 
-function achievementBadge(achievement, unlocked, extra = "") {
-  const badge = document.createElement("div");
+function achievementBadge(achievement, unlocked, extra = "", result = null) {
+  const badge = document.createElement(result ? "button" : "div");
   badge.className = `friend-badge tier-${achievement.tier}${unlocked ? " is-unlocked" : ""} ${extra}`.trim();
+  if (result) {
+    badge.type = "button";
+    badge.setAttribute("aria-label", `${(currentLang === "ru" ? achievement.ru : achievement.en)[0]} — ${t("progressLabel")}: ${result.value}/${result.target}`);
+    badge.addEventListener("click", () => showAchievementDetails(achievement, result));
+  }
   const icon = document.createElement("span");
   icon.className = "friend-badge-icon";
   icon.innerHTML = achievement.icon;
@@ -3925,6 +4072,45 @@ function favoriteCardEl(card) {
   return box;
 }
 
+function showAchievementDetails(achievement, result) {
+  const [title, description] = currentLang === "ru" ? achievement.ru : achievement.en;
+  const tier = t(`${achievement.tier}Tier`);
+  const dialog = document.getElementById("achievementDialog");
+  const content = document.getElementById("achievementDialogContent");
+  const icon = document.createElement("div");
+  icon.className = `achievement-detail-icon tier-${achievement.tier}${result.unlocked ? " is-unlocked" : ""}`;
+  icon.innerHTML = achievement.icon;
+  const copy = document.createElement("div");
+  copy.className = "achievement-detail-copy";
+  const desc = document.createElement("p");
+  desc.textContent = description;
+  const status = document.createElement("strong");
+  status.className = result.unlocked ? "achievement-status is-unlocked" : "achievement-status";
+  status.textContent = result.unlocked ? t("unlockedLabel") : t("notUnlockedLabel");
+  const progressHead = document.createElement("div");
+  progressHead.className = "achievement-progress-head";
+  const progressLabel = document.createElement("span");
+  progressLabel.textContent = `${t("progressLabel")} · ${result.value}/${result.target}`;
+  const percent = document.createElement("b");
+  percent.textContent = `${Math.round(result.value / result.target * 100)}%`;
+  progressHead.append(progressLabel, percent);
+  const bar = document.createElement("div");
+  bar.className = "achievement-progress";
+  bar.setAttribute("role", "progressbar");
+  bar.setAttribute("aria-valuemin", "0");
+  bar.setAttribute("aria-valuemax", String(result.target));
+  bar.setAttribute("aria-valuenow", String(result.value));
+  const fill = document.createElement("i");
+  fill.style.width = `${Math.min(100, result.value / result.target * 100)}%`;
+  bar.append(fill);
+  const tierLine = document.createElement("small");
+  tierLine.textContent = `${t("achievementTier")}: ${tier}`;
+  copy.append(desc, status, progressHead, bar, tierLine);
+  document.getElementById("achievementDialogTitle").textContent = title;
+  content.replaceChildren(icon, copy);
+  dialog.showModal();
+}
+
 async function resizeAvatar(file) {
   const bitmap = await createImageBitmap(file);
   const size = 256;
@@ -3940,11 +4126,14 @@ async function resizeAvatar(file) {
 }
 
 async function showProfile(userId) {
+  setCommunityView("profile");
   const { ok, data: profile } = await callRpc("get_league_profile", { p_user: userId });
   if (!ok || !profile) return;
   achievementsModule ??= await import("../global/achievements.js");
   const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
   const cards = await loadCardCatalog();
+  const results = evaluateAchievements(state.matches, profile.team_index);
+  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i]?.unlocked).map(a => a.id));
   const head = document.createElement("div");
   head.className = "profile-head";
   const title = document.createElement("h3");
@@ -3961,8 +4150,20 @@ async function showProfile(userId) {
     return;
   }
   const row = getStandings().find(item => item.index === profile.team_index);
-  const results = evaluateAchievements(state.matches, profile.team_index);
-  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i].unlocked).map(a => a.id));
+  const actions = document.createElement("div");
+  actions.className = "profile-actions";
+  if (profile.is_self) {
+    actions.append(friendButton(t("editPage"), "button-primary", () => void showProfileEditor(profile.user_id)));
+  } else if (profile.is_friend) {
+    actions.append(friendButton(t("sendMessage"), "button-primary", async () => {
+      const { ok, data } = await callRpc("list_friends");
+      const friend = ok ? data.find(item => item.user_id === profile.user_id) : null;
+      if (friend) void openMessageConversation(friend);
+    }));
+  }
+  const friendsShortcut = friendButton(t("friendsLink"), "button-quiet", () => openFriends());
+  actions.append(friendsShortcut);
+  parts.push(actions);
   const teamLine = document.createElement("p");
   teamLine.className = "friend-team";
   const photo = getTeamPhoto(profile.team_index);
@@ -3981,7 +4182,10 @@ async function showProfile(userId) {
   if (pinned.length) {
     const strip = document.createElement("div");
     strip.className = "friend-pinned";
-    pinned.forEach(achievement => strip.append(achievementBadge(achievement, true, "is-pinned")));
+    pinned.forEach(achievement => {
+      const result = results.find(item => item.id === achievement.id);
+      if (result) strip.append(achievementBadge(achievement, true, "is-pinned", result));
+    });
     parts.push(strip);
   }
   const favorite = cards.find(card => card.id === profile.favorite_card);
@@ -3996,21 +4200,22 @@ async function showProfile(userId) {
     record.append(item);
   });
   const grid = document.createElement("div");
-  grid.className = "friend-badges";
+  grid.className = "friend-badges profile-achievements-grid";
   [...ACHIEVEMENTS]
     .sort((a, b) => Number(unlockedIds.has(b.id)) - Number(unlockedIds.has(a.id)))
-    .forEach(achievement => grid.append(achievementBadge(achievement, unlockedIds.has(achievement.id))));
+    .forEach(achievement => {
+      const result = results.find(item => item.id === achievement.id);
+      if (result) grid.append(achievementBadge(achievement, unlockedIds.has(achievement.id), "", result));
+    });
   parts.push(record, grid);
-  if (profile.is_self) parts.push(buildProfileEditor(profile, ACHIEVEMENTS, unlockedIds, cards));
   friendProfile.replaceChildren(...parts);
   friendProfile.hidden = false;
+  renderCommunitySideUser();
 }
 
 function buildProfileEditor(profile, achievements, unlockedIds, cards) {
   const form = document.createElement("form");
   form.className = "profile-editor";
-  const heading = document.createElement("h4");
-  heading.textContent = t("editProfile");
   const draft = {
     avatarPath: profile.avatar_path || null,
     badges: (profile.featured_badges || []).filter(id => unlockedIds.has(id)).slice(0, 3),
@@ -4133,6 +4338,7 @@ function buildProfileEditor(profile, achievements, unlockedIds, cards) {
       if (!refreshed.error) myProfile = refreshed.data;
       showToast(t("profileSaved"));
       renderFriendsMe();
+      setCommunityView("profile");
       await showProfile(profile.user_id);
     } catch (error) {
       showToast(error.message || String(error));
@@ -4140,14 +4346,23 @@ function buildProfileEditor(profile, achievements, unlockedIds, cards) {
       save.disabled = false;
     }
   });
-  form.append(heading, nickLabel, avatarRow, badgesTitle, badgePicker, cardLabel, save);
+  form.append(nickLabel, avatarRow, badgesTitle, badgePicker, cardLabel, save);
   return form;
 }
 
 function renderFriendsMe() {
-  const box = document.getElementById("friendsMe");
+  const box = document.getElementById("communitySideUser");
   box.replaceChildren();
-  if (!myProfile) return;
+  if (!session) {
+    box.append(friendButton(t("signIn"), "button-primary", () => authDialog.showModal()));
+    return;
+  }
+  if (!myProfile) {
+    const loading = document.createElement("small");
+    loading.textContent = t("loadingLeague");
+    box.append(loading);
+    return;
+  }
   const info = document.createElement("div");
   info.className = "friends-me-info";
   const text = document.createElement("div");
@@ -4156,9 +4371,212 @@ function renderFriendsMe() {
   const label = document.createElement("small");
   label.textContent = myTeamIndex !== null ? state.teams[myTeamIndex]?.name ?? "" : t("noTeamLinked");
   text.append(name, label);
-  info.append(avatarEl(myProfile.avatar_path, myProfile.nickname), text,
-    friendButton(t("myProfile"), "button-quiet", () => void showProfile(myProfile.user_id)));
+  info.append(avatarEl(myProfile.avatar_path, myProfile.nickname), text);
   box.append(info);
+}
+
+async function showProfileEditor(userId) {
+  const { ok, data: profile } = await callRpc("get_league_profile", { p_user: userId });
+  if (!ok || !profile?.is_self) return;
+  achievementsModule ??= await import("../global/achievements.js");
+  const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
+  const cards = await loadCardCatalog();
+  const results = evaluateAchievements(state.matches, profile.team_index);
+  const unlockedIds = new Set(ACHIEVEMENTS.filter((_, i) => results[i]?.unlocked).map(a => a.id));
+  const content = document.getElementById("communityEditContent");
+  const heading = document.createElement("div");
+  heading.className = "community-page-heading";
+  const title = document.createElement("h2");
+  title.textContent = t("editPage");
+  const description = document.createElement("p");
+  description.textContent = t("editPageDesc");
+  const back = friendButton(t("profileBack"), "button-quiet", () => {
+    setCommunityView("profile");
+    void showProfile(userId);
+  });
+  heading.append(title, description, back);
+  content.replaceChildren(heading, buildProfileEditor(profile, ACHIEVEMENTS, unlockedIds, cards));
+  setCommunityView("edit");
+}
+
+async function renderAllAchievements() {
+  if (!myProfile || myTeamIndex === null) return;
+  achievementsModule ??= await import("../global/achievements.js");
+  const { ACHIEVEMENTS, evaluateAchievements } = achievementsModule;
+  const results = evaluateAchievements(state.matches, myTeamIndex);
+  const unlocked = results.filter(result => result.unlocked).length;
+  const heading = document.createElement("div");
+  heading.className = "community-page-heading";
+  const title = document.createElement("h2");
+  title.textContent = t("achievementsLink");
+  const description = document.createElement("p");
+  description.textContent = t("achievementPageDesc", unlocked, ACHIEVEMENTS.length);
+  heading.append(title, description);
+  const grid = document.createElement("div");
+  grid.className = "friend-badges profile-achievements-grid";
+  ACHIEVEMENTS.forEach(achievement => {
+    const result = results.find(item => item.id === achievement.id);
+    if (result) grid.append(achievementBadge(achievement, result.unlocked, "", result));
+  });
+  communityAchievementsView.replaceChildren(heading, grid);
+}
+
+let messagesUnavailable = false;
+
+function updateMessageUnread(count) {
+  for (const id of ["messageUnread", "messageUnreadTop"]) {
+    const badge = document.getElementById(id);
+    badge.hidden = count < 1;
+    badge.textContent = count > 99 ? "99+" : String(count);
+  }
+}
+
+async function loadMessageInbox() {
+  if (!session || communityPage !== "messages" || messagesUnavailable) return;
+  const { data: friends, error: friendsError } = await supabase.rpc("list_friends");
+  if (friendsError) {
+    console.error("Could not load friends for messages:", friendsError);
+    messagesPeople.replaceChildren();
+    return;
+  }
+  if (!friends?.length) {
+    updateMessageUnread(0);
+    activeMessageFriend = null;
+    messagesPeople.replaceChildren();
+    const empty = document.createElement("p");
+    empty.className = "friends-empty";
+    empty.textContent = t("messagesEmptyFriends");
+    messagesPeople.append(empty);
+    messagesChat.replaceChildren();
+    return;
+  }
+  const userId = session.user.id;
+  const { data: messages, error } = await supabase.from("league_messages")
+    .select("id,sender,recipient,body,sent_at,read_at")
+    .or(`sender.eq.${userId},recipient.eq.${userId}`)
+    .order("sent_at", { ascending: true });
+  if (error) {
+    messagesUnavailable = true;
+    console.error("Could not load private messages:", error);
+    const notice = document.createElement("p");
+    notice.className = "friends-empty";
+    notice.textContent = t("messagesNeedMigration");
+    messagesPeople.replaceChildren(notice);
+    messagesChat.replaceChildren(notice.cloneNode(true));
+    return;
+  }
+  const rows = messages || [];
+  const unread = rows.filter(message => message.recipient === userId && !message.read_at).length;
+  updateMessageUnread(unread);
+  messagesPeople.replaceChildren(...friends.filter(person => person.relation === "friend").map(person => {
+    const conversation = rows.filter(message =>
+      (message.sender === userId && message.recipient === person.user_id) ||
+      (message.recipient === userId && message.sender === person.user_id));
+    const latest = conversation[conversation.length - 1];
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `message-person${activeMessageFriend?.user_id === person.user_id ? " is-active" : ""}`;
+    item.append(avatarEl(person.avatar_path, person.nickname));
+    const details = document.createElement("span");
+    details.className = "message-person-copy";
+    const name = document.createElement("b");
+    name.textContent = person.nickname;
+    const preview = document.createElement("small");
+    preview.textContent = latest ? latest.body : t("noMessagesYet");
+    details.append(name, preview);
+    item.append(details);
+    if (conversation.some(message => message.recipient === userId && !message.read_at)) {
+      const unreadDot = document.createElement("i");
+      unreadDot.className = "message-unread-dot";
+      unreadDot.setAttribute("aria-label", t("unreadMessages"));
+      item.append(unreadDot);
+    }
+    item.addEventListener("click", () => void openMessageConversation(person, rows));
+    return item;
+  }));
+  if (activeMessageFriend && friends.some(friend => friend.user_id === activeMessageFriend.user_id)) {
+    renderMessageConversation(activeMessageFriend, rows);
+  } else if (activeMessageFriend) {
+    activeMessageFriend = null;
+    messagesChat.replaceChildren();
+    const empty = document.createElement("p");
+    empty.className = "friends-empty";
+    empty.textContent = t("chooseConversation");
+    messagesChat.append(empty);
+  }
+}
+
+function renderMessageConversation(person, messages) {
+  const userId = session.user.id;
+  const conversation = messages.filter(message =>
+    (message.sender === userId && message.recipient === person.user_id) ||
+    (message.recipient === userId && message.sender === person.user_id));
+  const header = document.createElement("div");
+  header.className = "message-chat-header";
+  header.append(avatarEl(person.avatar_path, person.nickname));
+  const name = document.createElement("b");
+  name.textContent = person.nickname;
+  header.append(name);
+  const thread = document.createElement("div");
+  thread.className = "message-thread";
+  if (!conversation.length) {
+    const empty = document.createElement("p");
+    empty.className = "friends-empty";
+    empty.textContent = t("noMessagesYet");
+    thread.append(empty);
+  }
+  conversation.forEach(message => {
+    const bubble = document.createElement("article");
+    bubble.className = `message-bubble${message.sender === userId ? " is-mine" : ""}`;
+    const body = document.createElement("p");
+    body.textContent = message.body;
+    const time = document.createElement("time");
+    time.dateTime = message.sent_at;
+    time.textContent = new Date(message.sent_at).toLocaleString(currentLang === "ru" ? "ru-RU" : "en-GB", {
+      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+    });
+    bubble.append(body, time);
+    thread.append(bubble);
+  });
+  const form = document.createElement("form");
+  form.className = "message-compose";
+  const input = document.createElement("textarea");
+  input.maxLength = 2000;
+  input.required = true;
+  input.rows = 2;
+  input.placeholder = t("messagePlaceholder");
+  const send = document.createElement("button");
+  send.type = "submit";
+  send.className = "button button-primary";
+  send.textContent = t("sendMessage");
+  form.append(input, send);
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    send.disabled = true;
+    const { error } = await supabase.rpc("send_league_message", {
+      p_recipient: person.user_id,
+      p_body: input.value.trim()
+    });
+    send.disabled = false;
+    if (error) {
+      showToast(error.message);
+      return;
+    }
+    input.value = "";
+    await loadMessageInbox();
+  });
+  messagesChat.replaceChildren(header, thread, form);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+async function openMessageConversation(person, cachedMessages = null) {
+  activeMessageFriend = person;
+  setCommunityView("messages", true);
+  if (!messageRefreshTimer) messageRefreshTimer = setInterval(() => void loadMessageInbox(), 12000);
+  if (cachedMessages) renderMessageConversation(person, cachedMessages);
+  const { error } = await supabase.rpc("mark_league_messages_read", { p_sender: person.user_id });
+  if (error) console.error("Could not mark messages read:", error);
+  await loadMessageInbox();
 }
 
 function friendRow(person, actions) {
@@ -4241,15 +4659,8 @@ async function renderFriendsTab(searchResults = null) {
 }
 
 function openFriends() {
-  if (!session) {
-    showToast(t("friendsNeedSignIn"));
-    return;
-  }
   friendsTab = "friends";
-  friendProfile.hidden = true;
-  renderFriendsMe();
-  void renderFriendsTab();
-  if (!friendsDialog.open) friendsDialog.showModal();
+  void openCommunityPage("friends");
 }
 
 document.querySelectorAll(".friends-tab").forEach(tab => {
@@ -4266,13 +4677,26 @@ friendSearchForm.addEventListener("submit", async event => {
   if (ok) void renderFriendsTab(data || []);
 });
 
-document.getElementById("friendsButton").addEventListener("click", () => {
+function navigateCommunity(page) {
   siteMenu.open = false;
-  openFriends();
+  void openCommunityPage(page);
+}
+
+document.getElementById("friendsButton").addEventListener("click", () => navigateCommunity("friends"));
+document.getElementById("myProfileButton").addEventListener("click", () => navigateCommunity("profile"));
+document.querySelectorAll("[data-community-page]").forEach(button => {
+  button.addEventListener("click", () => navigateCommunity(button.dataset.communityPage));
 });
-friendsDialog.addEventListener("click", event => {
-  if (event.target === friendsDialog) friendsDialog.close();
+window.addEventListener("hashchange", () => {
+  const match = location.hash.match(/^#community(?:\/(profile|friends|messages|achievements|edit))?$/);
+  if (match) void openCommunityPage(match[1] || "profile", false);
+  else {
+    document.body.classList.remove("community-mode");
+    communitySection.hidden = true;
+  }
 });
+const initialCommunityMatch = location.hash.match(/^#community(?:\/(profile|friends|messages|achievements|edit))?$/);
+if (initialCommunityMatch) void openCommunityPage(initialCommunityMatch[1] || "profile", false);
 
 updateAuthUi();
 try {
