@@ -101,6 +101,20 @@
                         <span id="analystTensionFill"></span>
                     </div>
                 </div>
+                <section class="analyst-conversation" aria-labelledby="analystConversationTitle">
+                    <h3 id="analystConversationTitle" data-i18n="analystAskTitle">What should we look at?</h3>
+                    <div class="analyst-conversation-history" id="analystConversationHistory" aria-live="polite"></div>
+                    <div class="analyst-typing" id="analystTyping" role="status" hidden>
+                        <img class="analyst-chat-avatar" id="analystTypingAvatar" alt="">
+                        <span data-i18n="analystTyping">The analyst is typing</span>
+                        <span class="analyst-typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    </div>
+                    <div class="analyst-question-choices" id="analystQuestionChoices" data-i18n-aria-label="analystAskTitle" aria-label="Ask the analyst">
+                        <button class="analyst-question" type="button" data-analyst-question="improve" data-i18n="analystQuestionImprove">What should I improve?</button>
+                        <button class="analyst-question" type="button" data-analyst-question="analyze" data-i18n="analystQuestionAnalyze">Analyze recent matches</button>
+                        <button class="analyst-question" type="button" data-analyst-question="motivate" data-i18n="analystQuestionMotivate">I need motivation</button>
+                    </div>
+                </section>
                 <div class="analyst-notice-list" id="analystNoticeList" aria-live="polite"></div>
             </section>
 

@@ -39,6 +39,29 @@ const TRANSLATIONS = {
     tensionCritical: "On edge",
     analystYourReply: "You",
     analystConversationEnded: "The staff has wrapped up this conversation.",
+    analystAskTitle: "What should we look at?",
+    analystQuestionImprove: "What should I improve?",
+    analystQuestionAnalyze: "Analyze recent matches",
+    analystQuestionMotivate: "I need motivation",
+    analystTyping: "The analyst is reviewing your recent matches",
+    analystChatEmpty: "Choose a question and the staff will review your latest results.",
+    analystNoMatchAnalysis: "There are no completed matches to analyze yet. Play a match and add its result first.",
+    analystOpponent: "the opponent",
+    analystRecentRecord: "In the last {0}: {1} wins, {2} draws, {3} losses; goals {4}–{5}.",
+    analystShotsSummary: " Recorded shot data: {0} shots, {1} on target.",
+    analystShotCountOnly: " Recorded shot data: {0} shots.",
+    analystPossessionSummary: " Average possession: {0}%.",
+    analystWinResult: "Great work: you beat {0} {1}–{2}. Keep the same focus and build on what worked.",
+    analystLossResult: "Tough result against {0} ({1}–{2}). One match does not define the team. Review the goals conceded, reset, and focus on the next game.",
+    analystDrawResult: "A {1}–{2} draw with {0}. You earned a point; let’s find one small improvement to turn the next close game into a win.",
+    analystConcededNote: " The numbers show {0} conceded in the last {1}; protect the middle and track runners into the box.",
+    analystScoringNote: " You scored {0} in the last {1} matches—there is a solid base to build on.",
+    analystResultWin: "win",
+    analystResultDraw: "draw",
+    analystResultLoss: "loss",
+    analystMotivateWin: "The latest result is a win. Enjoy it, then repeat the habits that created the chances—good decisions matter more than one scoreline.",
+    analystMotivateDraw: "The latest match ended level. You stayed in the contest and took a point; one sharper decision in the box can make the difference next time.",
+    analystMotivateLoss: "The latest result was a loss, but it does not erase your progress. Take one lesson from it, then give yourself a clean start in the next match.",
     eyebrow: "eFootball League",
     editTeams: "Teams",
     dbLink: "Card database",
@@ -400,6 +423,29 @@ const TRANSLATIONS = {
     tensionCritical: "На пределе",
     analystYourReply: "Вы",
     analystConversationEnded: "Штаб завершил этот разговор.",
+    analystAskTitle: "Что разберём?",
+    analystQuestionImprove: "Что улучшить в игре?",
+    analystQuestionAnalyze: "Разобрать последние матчи",
+    analystQuestionMotivate: "Мне нужна поддержка",
+    analystTyping: "Аналитик изучает последние матчи",
+    analystChatEmpty: "Выберите вопрос — штаб разберёт последние результаты.",
+    analystNoMatchAnalysis: "Пока нет завершённых матчей для анализа. Сыграйте матч и добавьте результат.",
+    analystOpponent: "соперник",
+    analystRecentRecord: "За последние {0}: побед {1}, ничьих {2}, поражений {3}; голы {4}–{5}.",
+    analystShotsSummary: " По записанной статистике: {0} ударов, {1} в створ.",
+    analystShotCountOnly: " По записанной статистике: {0} ударов.",
+    analystPossessionSummary: " Среднее владение: {0}%.",
+    analystWinResult: "Отличная работа: победа над командой «{0}» со счётом {1}–{2}. Сохрани этот настрой и опирайся на то, что сработало.",
+    analystLossResult: "Тяжёлый результат с командой «{0}» — {1}–{2}. Один матч не определяет команду. Разбери пропущенные голы, выдохни и сосредоточься на следующей игре.",
+    analystDrawResult: "Ничья с командой «{0}» — {1}–{2}. Вы заработали очко. Найдём одно улучшение, которое поможет выиграть следующий равный матч.",
+    analystConcededNote: " За последние {1} матчей пропущено {0}; плотнее закрой центр и следи за рывками в штрафную.",
+    analystScoringNote: " За последние {1} матчей забито {0} — это хорошая основа, на которой можно строить дальше.",
+    analystResultWin: "победа",
+    analystResultDraw: "ничья",
+    analystResultLoss: "поражение",
+    analystMotivateWin: "Последний матч завершился победой. Порадуйся ей, а затем повтори то, что создавало моменты: хорошие решения важнее одного счёта.",
+    analystMotivateDraw: "Последний матч завершился вничью. Команда боролась до конца и взяла очко; в следующий раз может хватить одного более точного решения у штрафной.",
+    analystMotivateLoss: "Последний матч закончился поражением, но это не перечёркивает прогресс. Возьми из игры один урок и начни следующий матч с чистого листа.",
     eyebrow: "eFootball Лига",
     editTeams: "Команды",
     dbLink: "База карточек",
@@ -756,6 +802,8 @@ let pendingProposals = [];
 let analystNoticeState = null;
 let analystToastNoticeId = null;
 let analystToastTimer = null;
+let analystTypingTimer = null;
+let analystIsTyping = false;
 let analystStorageFailureReported = false;
 let analystPresenceTimer = null;
 let sessionGeneration = 0;
@@ -2310,6 +2358,15 @@ function t(key, ...args) {
   return text;
 }
 
+function analystText(language, key, ...args) {
+  const dict = TRANSLATIONS[language] || TRANSLATIONS.en;
+  let text = dict[key] || TRANSLATIONS.en[key] || key;
+  args.forEach((arg, index) => {
+    text = text.replace(`{${index}}`, arg);
+  });
+  return text;
+}
+
 function applyLang() {
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
@@ -2411,8 +2468,9 @@ function renderWelcomeBanner() {
   teamName.textContent = t("welcomeTeam", team.name);
 }
 
-const ANALYST_STATE_VERSION = 4;
+const ANALYST_STATE_VERSION = 5;
 const ANALYST_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
+const ANALYST_QUESTION_TOPICS = ["improve", "analyze", "motivate"];
 
 function getAnalystStorageKey() {
   return `league-analyst-notices:${session?.user?.id || "signed-out"}`;
@@ -2426,15 +2484,30 @@ function readAnalystNoticeState() {
     notices: [],
     lastDeliveredAt: 0,
     welcomeDelivered: false,
-    tension: 50
+    tension: 50,
+    conversation: [],
+    matchHistoryInitialized: false,
+    seenMatchIds: []
   };
   const saved = JSON.parse(raw);
-  if (![1, 2, 3, ANALYST_STATE_VERSION].includes(saved?.version) ||
+  if (![1, 2, 3, 4, ANALYST_STATE_VERSION].includes(saved?.version) ||
       !Array.isArray(saved.delivered) ||
       !Array.isArray(saved.notices) ||
       !Number.isFinite(saved.lastDeliveredAt) ||
       (saved.version >= 3 &&
         (!Number.isInteger(saved.tension) || saved.tension < 0 || saved.tension > 100)) ||
+      (saved.version === ANALYST_STATE_VERSION &&
+        (!Array.isArray(saved.conversation) ||
+          typeof saved.matchHistoryInitialized !== "boolean" ||
+          !Array.isArray(saved.seenMatchIds) ||
+          !saved.seenMatchIds.every(id => typeof id === "string"))) ||
+      (saved.conversation !== undefined &&
+        (!Array.isArray(saved.conversation) || !saved.conversation.every(message =>
+          message && ["player", "staff"].includes(message.role) &&
+          ANALYST_QUESTION_TOPICS.includes(message.topic) &&
+          Number.isFinite(message.createdAt) &&
+          (message.role === "player" ||
+            message.text && typeof message.text.en === "string" && typeof message.text.ru === "string")))) ||
       !saved.notices.every(notice =>
         notice && typeof notice.id === "string" &&
         Number.isFinite(notice.createdAt) && typeof notice.read === "boolean" &&
@@ -2469,6 +2542,9 @@ function readAnalystNoticeState() {
     ...saved,
     version: ANALYST_STATE_VERSION,
     notices,
+    conversation: saved.version === ANALYST_STATE_VERSION ? saved.conversation : [],
+    matchHistoryInitialized: saved.version === ANALYST_STATE_VERSION && saved.matchHistoryInitialized,
+    seenMatchIds: saved.version === ANALYST_STATE_VERSION ? saved.seenMatchIds : [],
     welcomeDelivered: saved.version === 1 ? false : saved.welcomeDelivered === true,
     tension: saved.version >= 3 ? saved.tension : 50
   };
@@ -2622,6 +2698,251 @@ function analystChatBubble(kind, author, message) {
   return row;
 }
 
+function getAnalystTeamHistory(limit = 5) {
+  return state.matches
+    .map((match, order) => ({ match, order }))
+    .filter(({ match }) => match.home === myTeamIndex || match.away === myTeamIndex)
+    .sort((a, b) => new Date(a.match.date) - new Date(b.match.date) || a.order - b.order)
+    .map(({ match }) => {
+      const home = match.home === myTeamIndex;
+      const goalsFor = home ? match.homeGoals : match.awayGoals;
+      const goalsAgainst = home ? match.awayGoals : match.homeGoals;
+      const teamStats = match.stats?.[home ? "home" : "away"] || {};
+      return {
+        opponent: state.teams[home ? match.away : match.home]?.name ||
+          analystText(currentLang, "analystOpponent"),
+        goalsFor,
+        goalsAgainst,
+        outcome: goalsFor > goalsAgainst ? "win" : goalsFor < goalsAgainst ? "loss" : "draw",
+        shots: Number.isFinite(teamStats.shots) ? teamStats.shots : null,
+        shotsOnTarget: Number.isFinite(teamStats.shotsOnTarget) ? teamStats.shotsOnTarget : null,
+        possession: Number.isFinite(teamStats.possession) ? teamStats.possession : null
+      };
+    })
+    .slice(-limit);
+}
+
+function getAnalystRecentSummary(language, recent) {
+  const wins = recent.filter(match => match.outcome === "win").length;
+  const draws = recent.filter(match => match.outcome === "draw").length;
+  const losses = recent.filter(match => match.outcome === "loss").length;
+  const goalsFor = recent.reduce((total, match) => total + match.goalsFor, 0);
+  const goalsAgainst = recent.reduce((total, match) => total + match.goalsAgainst, 0);
+  return analystText(language, "analystRecentRecord",
+    recent.length, wins, draws, losses, goalsFor, goalsAgainst);
+}
+
+function getAnalystConversationAnswer(topic) {
+  const recent = getAnalystTeamHistory(5);
+  if (!recent.length) {
+    return { en: analystText("en", "analystNoMatchAnalysis"), ru: analystText("ru", "analystNoMatchAnalysis") };
+  }
+  const outcomes = recent.map(match => match.outcome);
+  const wins = outcomes.filter(outcome => outcome === "win").length;
+  const losses = outcomes.filter(outcome => outcome === "loss").length;
+  const goalsFor = recent.reduce((total, match) => total + match.goalsFor, 0);
+  const goalsAgainst = recent.reduce((total, match) => total + match.goalsAgainst, 0);
+  const shotsRows = recent.filter(match => match.shots !== null);
+  const shotsOnTargetRows = recent.filter(match => match.shotsOnTarget !== null);
+  const possessionRows = recent.filter(match => match.possession !== null);
+
+  if (topic === "improve") {
+    const advice = evaluateAnalystAdvice(state.matches, myTeamIndex)[0];
+    const copy = advice ? {
+      en: getAnalystAdviceCopy(advice, "en").message,
+      ru: getAnalystAdviceCopy(advice, "ru").message
+    } : {
+      en: goalsAgainst > goalsFor
+        ? "You are conceding more than you score. Keep a midfielder behind the ball and protect the middle before sending both full-backs forward."
+        : "The recent results are balanced. Keep the defensive shape compact and look for one extra runner when an attack reaches the box.",
+      ru: goalsAgainst > goalsFor
+        ? "Команда пропускает больше, чем забивает. Оставляй полузащитника за мячом и закрывай центр, прежде чем отправлять обоих защитников вперёд."
+        : "Последние результаты выглядят ровно. Сохраняй компактность в обороне и подключай ещё одного игрока, когда атака доходит до штрафной."
+    };
+    return {
+      en: `${getAnalystRecentSummary("en", recent)} ${copy.en}`,
+      ru: `${getAnalystRecentSummary("ru", recent)} ${copy.ru}`
+    };
+  }
+
+  if (topic === "analyze") {
+    const lastThreeEn = recent.slice(-3).reverse().map(match =>
+      `${match.opponent} ${match.goalsFor}–${match.goalsAgainst} (${analystText("en", `analystResult${match.outcome[0].toUpperCase()}${match.outcome.slice(1)}`)})`
+    ).join("; ");
+    const lastThreeRu = recent.slice(-3).reverse().map(match =>
+      `${match.opponent} ${match.goalsFor}–${match.goalsAgainst} (${analystText("ru", `analystResult${match.outcome[0].toUpperCase()}${match.outcome.slice(1)}`)})`
+    ).join("; ");
+    const shots = shotsRows.length ? (() => {
+      const totalShots = shotsRows.reduce((total, match) => total + match.shots, 0);
+      if (!shotsOnTargetRows.length) return {
+        en: analystText("en", "analystShotCountOnly", totalShots),
+        ru: analystText("ru", "analystShotCountOnly", totalShots)
+      };
+      const totalOnTarget = shotsOnTargetRows.reduce((total, match) => total + match.shotsOnTarget, 0);
+      return {
+        en: analystText("en", "analystShotsSummary",
+          totalShots, totalOnTarget),
+        ru: analystText("ru", "analystShotsSummary",
+          totalShots, totalOnTarget)
+      };
+    })() : { en: "", ru: "" };
+    const possession = possessionRows.length
+      ? {
+        en: analystText("en", "analystPossessionSummary",
+          Math.round(possessionRows.reduce((total, match) => total + match.possession, 0) / possessionRows.length)),
+        ru: analystText("ru", "analystPossessionSummary",
+          Math.round(possessionRows.reduce((total, match) => total + match.possession, 0) / possessionRows.length))
+      } : { en: "", ru: "" };
+    return {
+      en: `${getAnalystRecentSummary("en", recent)} Last results: ${lastThreeEn}.${shots.en}${possession.en}`,
+      ru: `${getAnalystRecentSummary("ru", recent)} Последние матчи: ${lastThreeRu}.${shots.ru}${possession.ru}`
+    };
+  }
+
+  const latest = recent[recent.length - 1];
+  const key = `analystMotivate${latest.outcome[0].toUpperCase()}${latest.outcome.slice(1)}`;
+  const base = {
+    en: analystText("en", key),
+    ru: analystText("ru", key)
+  };
+  if (latest.outcome === "loss" && goalsAgainst > goalsFor) {
+    base.en += analystText("en", "analystConcededNote", goalsAgainst, recent.length);
+    base.ru += analystText("ru", "analystConcededNote", goalsAgainst, recent.length);
+  } else if (latest.outcome === "win" && wins >= Math.ceil(recent.length / 2)) {
+    base.en += analystText("en", "analystScoringNote", goalsFor, recent.length);
+    base.ru += analystText("ru", "analystScoringNote", goalsFor, recent.length);
+  } else if (latest.outcome === "draw" && losses === 0) {
+    base.en += ` ${getAnalystRecentSummary("en", recent)}`;
+    base.ru += ` ${getAnalystRecentSummary("ru", recent)}`;
+  }
+  return base;
+}
+
+function renderAnalystConversation() {
+  const history = document.getElementById("analystConversationHistory");
+  const typing = document.getElementById("analystTyping");
+  const typingAvatar = document.getElementById("analystTypingAvatar");
+  const choices = document.getElementById("analystQuestionChoices");
+  if (!history || !analystNoticeState) return;
+  history.replaceChildren();
+  if (!analystNoticeState.conversation.length) {
+    const empty = document.createElement("p");
+    empty.className = "analyst-chat-empty";
+    empty.textContent = t("analystChatEmpty");
+    history.append(empty);
+  } else {
+    analystNoticeState.conversation.slice(-20).forEach(message => {
+      const text = message.role === "player"
+        ? t(`analystQuestion${message.topic[0].toUpperCase()}${message.topic.slice(1)}`)
+        : message.text[currentLang] || message.text.en;
+      history.append(analystChatBubble(
+        message.role,
+        message.role === "player" ? t("analystYourReply") : getAnalystAuthor(myTeamIndex),
+        text
+      ));
+    });
+  }
+  typing.hidden = !analystIsTyping;
+  typingAvatar.src = getAnalystAvatar(myTeamIndex);
+  typingAvatar.alt = "";
+  choices.querySelectorAll("[data-analyst-question]").forEach(button => {
+    button.disabled = analystIsTyping;
+  });
+  history.scrollTop = history.scrollHeight;
+}
+
+function finishAnalystQuestion() {
+  analystTypingTimer = null;
+  const last = analystNoticeState?.conversation.at(-1);
+  if (!last || last.role !== "player") {
+    analystIsTyping = false;
+    renderAnalystConversation();
+    return;
+  }
+  analystNoticeState.conversation.push({
+    role: "staff",
+    topic: last.topic,
+    createdAt: Date.now(),
+    text: getAnalystConversationAnswer(last.topic)
+  });
+  analystNoticeState.conversation = analystNoticeState.conversation.slice(-40);
+  analystIsTyping = false;
+  saveAnalystNoticeState();
+  renderAnalystConversation();
+}
+
+function scheduleAnalystReply() {
+  if (!analystNoticeState || analystIsTyping) return;
+  const last = analystNoticeState.conversation.at(-1);
+  if (!last || last.role !== "player") return;
+  analystIsTyping = true;
+  renderAnalystConversation();
+  analystTypingTimer = setTimeout(finishAnalystQuestion, 900);
+}
+
+function askAnalystQuestion(topic) {
+  if (!ANALYST_QUESTION_TOPICS.includes(topic) || analystIsTyping || !analystNoticeState) return;
+  analystNoticeState.conversation.push({
+    role: "player",
+    topic,
+    createdAt: Date.now()
+  });
+  analystNoticeState.conversation = analystNoticeState.conversation.slice(-39);
+  saveAnalystNoticeState();
+  scheduleAnalystReply();
+}
+
+function makeMatchOutcomeNotice(match, now) {
+  const isHome = match.home === myTeamIndex;
+  const goalsFor = isHome ? match.homeGoals : match.awayGoals;
+  const goalsAgainst = isHome ? match.awayGoals : match.homeGoals;
+  const opponent = state.teams[isHome ? match.away : match.home]?.name ||
+    analystText(currentLang, "analystOpponent");
+  const outcome = goalsFor > goalsAgainst ? "win" : goalsFor < goalsAgainst ? "loss" : "draw";
+  const messageKey = `analyst${outcome[0].toUpperCase()}${outcome.slice(1)}Result`;
+  const enMessage = analystText("en", messageKey, opponent, goalsFor, goalsAgainst);
+  const ruMessage = analystText("ru", messageKey, opponent, goalsFor, goalsAgainst);
+  return {
+    id: `match-result-${String(match.id)}`,
+    createdAt: Number.isFinite(new Date(match.date).getTime()) ? new Date(match.date).getTime() : now,
+    read: false,
+    en: { message: enMessage, signoff: "We’ll review the details together and come back stronger." },
+    ru: { message: ruMessage, signoff: "Разберём детали вместе и вернёмся сильнее." }
+  };
+}
+
+function recordNewAnalystMatches(now) {
+  if (!analystNoticeState.matchHistoryInitialized) {
+    analystNoticeState.seenMatchIds = state.matches
+      .filter(match => match.id !== undefined && match.id !== null)
+      .map(match => String(match.id));
+    analystNoticeState.matchHistoryInitialized = true;
+    saveAnalystNoticeState();
+    return;
+  }
+  const seen = new Set(analystNoticeState.seenMatchIds);
+  const newMatches = state.matches.filter(match =>
+    match.id !== undefined && match.id !== null && !seen.has(String(match.id)));
+  if (!newMatches.length) return;
+  const ownMatches = newMatches.filter(match => match.home === myTeamIndex || match.away === myTeamIndex);
+  analystNoticeState.seenMatchIds = [
+    ...analystNoticeState.seenMatchIds,
+    ...newMatches.map(match => String(match.id))
+  ];
+  ownMatches.forEach(match => {
+    const notice = makeMatchOutcomeNotice(match, now);
+    if (!analystNoticeState.notices.some(item => item.id === notice.id)) {
+      analystNoticeState.notices.push(notice);
+    }
+  });
+  saveAnalystNoticeState();
+  if (ownMatches.length) {
+    const latestNotice = analystNoticeState.notices.find(item =>
+      item.id === `match-result-${String(ownMatches[ownMatches.length - 1].id)}`);
+    if (latestNotice) showAnalystToast(latestNotice);
+  }
+}
+
 function answerAnalystNotice(notice, choiceIndex) {
   if (notice.replyChoice !== undefined) return;
   const dialogue = ANALYST_DIALOGUES[notice.id];
@@ -2655,6 +2976,7 @@ function renderAnalystNotifications() {
   const unread = analystNoticeState.notices.filter(notice => !notice.read && !notice.dismissed).length;
   analystNotificationCount.hidden = unread === 0;
   analystNotificationCount.textContent = unread > 9 ? "9+" : String(unread);
+  renderAnalystConversation();
   const orderedNotices = analystNoticeState.notices.slice().sort((a, b) => b.createdAt - a.createdAt);
   const activeNotices = orderedNotices.filter(notice => !notice.dismissed);
   const archivedNotices = orderedNotices.filter(notice => notice.dismissed);
@@ -2811,6 +3133,8 @@ async function refreshAnalystBriefing() {
         showAnalystToast(welcome);
       }
     }
+    recordNewAnalystMatches(now);
+    scheduleAnalystReply();
     const hasVisibleNotice = analystNoticeState.notices.some(notice => !notice.dismissed);
     if (analystNoticeState.welcomeDelivered && !hasVisibleNotice &&
         now - analystNoticeState.lastDeliveredAt >= ANALYST_COOLDOWN_MS) {
@@ -2853,6 +3177,12 @@ document.getElementById("analystToastView").addEventListener("click", () => {
 });
 document.getElementById("analystToastHide").addEventListener("click", () => {
   if (analystToastNoticeId) dismissAnalystNotice(analystToastNoticeId);
+});
+document.getElementById("analystQuestionChoices").addEventListener("click", event => {
+  const button = event.target.closest("[data-analyst-question]");
+  if (button instanceof HTMLButtonElement) {
+    askAnalystQuestion(button.dataset.analystQuestion);
+  }
 });
 document.addEventListener("visibilitychange", renderAnalystPresence);
 
@@ -2984,6 +3314,9 @@ async function handleSession(nextSession) {
   myProfile = null;
   analystNoticeState = null;
   clearAnalystToast();
+  if (analystTypingTimer) clearTimeout(analystTypingTimer);
+  analystTypingTimer = null;
+  analystIsTyping = false;
   analystBriefing.hidden = true;
   analystNotificationsButton.hidden = true;
   pendingProposals = [];
