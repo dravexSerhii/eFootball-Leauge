@@ -44,6 +44,7 @@ const UI = {
     median: "Median rating",
     played: "played",
     form: "FORM",
+    formHistory: (count) => `LAST ${count}`,
     formRecord: (results) => `LAST ${results.length}: ${results.join(" ") || "—"}`,
     formResults: { win: "W", draw: "D", loss: "L" },
     wins: "W",
@@ -164,6 +165,7 @@ const UI = {
     median: "Медианный рейтинг",
     played: "сыграно",
     form: "ФОРМА",
+    formHistory: (count) => `ПОСЛЕДНИЕ ${count}`,
     formRecord: (results) => `ПОСЛЕДНИЕ ${results.length}: ${results.join(" ") || "—"}`,
     formResults: { win: "В", draw: "Н", loss: "П" },
     wins: "В",
@@ -770,12 +772,12 @@ function radarSvg(team) {
   scores.forEach((score, i) => {
     const [x, y] = point(i, (score ?? 0) / 100);
     const dot = document.createElementNS(svg.namespaceURI, "circle");
-    dot.setAttribute("class", "radar-dot"); dot.setAttribute("cx", String(x)); dot.setAttribute("cy", String(y)); dot.setAttribute("r", score === null ? "2" : "3");
+    dot.setAttribute("class", `radar-dot metric-axis-${i}`); dot.setAttribute("cx", String(x)); dot.setAttribute("cy", String(y)); dot.setAttribute("r", score === null ? "3" : "4");
     if (score === null) dot.setAttribute("opacity", "0.35");
     svg.append(dot);
     const [lx, ly] = point(i, 1.22);
     const label = document.createElementNS(svg.namespaceURI, "text");
-    label.setAttribute("class", "radar-label"); label.setAttribute("x", String(lx)); label.setAttribute("y", String(ly));
+    label.setAttribute("class", `radar-label metric-axis-${i}`); label.setAttribute("x", String(lx)); label.setAttribute("y", String(ly));
     label.setAttribute("text-anchor", lx < cx - 8 ? "end" : lx > cx + 8 ? "start" : "middle");
     label.textContent = `${labels[i]}${score === null ? " —" : ""}`;
     svg.append(label);
@@ -801,10 +803,19 @@ function renderTeamCard(team, ratedTeams) {
   card.append(head);
   const form = node("div", `team-form form-${m.form.grade.toLowerCase()}`);
   const translatedResults = m.form.results.map((result) => tt.formResults[result]);
+  const formResults = node("span", "form-results");
+  formResults.setAttribute("role", "img");
+  formResults.setAttribute("aria-label", tt.formRecord(translatedResults));
+  m.form.results.forEach((result, index) => {
+    const outcome = node("span", `form-result result-${result}`, translatedResults[index]);
+    outcome.setAttribute("aria-hidden", "true");
+    formResults.append(outcome);
+  });
   form.append(
     node("span", "form-label", tt.form),
     node("b", "form-grade", m.form.grade),
-    node("span", "form-details", tt.formRecord(translatedResults))
+    node("span", "form-history-label", tt.formHistory(translatedResults.length)),
+    formResults
   );
   card.append(form);
   if (m.rating !== null) {
@@ -825,7 +836,7 @@ function renderTeamCard(team, ratedTeams) {
       m.conversionRate === null ? "—" : tt.conversionValue(m.conversionRate.toFixed(1))
     ];
     m.axes.forEach((score, i) => {
-      const row = node("div", "metric-row");
+      const row = node("div", `metric-row metric-axis-${i}`);
       row.append(node("span", "metric-label", labels[i]), node("b", "metric-value", values[i]));
       const track = node("div", "metric-track");
       const fill = node("div", "metric-fill");
@@ -849,7 +860,7 @@ function renderTeamCard(team, ratedTeams) {
     })).filter((item) => item.count > 0);
     const strongest = node("div", "strengths");
     strongest.append(node("span", "strength-chip", tt.strongest));
-    maxAxis.forEach(({ i }) => strongest.append(node("span", "strength-chip", [tt.attack, tt.defense, tt.passes, tt.possession, tt.conversion][i])));
+    maxAxis.forEach(({ i }) => strongest.append(node("span", `strength-chip metric-axis-${i}`, [tt.attack, tt.defense, tt.passes, tt.possession, tt.conversion][i])));
     card.append(strongest);
   } else {
     card.append(node("p", "favorite-empty", tt.noMatches));
