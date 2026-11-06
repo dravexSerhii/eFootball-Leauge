@@ -148,6 +148,63 @@ const TRANSLATIONS = {
     siteMenu: "Explore",
     addMatch: "Add match",
     championshipTitle: "Championship Race",
+    championsLeagueTitle: "Champions League",
+    championsLeagueEyebrow: "THE ROAD TO EUROPEAN GLORY",
+    championsLeagueSubtitle: "Two legs each season · aggregate score decides the champion",
+    championsLeagueStatsLink: "Champions League analytics",
+    championsSeason: "EUROPEAN CAMPAIGN",
+    championsRoadTitle: "The road to the final",
+    championsHistory: "Match history",
+    championsConfirmedOnly: "Confirmed results",
+    championsClubhouse: "CLUB HONOURS",
+    championsFixtureReady: "READY TO PLAY",
+    championsFixtureComplete: "COMPLETED",
+    championsFixtureLocked: "LOCKED",
+    championsFixtureTbd: "To be decided",
+    championsFixtureOpens: "Unlocks after {0} league matches",
+    championsFixtureAggregateNeeded: "Only if the aggregate is level",
+    championsLeg: "Match",
+    championsScore: "Score",
+    championsDate: "Date",
+    championsLegOne: "First leg",
+    championsLegTwo: "Second leg",
+    championsDecider: "Deciding match",
+    championsWaiting18: "First leg unlocks after 18 league matches ({0}/18 played).",
+    championsWaiting36: "Second leg unlocks after 36 league matches ({0}/36 played).",
+    championsWaitingSignIn: "Sign in as a team owner to submit or confirm a Champions League result.",
+    championsWaitingOpponent: "Waiting for the other club to confirm this result.",
+    championsLevelAggregate: "The two legs are level on aggregate. A deciding third match is required.",
+    championsAggregateScore: "Two-leg aggregate: {0} {1}–{2} {3}",
+    championsWinner: "{0} are Champions League winners for Season {1}!",
+    championsNoMatches: "No Champions League matches have been played this season.",
+    championsNoMigration: "Champions League is not set up yet. Run sql/supabase-migration-champions-league.sql in Supabase.",
+    championsLoadError: "Could not load Champions League data: {0}",
+    championsEntryTitle: "{0} · Season {1}",
+    championsHomeScore: "{0} goals",
+    championsAwayScore: "{0} goals",
+    championsPenaltyScores: "Penalty shootout score (only if the deciding match is level)",
+    championsHomePenalties: "{0} pens",
+    championsAwayPenalties: "{0} pens",
+    championsMatchStats: "Match statistics · optional",
+    championsStatsOptional: "Leave any statistic blank if you do not have it.",
+    championsShots: "Shots",
+    championsShotsOnTarget: "Shots on target",
+    championsPossession: "Possession (%)",
+    championsPasses: "Passes",
+    championsSubmit: "Submit result for confirmation",
+    championsConfirm: "Confirm result",
+    championsReject: "Reject",
+    championsProposalWaiting: "{0} reports {1} {2}–{3} {4} · {5}",
+    championsProposalSent: "Champions League result sent to the other club for confirmation.",
+    championsProposalConfirmed: "Champions League result confirmed.",
+    championsPenaltyRequired: "If the deciding match is level, enter unequal penalty scores.",
+    championsMatchSaved: "Champions League result saved.",
+    clubProfileLink: "Club profile",
+    clubProfiles: "Club profiles",
+    clubTrophiesCount: "{0} Champions League titles",
+    clubNoTrophies: "No trophies yet",
+    championsTrophyName: "Champions League trophy",
+    participationMedalName: "First participation medal",
     liveSimulation: "LIVE SIMULATION",
     raceDisclaimer: "Live estimate from season results with simulated momentum. Not live-match odds.",
     raceChartLabel: "Live championship chance cardiogram",
@@ -532,6 +589,63 @@ const TRANSLATIONS = {
     siteMenu: "Разделы",
     addMatch: "Добавить матч",
     championshipTitle: "Гонка за чемпионством",
+    championsLeagueTitle: "Лига чемпионов",
+    championsLeagueEyebrow: "ПУТЬ К ЕВРОПЕЙСКОЙ СЛАВЕ",
+    championsLeagueSubtitle: "Две встречи за сезон · чемпион определяется по сумме голов",
+    championsLeagueStatsLink: "Статистика ЛЧ",
+    championsSeason: "ЕВРОПЕЙСКИЙ СЕЗОН",
+    championsRoadTitle: "Путь к финалу",
+    championsHistory: "История матчей",
+    championsConfirmedOnly: "Подтверждённые результаты",
+    championsClubhouse: "КЛУБНЫЕ НАГРАДЫ",
+    championsFixtureReady: "МОЖНО ИГРАТЬ",
+    championsFixtureComplete: "СЫГРАНО",
+    championsFixtureLocked: "ЗАКРЫТО",
+    championsFixtureTbd: "Определится позже",
+    championsFixtureOpens: "Откроется после {0} матчей лиги",
+    championsFixtureAggregateNeeded: "Только при равенстве по сумме",
+    championsLeg: "Встреча",
+    championsScore: "Счёт",
+    championsDate: "Дата",
+    championsLegOne: "Первый матч",
+    championsLegTwo: "Ответный матч",
+    championsDecider: "Решающая встреча",
+    championsWaiting18: "Первый матч откроется после 18 матчей лиги (сыграно {0}/18).",
+    championsWaiting36: "Ответный матч откроется после 36 матчей лиги (сыграно {0}/36).",
+    championsWaitingSignIn: "Войдите как владелец клуба, чтобы отправить или подтвердить результат ЛЧ.",
+    championsWaitingOpponent: "Ожидаем подтверждения результата вторым клубом.",
+    championsLevelAggregate: "После двух матчей равенство по сумме голов. Нужна третья решающая встреча.",
+    championsAggregateScore: "Сумма двух матчей: {0} {1}–{2} {3}",
+    championsWinner: "«{0}» — победитель Лиги чемпионов сезона {1}!",
+    championsNoMatches: "В этом сезоне Лиги чемпионов матчей пока нет.",
+    championsNoMigration: "Лига чемпионов ещё не настроена. Выполните в Supabase файл sql/supabase-migration-champions-league.sql.",
+    championsLoadError: "Не удалось загрузить данные ЛЧ: {0}",
+    championsEntryTitle: "{0} · Сезон {1}",
+    championsHomeScore: "Голы {0}",
+    championsAwayScore: "Голы {0}",
+    championsPenaltyScores: "Счёт серии пенальти (только если решающий матч завершился вничью)",
+    championsHomePenalties: "Пен. {0}",
+    championsAwayPenalties: "Пен. {0}",
+    championsMatchStats: "Статистика матча · необязательно",
+    championsStatsOptional: "Оставьте поле пустым, если нет точных данных.",
+    championsShots: "Удары",
+    championsShotsOnTarget: "Удары в створ",
+    championsPossession: "Владение (%)",
+    championsPasses: "Пасы",
+    championsSubmit: "Отправить результат на подтверждение",
+    championsConfirm: "Подтвердить результат",
+    championsReject: "Отклонить",
+    championsProposalWaiting: "{0} сообщает: {1} {2}–{3} {4} · {5}",
+    championsProposalSent: "Результат ЛЧ отправлен второму клубу на подтверждение.",
+    championsProposalConfirmed: "Результат ЛЧ подтверждён.",
+    championsPenaltyRequired: "Если решающий матч завершился вничью, укажите разный счёт пенальти.",
+    championsMatchSaved: "Результат ЛЧ сохранён.",
+    clubProfileLink: "Профиль клуба",
+    clubProfiles: "Профили клубов",
+    clubTrophiesCount: "Титулов Лиги чемпионов: {0}",
+    clubNoTrophies: "Трофеев пока нет",
+    championsTrophyName: "Кубок Лиги чемпионов",
+    participationMedalName: "Медаль за первое участие",
     liveSimulation: "ЖИВАЯ СИМУЛЯЦИЯ",
     raceDisclaimer: "Оценка по результатам сезона с моделируемой динамикой. Это не шансы во время матча.",
     raceChartLabel: "Кардиограмма шансов на чемпионство в реальном времени",
@@ -799,6 +913,10 @@ let dataReady = false;
 let myTeamIndex = null;
 let myProfile = null;
 let pendingProposals = [];
+let championsLeagueMatches = [];
+let championsLeagueProposals = [];
+let clubTrophies = [];
+let championsLeagueError = null;
 let analystNoticeState = null;
 let analystToastNoticeId = null;
 let analystToastTimer = null;
@@ -839,6 +957,7 @@ const raceChartCanvas = document.getElementById("raceChart");
 const matchOddsChartCanvas = document.getElementById("matchOddsChart");
 const seasonInfo = document.getElementById("seasonInfo");
 const seasonBadge = document.getElementById("seasonBadge");
+const clubProfileDialog = document.getElementById("clubProfileDialog");
 const matchCounter = document.getElementById("matchCounter");
 const championshipList = document.getElementById("championshipList");
 const h2hList = document.getElementById("h2hList");
@@ -869,6 +988,7 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 function render() {
   renderStandings();
   renderTeamMomentum();
+  renderChampionsLeague();
   renderMatches();
   renderLastMatch();
   renderNews();
@@ -3272,6 +3392,7 @@ async function fetchServerState() {
   render();
   updateAuthUi();
   renderProposals();
+  await refreshChampionsLeague();
 }
 
 async function refreshFromServer() {
@@ -3298,6 +3419,12 @@ function subscribeToChanges(generation) {
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "league_match_proposals" }, () => {
       if (generation === sessionGeneration) void refreshFromServer();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "league_champions_matches" }, () => {
+      if (generation === sessionGeneration) void refreshChampionsLeague();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "league_champions_proposals" }, () => {
+      if (generation === sessionGeneration) void refreshChampionsLeague();
     })
     .subscribe(status => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -4181,6 +4308,613 @@ function renderProposals() {
     row.append(text, actions);
     list.append(row);
   });
+}
+
+function championsMigrationMissing(error) {
+  return error?.code === "42P01" || error?.code === "PGRST205";
+}
+
+async function refreshChampionsLeague() {
+  const [matchesResponse, trophiesResponse] = await Promise.all([
+    supabase.from("league_champions_matches").select("*").order("played_at", { ascending: true }),
+    supabase.from("league_club_trophies").select("*")
+  ]);
+  const error = matchesResponse.error || trophiesResponse.error;
+  if (error) {
+    championsLeagueMatches = [];
+    clubTrophies = [];
+    championsLeagueProposals = [];
+    championsLeagueError = championsMigrationMissing(error) ? "missing" : error.message;
+    if (championsLeagueError !== "missing") {
+      console.error("Failed to load Champions League data:", error);
+    }
+    renderChampionsLeague();
+    return;
+  }
+  championsLeagueMatches = matchesResponse.data || [];
+  clubTrophies = trophiesResponse.data || [];
+  championsLeagueError = null;
+  championsLeagueProposals = [];
+  if (session) {
+    const proposalsResponse = await supabase.from("league_champions_proposals")
+      .select("*").eq("status", "pending");
+    if (proposalsResponse.error) {
+      if (championsMigrationMissing(proposalsResponse.error)) {
+        championsLeagueError = "missing";
+      } else {
+        console.error("Failed to load Champions League proposals:", proposalsResponse.error);
+        championsLeagueError = proposalsResponse.error.message;
+      }
+    } else {
+      championsLeagueProposals = proposalsResponse.data || [];
+    }
+  }
+  renderChampionsLeague();
+}
+
+function championsAggregate(matches) {
+  const totals = [0, 0];
+  matches.forEach(match => {
+    totals[match.home_team] += Number(match.home_goals);
+    totals[match.away_team] += Number(match.away_goals);
+  });
+  return totals;
+}
+
+function renderChampionsLeague() {
+  const status = document.getElementById("championsLeagueStatus");
+  const rows = document.getElementById("championsLeagueRows");
+  const entry = document.getElementById("championsLeagueEntry");
+  const proposals = document.getElementById("championsLeagueProposals");
+  if (!status || !rows || !entry || !proposals) return;
+  renderClubProfiles();
+  status.replaceChildren();
+  status.classList.remove("is-error");
+  rows.replaceChildren();
+  entry.replaceChildren();
+  proposals.replaceChildren();
+
+  if (championsLeagueError) {
+    const note = document.createElement("p");
+    note.className = "ucl-system-note";
+    note.textContent = championsLeagueError === "missing"
+      ? t("championsNoMigration")
+      : t("championsLoadError", championsLeagueError);
+    status.classList.add("is-error");
+    status.append(note);
+  }
+
+  const seasonMatches = championsLeagueMatches.filter(match => Number(match.season) === currentSeason)
+    .sort((a, b) => Number(a.leg) - Number(b.leg));
+  const seasonTrophies = clubTrophies.filter(trophy => Number(trophy.season) === currentSeason);
+  const leagueMatchesPlayed = state.matches.filter(match => match.season === currentSeason).length;
+  document.getElementById("championsSeasonBadge").textContent =
+    `${t("season").toUpperCase()} ${currentSeason}`;
+  const totals = championsAggregate(seasonMatches);
+  const aggregate = championsAggregate(seasonMatches.filter(match => Number(match.leg) <= 2));
+  renderChampionsProgress(seasonMatches, leagueMatchesPlayed, aggregate);
+  document.querySelector(".champions-league-table-wrap")
+    ?.classList.toggle("is-empty", seasonMatches.length === 0);
+  document.querySelector(".ucl-history-heading")
+    ?.classList.toggle("is-empty", seasonMatches.length === 0);
+  const trophy = seasonTrophies.find(item => item.competition === "champions_league");
+  let winner = trophy?.team_index;
+  if (winner == null && seasonMatches.length >= 2 && totals[0] !== totals[1]) {
+    winner = totals[0] > totals[1] ? 0 : 1;
+  } else if (winner == null && seasonMatches.some(match => Number(match.leg) === 3)) {
+    const decider = seasonMatches.find(match => Number(match.leg) === 3);
+    winner = decider.home_goals > decider.away_goals ||
+      decider.home_goals === decider.away_goals && decider.home_penalties > decider.away_penalties
+      ? decider.home_team : decider.away_team;
+  }
+
+  if (seasonMatches.length === 0 && !championsLeagueError) {
+    const empty = document.createElement("p");
+    empty.className = "champions-empty";
+    empty.textContent = t("championsNoMatches");
+    status.append(empty);
+  }
+
+  seasonMatches.forEach(match => {
+    const row = document.createElement("tr");
+    const legCell = document.createElement("th");
+    legCell.scope = "row";
+    legCell.textContent = t(match.leg === 1 ? "championsLegOne" :
+      match.leg === 2 ? "championsLegTwo" : "championsDecider");
+    const home = document.createElement("td");
+    home.textContent = state.teams[match.home_team]?.name ?? "?";
+    const score = document.createElement("td");
+    score.className = "champions-match-score";
+    score.textContent = `${match.home_goals} – ${match.away_goals}` +
+      (match.home_penalties == null ? "" : ` (${match.home_penalties}–${match.away_penalties} pens)`);
+    const away = document.createElement("td");
+    away.textContent = state.teams[match.away_team]?.name ?? "?";
+    const date = document.createElement("td");
+    date.textContent = new Date(match.played_at).toLocaleDateString(
+      currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short", year: "numeric" }
+    );
+    row.append(legCell, home, score, away, date);
+    rows.append(row);
+  });
+
+  if (winner != null) {
+    const winnerStatus = document.createElement("div");
+    winnerStatus.className = "champions-winner";
+    const icon = document.createElement("img");
+    icon.src = "trophy/leauge-champions.png";
+    icon.alt = "";
+    const text = document.createElement("strong");
+    text.textContent = t("championsWinner", state.teams[winner]?.name ?? "?", currentSeason);
+    winnerStatus.append(icon, text);
+    status.append(winnerStatus);
+  }
+  if (seasonMatches.length >= 2) {
+    const aggregateStatus = document.createElement("p");
+    aggregateStatus.className = "champions-aggregate";
+    aggregateStatus.textContent = t("championsAggregateScore",
+      state.teams[0]?.name ?? "?", aggregate[0], aggregate[1], state.teams[1]?.name ?? "?");
+    status.append(aggregateStatus);
+  }
+  if (winner == null && seasonMatches.length >= 2 && totals[0] === totals[1]) {
+    const aggregateStatus = document.createElement("p");
+    aggregateStatus.className = "champions-level";
+    aggregateStatus.textContent = t("championsLevelAggregate");
+    status.append(aggregateStatus);
+  }
+
+  seasonTrophies.filter(item => item.competition === "participation").forEach(item => {
+    const medal = document.createElement("span");
+    medal.className = "champions-medal";
+    const icon = document.createElement("img");
+    icon.src = "trophy/first-title.png";
+    icon.alt = t("participationMedalName");
+    medal.append(icon, document.createTextNode(`${state.teams[item.team_index]?.name ?? "?"} · ${t("participationMedalName")}`));
+    status.append(medal);
+  });
+
+  const pending = championsLeagueProposals.filter(proposal =>
+    Number(proposal.season) === currentSeason &&
+    (proposal.home_team === myTeamIndex || proposal.away_team === myTeamIndex));
+  const canSubmit = session && (myTeamIndex === 0 || myTeamIndex === 1) &&
+    pending.length === 0 && winner == null;
+  let availableLeg = null;
+  if (seasonMatches.length === 0 && leagueMatchesPlayed >= 18) availableLeg = 1;
+  else if (seasonMatches.length === 1 && leagueMatchesPlayed >= 36) availableLeg = 2;
+  else if (seasonMatches.length === 2 && totals[0] === totals[1]) availableLeg = 3;
+
+  if (!championsLeagueError) {
+    if (!session) {
+      entry.textContent = t("championsWaitingSignIn");
+    } else if (!canSubmit && pending.length === 0 && winner == null && !availableLeg) {
+      entry.textContent = t("championsWaitingOpponent");
+    } else if (canSubmit && availableLeg) {
+      renderChampionsEntry(entry, availableLeg);
+    } else if (pending.length > 0) {
+      entry.textContent = t("championsWaitingOpponent");
+    }
+  }
+
+  pending.forEach(proposal => renderChampionsProposal(proposals, proposal));
+}
+
+function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
+  const container = document.getElementById("championsLeagueProgress");
+  if (!container) return;
+  const firstLeg = matches.find(match => Number(match.leg) === 1);
+  const secondLeg = matches.find(match => Number(match.leg) === 2);
+  const decidingMatch = matches.find(match => Number(match.leg) === 3);
+  const tied = Boolean(secondLeg) && aggregate[0] === aggregate[1];
+  const fixtures = [
+    {
+      leg: 1,
+      match: firstLeg,
+      available: !firstLeg && leagueMatchesPlayed >= 18,
+      lockedText: t("championsFixtureOpens", 18),
+      home: 0,
+      away: 1
+    },
+    {
+      leg: 2,
+      match: secondLeg,
+      available: !secondLeg && Boolean(firstLeg) && leagueMatchesPlayed >= 36,
+      lockedText: firstLeg ? t("championsFixtureOpens", 36) : t("championsFixtureLocked"),
+      home: 1,
+      away: 0
+    },
+    {
+      leg: 3,
+      match: decidingMatch,
+      available: !decidingMatch && tied,
+      lockedText: secondLeg && !tied
+        ? t("championsFixtureAggregateNeeded")
+        : t("championsFixtureLocked"),
+      home: 0,
+      away: 1
+    }
+  ];
+  container.replaceChildren(...fixtures.map(fixture => {
+    const played = Boolean(fixture.match);
+    const locked = !played && !fixture.available;
+    const card = document.createElement("article");
+    card.className = `ucl-fixture-card${played ? " is-complete" : fixture.available ? " is-ready" : " is-locked"}`;
+
+    const head = document.createElement("div");
+    head.className = "ucl-fixture-head";
+    const number = document.createElement("span");
+    number.className = "ucl-fixture-number";
+    number.textContent = String(fixture.leg).padStart(2, "0");
+    const label = document.createElement("span");
+    label.className = "ucl-fixture-label";
+    label.textContent = t(fixture.leg === 1 ? "championsLegOne" :
+      fixture.leg === 2 ? "championsLegTwo" : "championsDecider");
+    const state = document.createElement("span");
+    state.className = "ucl-fixture-state";
+    state.textContent = played ? t("championsFixtureComplete") :
+      fixture.available ? t("championsFixtureReady") : t("championsFixtureLocked");
+    head.append(number, label, state);
+
+    const teams = document.createElement("div");
+    teams.className = "ucl-fixture-teams";
+    const home = createUclTeam(fixture.match?.home_team ?? fixture.home, fixture.match?.home_goals);
+    const versus = document.createElement("span");
+    versus.className = "ucl-versus";
+    versus.textContent = played ? "–" : "VS";
+    const away = createUclTeam(fixture.match?.away_team ?? fixture.away, fixture.match?.away_goals);
+    teams.append(home, versus, away);
+
+    const footer = document.createElement("div");
+    footer.className = "ucl-fixture-footer";
+    const hint = document.createElement("span");
+    hint.textContent = played
+      ? new Date(fixture.match.played_at).toLocaleDateString(
+        currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short", year: "numeric" })
+      : fixture.leg === 3 && !tied
+        ? t("championsFixtureAggregateNeeded")
+        : fixture.lockedText;
+    footer.append(hint);
+
+    card.append(head, teams, footer);
+    if (played && fixture.match.home_penalties != null) {
+      const penalties = document.createElement("span");
+      penalties.className = "ucl-penalty-result";
+      penalties.textContent = `${fixture.match.home_penalties}–${fixture.match.away_penalties} ${currentLang === "ru" ? "пен." : "PEN"}`;
+      footer.append(penalties);
+    }
+    return card;
+  }));
+}
+
+function createUclTeam(teamIndex, score) {
+  const team = state.teams[teamIndex];
+  const element = document.createElement("span");
+  element.className = "ucl-fixture-team";
+  if (!team) {
+    element.classList.add("is-tbd");
+    element.textContent = t("championsFixtureTbd");
+    return element;
+  }
+  const badge = document.createElement("span");
+  badge.className = `ucl-fixture-badge team-${teamIndex}`;
+  if (typeof team.logo === "string" && /^https:\/\//i.test(team.logo)) {
+    const logo = document.createElement("img");
+    logo.src = team.logo;
+    logo.alt = "";
+    badge.append(logo);
+  } else {
+    badge.textContent = team.name.split(/\s+/).map(part => part[0] || "").slice(0, 2).join("").toUpperCase();
+  }
+  const name = document.createElement("span");
+  name.className = "ucl-fixture-team-name";
+  name.textContent = team.name;
+  element.append(badge, name);
+  if (score !== undefined) {
+    const goals = document.createElement("strong");
+    goals.className = "ucl-fixture-goals";
+    goals.textContent = String(score);
+    element.append(goals);
+  }
+  return element;
+}
+
+function renderClubProfiles() {
+  const list = document.getElementById("clubProfileList");
+  if (!list) return;
+  list.replaceChildren(...state.teams.map((team, teamIndex) => {
+    const awards = clubTrophies.filter(trophy => Number(trophy.team_index) === teamIndex);
+    const titleCount = awards.filter(trophy => trophy.competition === "champions_league").length;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `club-profile-card ${teamTone(teamIndex)}`;
+    button.setAttribute("aria-label", `${t("clubProfileLink")}: ${team.name}`);
+
+    const emblem = document.createElement("span");
+    emblem.className = "club-profile-emblem";
+    if (typeof team.logo === "string" && /^https:\/\//i.test(team.logo)) {
+      const image = document.createElement("img");
+      image.src = team.logo;
+      image.alt = "";
+      emblem.append(image);
+    } else {
+      emblem.textContent = team.name.split(/\s+/).map(part => part[0] || "").slice(0, 2).join("").toUpperCase();
+    }
+
+    const info = document.createElement("span");
+    info.className = "club-profile-info";
+    const name = document.createElement("strong");
+    name.textContent = team.name;
+    const summary = document.createElement("span");
+    summary.textContent = t("clubTrophiesCount", titleCount);
+    info.append(name, summary);
+
+    const awardIcons = document.createElement("span");
+    awardIcons.className = "club-profile-awards";
+    awards.filter(trophy => trophy.competition === "participation" || trophy.competition === "champions_league")
+      .slice(0, 4)
+      .forEach(trophy => {
+        const icon = document.createElement("img");
+        icon.src = trophy.competition === "participation" ? "trophy/first-title.png" : "trophy/leauge-champions.png";
+        icon.alt = trophy.competition === "participation" ? t("participationMedalName") : t("championsTrophyName");
+        icon.title = `${icon.alt} · ${t("season")} ${trophy.season}`;
+        awardIcons.append(icon);
+      });
+    button.append(emblem, info, awardIcons);
+    button.addEventListener("click", () => openClubProfile(team, awards));
+    return button;
+  }));
+}
+
+function openClubProfile(team, awards) {
+  const title = document.getElementById("clubProfileDialogTitle");
+  const content = document.getElementById("clubProfileDialogContent");
+  if (!clubProfileDialog || !title || !content) return;
+  title.textContent = team.name;
+  content.replaceChildren();
+  if (!awards.length) {
+    const empty = document.createElement("p");
+    empty.className = "club-profile-empty";
+    empty.textContent = t("clubNoTrophies");
+    content.append(empty);
+  } else {
+    const grid = document.createElement("div");
+    grid.className = "club-profile-trophy-grid";
+    awards.slice().sort((a, b) => Number(a.season) - Number(b.season)).forEach(award => {
+      const card = document.createElement("article");
+      card.className = "club-profile-trophy";
+      const image = document.createElement("img");
+      image.src = award.competition === "participation" ? "trophy/first-title.png" : "trophy/leauge-champions.png";
+      image.alt = "";
+      const label = document.createElement("strong");
+      label.textContent = award.competition === "participation" ? t("participationMedalName") : t("championsTrophyName");
+      const season = document.createElement("span");
+      season.textContent = `${t("season")} ${award.season}`;
+      card.append(image, label, season);
+      grid.append(card);
+    });
+    content.append(grid);
+  }
+  clubProfileDialog.showModal();
+}
+
+document.getElementById("clubProfileDialogClose")?.addEventListener("click", () => clubProfileDialog?.close());
+
+function renderChampionsEntry(container, leg) {
+  const homeIndex = leg === 2 ? 1 : 0;
+  const awayIndex = 1 - homeIndex;
+  const form = document.createElement("form");
+  form.className = "champions-result-form";
+  const title = document.createElement("h3");
+  title.textContent = t("championsEntryTitle",
+    t(leg === 1 ? "championsLegOne" : leg === 2 ? "championsLegTwo" : "championsDecider"),
+    currentSeason);
+  const fieldset = document.createElement("fieldset");
+  const legend = document.createElement("legend");
+  legend.textContent = `${state.teams[homeIndex]?.name ?? "?"} vs ${state.teams[awayIndex]?.name ?? "?"}`;
+  const homeInput = makeChampionsScoreInput(t("championsHomeScore", state.teams[homeIndex]?.name ?? "?"));
+  const awayInput = makeChampionsScoreInput(t("championsAwayScore", state.teams[awayIndex]?.name ?? "?"));
+  fieldset.append(legend, homeInput.label, awayInput.label);
+  form.append(title, fieldset);
+
+  const statDefinitions = [
+    { key: "shots", label: t("championsShots"), max: 999 },
+    { key: "shotsOnTarget", label: t("championsShotsOnTarget"), max: 999 },
+    { key: "possession", label: t("championsPossession"), max: 100 },
+    { key: "passes", label: t("championsPasses"), max: 9999 }
+  ];
+  const statsSection = document.createElement("section");
+  statsSection.className = "stats-entry champions-stats-entry";
+  const statsTitle = document.createElement("h3");
+  statsTitle.textContent = t("championsMatchStats");
+  const statsHint = document.createElement("p");
+  statsHint.textContent = t("championsStatsOptional");
+  const statsHead = document.createElement("div");
+  statsHead.className = "stats-entry-head";
+  statsHead.setAttribute("aria-hidden", "true");
+  const homeStatTitle = state.teams[homeIndex]?.name ?? "?";
+  const awayStatTitle = state.teams[awayIndex]?.name ?? "?";
+  statsHead.append(
+    document.createElement("span"),
+    Object.assign(document.createElement("span"), { textContent: homeStatTitle }),
+    Object.assign(document.createElement("span"), { textContent: awayStatTitle })
+  );
+  const statInputs = { home: {}, away: {} };
+  statsSection.append(statsTitle, statsHint, statsHead);
+  statDefinitions.forEach(stat => {
+    const row = document.createElement("div");
+    row.className = "stats-entry-row";
+    const label = document.createElement("span");
+    label.textContent = stat.label;
+    row.append(label);
+    ["home", "away"].forEach(side => {
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = "0";
+      input.max = String(stat.max);
+      input.step = "1";
+      input.inputMode = "numeric";
+      input.setAttribute("aria-label", `${stat.label} · ${side === "home" ? homeStatTitle : awayStatTitle}`);
+      statInputs[side][stat.key] = input;
+      row.append(input);
+    });
+    statsSection.append(row);
+  });
+  form.append(statsSection);
+
+  let homePens = null;
+  let awayPens = null;
+  if (leg === 3) {
+    const penaltyFieldset = document.createElement("fieldset");
+    penaltyFieldset.className = "champions-penalty-fields";
+    penaltyFieldset.hidden = true;
+    const penaltyLegend = document.createElement("legend");
+    penaltyLegend.textContent = t("championsPenaltyScores");
+    homePens = makeChampionsScoreInput(t("championsHomePenalties", state.teams[homeIndex]?.name ?? "?"));
+    awayPens = makeChampionsScoreInput(t("championsAwayPenalties", state.teams[awayIndex]?.name ?? "?"));
+    homePens.input.required = false;
+    awayPens.input.required = false;
+    penaltyFieldset.append(penaltyLegend, homePens.label, awayPens.label);
+    form.append(penaltyFieldset);
+    const updatePenaltyVisibility = () => {
+      penaltyFieldset.hidden = homeInput.input.value === "" || awayInput.input.value === "" ||
+        Number(homeInput.input.value) !== Number(awayInput.input.value);
+    };
+    homeInput.input.addEventListener("input", updatePenaltyVisibility);
+    awayInput.input.addEventListener("input", updatePenaltyVisibility);
+  }
+
+  const message = document.createElement("p");
+  message.className = "champions-form-message";
+  message.setAttribute("role", "status");
+  const submit = document.createElement("button");
+  submit.type = "submit";
+  submit.className = "button button-primary";
+  submit.textContent = t("championsSubmit");
+  form.append(message, submit);
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const homeGoals = Number(homeInput.input.value);
+    const awayGoals = Number(awayInput.input.value);
+    const stats = {
+      home: Object.fromEntries(statDefinitions.map(stat => [
+        stat.key, statInputs.home[stat.key].value === "" ? null : Number(statInputs.home[stat.key].value)
+      ])),
+      away: Object.fromEntries(statDefinitions.map(stat => [
+        stat.key, statInputs.away[stat.key].value === "" ? null : Number(statInputs.away[stat.key].value)
+      ]))
+    };
+    const enteredStats = [...Object.values(stats.home), ...Object.values(stats.away)].filter(value => value !== null);
+    if (enteredStats.some(value => !Number.isInteger(value) || value < 0 || value > 9999)) {
+      message.textContent = t("statsWhole");
+      return;
+    }
+    if (stats.home.shotsOnTarget !== null && stats.home.shots !== null &&
+      stats.home.shotsOnTarget > stats.home.shots ||
+      stats.away.shotsOnTarget !== null && stats.away.shots !== null &&
+      stats.away.shotsOnTarget > stats.away.shots) {
+      message.textContent = t("sotLimit");
+      return;
+    }
+    const hasHomePossession = stats.home.possession !== null;
+    const hasAwayPossession = stats.away.possession !== null;
+    if (hasHomePossession !== hasAwayPossession ||
+      hasHomePossession && stats.home.possession + stats.away.possession !== 100) {
+      message.textContent = t("possessionRule");
+      return;
+    }
+    if (leg === 3 && homeGoals === awayGoals &&
+      (!homePens.input.value || !awayPens.input.value ||
+        Number(homePens.input.value) === Number(awayPens.input.value))) {
+      message.textContent = t("championsPenaltyRequired");
+      return;
+    }
+    submit.disabled = true;
+    const { error } = await supabase.rpc("propose_league_champions_match", {
+      p_home: homeIndex,
+      p_away: awayIndex,
+      p_home_goals: homeGoals,
+      p_away_goals: awayGoals,
+      p_season: currentSeason,
+      p_leg: leg,
+      p_stats: stats,
+      p_home_penalties: leg === 3 && homeGoals === awayGoals && homePens.input.value ? Number(homePens.input.value) : null,
+      p_away_penalties: leg === 3 && homeGoals === awayGoals && awayPens.input.value ? Number(awayPens.input.value) : null
+    });
+    if (error) {
+      console.error("Failed to submit Champions League result:", error);
+      message.textContent = error.message;
+      submit.disabled = false;
+      return;
+    }
+    showToast(t("championsProposalSent"));
+    await refreshChampionsLeague();
+  });
+  container.append(form);
+}
+
+function makeChampionsScoreInput(labelText) {
+  const label = document.createElement("label");
+  label.className = "champions-score-field";
+  const text = document.createElement("span");
+  text.textContent = labelText;
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "0";
+  input.max = "99";
+  input.step = "1";
+  input.required = true;
+  input.inputMode = "numeric";
+  label.append(text, input);
+  return { label, input };
+}
+
+function renderChampionsProposal(container, proposal) {
+  const row = document.createElement("div");
+  row.className = "proposal-row champions-proposal-row";
+  const own = proposal.proposer_team === myTeamIndex;
+  const text = document.createElement("span");
+  const home = state.teams[proposal.home_team]?.name ?? "?";
+  const away = state.teams[proposal.away_team]?.name ?? "?";
+  const summary = `${home} ${proposal.home_goals}–${proposal.away_goals} ${away}`;
+  text.textContent = t("championsProposalWaiting",
+    state.teams[proposal.proposer_team]?.name ?? "?", home, proposal.home_goals, proposal.away_goals, away, summary);
+  const actions = document.createElement("div");
+  actions.className = "proposal-actions";
+  if (!own) {
+    const confirm = document.createElement("button");
+    confirm.type = "button";
+    confirm.className = "button button-primary";
+    confirm.textContent = t("championsConfirm");
+    confirm.addEventListener("click", async () => {
+      confirm.disabled = true;
+      const { error } = await supabase.rpc("confirm_league_champions_match", { p_id: proposal.id });
+      if (error) {
+        console.error("Failed to confirm Champions League result:", error);
+        showToast(error.message);
+        confirm.disabled = false;
+      } else {
+        showToast(t("championsProposalConfirmed"));
+        await refreshChampionsLeague();
+      }
+    });
+    actions.append(confirm);
+  }
+  const decline = document.createElement("button");
+  decline.type = "button";
+  decline.className = "button button-quiet";
+  decline.textContent = own ? t("proposalCancel") : t("championsReject");
+  decline.addEventListener("click", async () => {
+    decline.disabled = true;
+    const { error } = await supabase.rpc("decline_league_champions_match", { p_id: proposal.id });
+    if (error) {
+      console.error("Failed to reject Champions League result:", error);
+      showToast(error.message);
+      decline.disabled = false;
+    } else {
+      await refreshChampionsLeague();
+    }
+  });
+  actions.append(decline);
+  row.append(text, actions);
+  container.append(row);
 }
 
 let teamsDraft = [];

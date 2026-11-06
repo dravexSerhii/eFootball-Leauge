@@ -4642,3 +4642,254 @@ body.community-mode #communitySection {
   .friend-badges { grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 8px; }
   .community-signin-card { align-items: stretch; flex-direction: column; }
 }
+
+.champions-league-panel {
+  position: relative;
+  isolation: isolate;
+  margin-top: 26px;
+  scroll-margin-top: 96px;
+  padding: 0 26px 26px;
+  overflow: hidden;
+  border: 1px solid rgba(166, 190, 255, .2);
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 82% 0%, rgba(52, 94, 186, .24), transparent 38%),
+    radial-gradient(ellipse at 8% 78%, rgba(36, 68, 139, .18), transparent 46%),
+    linear-gradient(135deg, #0d1832 0%, #101a36 45%, #0a142a 100%);
+  box-shadow: 0 24px 60px rgba(3, 10, 28, .34), inset 0 1px rgba(255,255,255,.06);
+  color: #f5f7ff;
+}
+.champions-league-panel::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(233, 239, 255, .78) 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(174, 198, 255, .58) 1px, transparent 2px);
+  background-position: 13px 22px, 47px 59px;
+  background-size: 88px 82px, 137px 121px;
+  content: "";
+  opacity: .2;
+  mask-image: linear-gradient(110deg, #000 0%, transparent 40%, #000 95%);
+  pointer-events: none;
+}
+.champions-league-panel::after {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e8c978 22%, #fff0bf 50%, #e8c978 78%, transparent);
+  content: "";
+  opacity: .9;
+}
+.ucl-masthead {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  min-height: 144px;
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(201, 216, 255, .13);
+}
+.ucl-emblem {
+  position: relative;
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  border: 1px solid rgba(232, 201, 120, .52);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 167, 93, .2), rgba(13, 26, 55, .4) 68%);
+  box-shadow: 0 0 34px rgba(70, 111, 205, .2), inset 0 0 20px rgba(255,255,255,.04);
+}
+.ucl-emblem::before, .ucl-emblem::after {
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(199, 215, 255, .22);
+  border-radius: 50%;
+  content: "";
+  transform: rotate(35deg) scaleX(.48);
+}
+.ucl-emblem::after { transform: rotate(-35deg) scaleX(.48); }
+.ucl-emblem img { z-index: 1; width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,.4)); }
+.ucl-star-orbit { position: absolute; z-index: 2; color: #f1d991; font-size: 15px; text-shadow: 0 0 10px rgba(255,222,144,.8); }
+.ucl-star-orbit-one { top: 0; right: 8px; }
+.ucl-star-orbit-two { bottom: 4px; left: 4px; font-size: 11px; }
+.ucl-heading-copy { min-width: 0; }
+.ucl-kicker, .ucl-section-kicker {
+  margin: 0 0 7px;
+  color: #d7bc77;
+  font: 800 9px/1.4 Inter, sans-serif;
+  letter-spacing: .22em;
+}
+.ucl-heading-copy h2 {
+  margin: 0;
+  color: #fff;
+  font: 700 clamp(24px, 3.2vw, 36px)/1.04 Oswald, Inter, sans-serif;
+  letter-spacing: .015em;
+  text-shadow: 0 3px 22px rgba(124, 160, 239, .2);
+}
+.champions-league-subtitle { margin: 9px 0 0; color: #aab8d8; font: 500 12px/1.5 Inter, sans-serif; }
+.ucl-analytics-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(219, 194, 129, .43);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(237, 211, 149, .13), rgba(255,255,255,.025));
+  color: #f1dcaa;
+  text-decoration: none;
+  font: 750 11px Inter, sans-serif;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+.ucl-analytics-link:hover { transform: translateY(-1px); border-color: #e4c87f; background: rgba(232,201,120,.18); }
+.ucl-analytics-link:focus-visible, .club-profile-card:focus-visible { outline: 2px solid #f1d991; outline-offset: 3px; }
+.ucl-analytics-link > span:first-child { font-size: 15px; }
+.champions-league-status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 0 4px; color: #c0cbe2; font: 600 12px/1.5 Inter, sans-serif; }
+.ucl-system-note, .champions-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(226, 194, 120, .2);
+  border-radius: 8px;
+  background: rgba(229, 193, 111, .06);
+  color: #c8cfe0;
+  font: 550 11px/1.55 Inter, sans-serif;
+}
+.ucl-system-note::before { flex: 0 0 auto; color: #e2c278; content: "✦"; }
+.champions-league-status.is-error .ucl-system-note { border-color: rgba(226,194,120,.26); }
+.champions-winner, .champions-medal { display: inline-flex; align-items: center; gap: 9px; color: #f4e4b7; }
+.champions-winner img { width: 38px; height: 38px; object-fit: contain; }
+.champions-medal img { width: 25px; height: 25px; object-fit: contain; }
+.champions-level { margin: 0; color: #f1d991; }
+.champions-match-score { color: #f1d991; font-weight: 850; white-space: nowrap; }
+.champions-aggregate { margin: 0; color: #fff; }
+.ucl-fixtures { padding: 21px 0 22px; }
+.ucl-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 15px; }
+.ucl-section-kicker { margin-bottom: 4px; color: #90a9e3; font-size: 8px; letter-spacing: .2em; }
+.ucl-section-heading h3, .ucl-history-heading h3 {
+  margin: 0;
+  color: #f4f6fd;
+  font: 650 19px/1.2 Oswald, Inter, sans-serif;
+  letter-spacing: .02em;
+}
+.ucl-season-badge { padding: 6px 9px; border: 1px solid rgba(219,194,129,.35); border-radius: 99px; color: #e7d49e; font: 800 9px Inter,sans-serif; letter-spacing: .12em; }
+.ucl-fixture-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+.ucl-fixture-card {
+  position: relative;
+  min-width: 0;
+  padding: 13px 13px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(159, 181, 232, .17);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(35, 54, 96, .65), rgba(18, 30, 60, .82));
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+  transition: border-color .2s ease, transform .2s ease, opacity .2s ease;
+}
+.ucl-fixture-card.is-ready { border-color: rgba(232,201,120,.66); box-shadow: 0 0 23px rgba(201,167,93,.09), inset 0 1px rgba(255,255,255,.06); }
+.ucl-fixture-card.is-complete { border-color: rgba(117, 177, 229, .48); background: linear-gradient(145deg, rgba(36, 69, 111, .8), rgba(19, 38, 72, .92)); }
+.ucl-fixture-card.is-locked { opacity: .66; }
+.ucl-fixture-head { display: flex; min-width: 0; align-items: center; gap: 7px; }
+.ucl-fixture-number { display: grid; flex: 0 0 24px; width: 24px; height: 24px; place-items: center; border: 1px solid rgba(232,201,120,.38); border-radius: 50%; color: #e4cf99; font: 800 9px Inter,sans-serif; }
+.ucl-fixture-label { overflow: hidden; color: #e9edfa; text-overflow: ellipsis; white-space: nowrap; font: 700 11px Inter,sans-serif; }
+.ucl-fixture-state { margin-left: auto; color: #93a4c7; font: 800 7px Inter,sans-serif; letter-spacing: .1em; white-space: nowrap; }
+.is-ready .ucl-fixture-state { color: #f0d48e; }
+.is-complete .ucl-fixture-state { color: #9dc9ed; }
+.ucl-fixture-teams { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr); align-items: center; gap: 4px; min-height: 73px; padding: 9px 0 5px; }
+.ucl-fixture-team { display: flex; min-width: 0; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-align: center; }
+.ucl-fixture-badge { display: grid; width: 34px; height: 34px; place-items: center; overflow: hidden; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; background: radial-gradient(circle at 35% 20%, #5270b1, #1a2c57 72%); color: #f4e4b7; font: 800 10px Inter,sans-serif; }
+.ucl-fixture-badge.team-1 { background: radial-gradient(circle at 35% 20%, #768bb7, #283c68 72%); }
+.ucl-fixture-badge img { width: 100%; height: 100%; object-fit: contain; }
+.ucl-fixture-team-name { display: block; width: 100%; overflow: hidden; color: #d9e1f4; text-overflow: ellipsis; white-space: nowrap; font: 600 9px Inter,sans-serif; }
+.ucl-fixture-team.is-tbd { color: #8795b3; font: 550 9px Inter,sans-serif; }
+.ucl-fixture-goals { color: #fff; font: 700 17px/1 Oswald, Inter,sans-serif; }
+.ucl-versus { color: #9aa8c7; text-align: center; font: 800 9px Inter,sans-serif; letter-spacing: .08em; }
+.ucl-fixture-footer { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-height: 25px; padding-top: 7px; border-top: 1px solid rgba(198,213,248,.1); color: #9facca; font: 550 8px/1.35 Inter,sans-serif; }
+.ucl-penalty-result { flex: 0 0 auto; color: #eed58f; font-weight: 800; }
+.ucl-history-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 17px 0 10px; border-top: 1px solid rgba(201,216,255,.13); }
+.ucl-history-heading > span { color: #8e9dbc; font: 650 8px Inter,sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.ucl-history-heading.is-empty, .champions-league-table-wrap.is-empty { display: none; }
+.champions-league-table-wrap { overflow-x: auto; border: 1px solid rgba(159,181,232,.15); border-radius: 9px; background: rgba(4,12,28,.24); }
+.champions-league-table { width: 100%; min-width: 540px; border-collapse: collapse; text-align: center; }
+.champions-league-table thead { background: rgba(133,157,209,.08); }
+.champions-league-table th { height: 38px; padding: 0 10px; color: #8799bd; font: 800 8px Inter,sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.champions-league-table td { height: 44px; padding: 7px 10px; border-top: 1px solid rgba(198,213,248,.08); color: #dce4f6; font: 550 11px Inter,sans-serif; }
+.champions-league-table td:last-child { color: #93a2c0; }
+.champions-league-entry:empty, .champions-proposals:empty { display: none; }
+.champions-league-entry:not(:empty) { margin-top: 14px; padding: 14px; border: 1px solid rgba(232,201,120,.28); border-radius: 10px; background: rgba(232,201,120,.055); color: #d9e2f5; font: 600 11px/1.55 Inter,sans-serif; }
+.champions-result-form { display: grid; gap: 14px; max-width: 700px; margin: 0; }
+.champions-result-form h3 { margin: 0; color: #f3e4bc; font: 700 17px Oswald,Inter,sans-serif; }
+.champions-result-form fieldset { display: flex; flex-wrap: wrap; gap: 12px; margin: 0; padding: 12px; border: 1px solid rgba(159,181,232,.2); border-radius: 9px; }
+.champions-result-form fieldset[hidden] { display: none; }
+.champions-result-form legend { padding: 0 5px; color: #a9b7d2; font: 650 10px Inter,sans-serif; }
+.champions-score-field { display: grid; flex: 1 1 130px; gap: 6px; color: #a9b7d2; font: 600 10px Inter,sans-serif; }
+.champions-form-message { min-height: 1em; margin: 0; color: #ff9898; }
+.champions-result-form .button-primary { border-color: #d4b96e; background: linear-gradient(135deg, #e4ce93, #b9954f); color: #17213a; }
+.champions-proposal-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0; padding: 14px; border: 1px solid rgba(232,201,120,.27); border-radius: 10px; background: rgba(232,201,120,.06); }
+.champions-proposal-row > span { flex: 1 1 250px; color: #e0e7f6; font: 600 11px/1.5 Inter,sans-serif; }
+.champions-proposal-row .proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.club-profiles { margin-top: 21px; padding-top: 19px; border-top: 1px solid rgba(201,216,255,.13); }
+.ucl-clubs-heading { margin-bottom: 12px; }
+.ucl-clubs-heading h3 { font-size: 17px; }
+.club-profile-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.club-profile-card { display: flex; min-width: 0; align-items: center; gap: 11px; padding: 12px; border: 1px solid rgba(166,190,255,.17); border-radius: 10px; background: linear-gradient(125deg, rgba(39,57,96,.58), rgba(16,29,59,.76)); color: #f4f6fd; cursor: pointer; text-align: left; transition: border-color .2s ease, transform .2s ease, background .2s ease; }
+.club-profile-card:hover { transform: translateY(-2px); border-color: rgba(232,201,120,.48); background: linear-gradient(125deg, rgba(52,71,112,.7), rgba(20,35,69,.85)); }
+.club-profile-emblem { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; overflow: hidden; border: 1px solid rgba(232,201,120,.36); border-radius: 50%; background: radial-gradient(circle at 35% 20%, #4968a9, #182a53 72%); color: #f2dda3; font: 850 12px Inter,sans-serif; }
+.club-profile-card.two .club-profile-emblem { background: radial-gradient(circle at 35% 20%, #7385b0, #263a67 72%); }
+.club-profile-emblem img { width: 100%; height: 100%; object-fit: contain; }
+.club-profile-info { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.club-profile-info strong { overflow: hidden; color: #f1f4fc; text-overflow: ellipsis; white-space: nowrap; font: 700 11px Inter,sans-serif; }
+.club-profile-info > span { color: #9eacc9; font: 550 9px Inter,sans-serif; }
+.club-profile-awards { display: flex; flex-wrap: wrap; gap: 3px; }
+.club-profile-awards img { width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 2px 3px rgba(0,0,0,.3)); }
+.club-profile-dialog { width: min(560px, calc(100% - 28px)); border: 1px solid rgba(166,190,255,.24); border-radius: 18px; background: linear-gradient(145deg,#142343,#0c1730); color: #f5f7ff; }
+.club-profile-dialog::backdrop { background: rgba(3,8,20,.78); backdrop-filter: blur(7px); }
+.club-profile-dialog .dialog-inner { padding: 22px; }
+.club-profile-dialog .dialog-header { margin-bottom: 18px; }
+.club-profile-dialog h2 { margin: 0; color: #fff; font: 700 22px Oswald,Inter,sans-serif; }
+.club-profile-dialog .eyebrow { margin: 0 0 7px; color: #d7bc77; letter-spacing: .12em; font: 750 10px Inter,sans-serif; }
+.club-profile-trophy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+.club-profile-trophy { display: grid; justify-items: center; gap: 8px; padding: 16px 12px; border: 1px solid rgba(166,190,255,.17); border-radius: 12px; background: rgba(34,53,91,.55); text-align: center; }
+.club-profile-trophy img { width: 74px; height: 74px; object-fit: contain; }
+.club-profile-trophy strong { color: #f3e5bf; font: 700 12px/1.4 Inter,sans-serif; }
+.club-profile-trophy span, .club-profile-empty { color: #aab8d4; font: 550 12px Inter,sans-serif; }
+@media (max-width: 760px) {
+  .champions-league-panel { padding-right: 17px; padding-left: 17px; }
+  .ucl-masthead { grid-template-columns: 68px minmax(0,1fr); gap: 13px; padding: 18px 0; }
+  .ucl-emblem { width: 64px; height: 64px; }
+  .ucl-emblem img { width: 48px; height: 48px; }
+  .ucl-analytics-link { grid-column: 2; justify-self: start; min-height: 36px; margin-top: -3px; }
+  .ucl-fixture-grid { gap: 8px; }
+  .ucl-fixture-card { padding: 10px 8px 8px; }
+  .ucl-fixture-head { gap: 5px; }
+  .ucl-fixture-number { flex-basis: 21px; width: 21px; height: 21px; }
+  .ucl-fixture-state { font-size: 6px; }
+}
+@media (max-width: 520px) {
+  .champions-league-panel { padding: 0 13px 16px; border-radius: 16px; }
+  .ucl-masthead { grid-template-columns: 54px minmax(0,1fr); gap: 11px; min-height: auto; }
+  .ucl-emblem { width: 52px; height: 52px; }
+  .ucl-emblem img { width: 39px; height: 39px; }
+  .ucl-star-orbit-one { right: 4px; }
+  .ucl-heading-copy h2 { font-size: 25px; }
+  .champions-league-subtitle { font-size: 10px; }
+  .ucl-fixture-grid { grid-template-columns: 1fr; gap: 7px; }
+  .ucl-fixture-card { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,1.2fr); align-items: center; gap: 0 8px; padding: 9px 10px; }
+  .ucl-fixture-head { grid-column: 1 / -1; }
+  .ucl-fixture-teams { min-height: 60px; padding: 5px 0 0; }
+  .ucl-fixture-footer { align-self: stretch; min-height: 0; padding: 5px 0 0 8px; border-top: 0; border-left: 1px solid rgba(198,213,248,.1); }
+  .ucl-fixture-state { font-size: 7px; }
+  .ucl-section-heading h3, .ucl-history-heading h3 { font-size: 17px; }
+  .ucl-history-heading { padding-top: 14px; }
+  .club-profile-list { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ucl-analytics-link, .ucl-fixture-card, .club-profile-card { transition: none; }
+}

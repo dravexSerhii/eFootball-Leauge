@@ -244,6 +244,7 @@ const UI = {
   }
 };
 
+const competitionMode = new URLSearchParams(window.location.search).get("competition") === "champions";
 const state = { teams: [], matches: [], lineups: {}, season: 1, selectedSeason: "current" };
 let lang = localStorage.getItem("leagueLang") === "ru" ? "ru" : "en";
 let client = null;
@@ -1738,12 +1739,22 @@ function setLanguage(nextLang) {
   localStorage.setItem("leagueLang", lang);
   document.documentElement.lang = lang;
   const tt = t();
-  document.title = `eFootball League — ${tt.title}`;
-  $("backLink").textContent = tt.back;
-  $("pageTitle").textContent = tt.title;
-  $("eyebrow").textContent = tt.eyebrow;
-  $("heroTitle").textContent = tt.hero;
-  $("heroSubtitle").textContent = tt.subtitle;
+  const pageTitle = competitionMode
+    ? L("Аналитика Лиги чемпионов", "Champions League Analytics")
+    : tt.title;
+  document.title = `eFootball League — ${pageTitle}`;
+  $("backLink").textContent = competitionMode ? L("← Турнир ЛЧ", "← Champions League") : tt.back;
+  $("backLink").href = competitionMode ? "../index.html#championsLeague" : "../index.html";
+  $("pageTitle").textContent = pageTitle;
+  $("eyebrow").textContent = competitionMode
+    ? L("АНАЛИТИКА ЛИГИ ЧЕМПИОНОВ · ОНЛАЙН", "CHAMPIONS LEAGUE ANALYTICS · LIVE")
+    : tt.eyebrow;
+  $("heroTitle").textContent = competitionMode
+    ? L("Статистика матчей Лиги чемпионов", "Champions League match analytics")
+    : tt.hero;
+  $("heroSubtitle").textContent = competitionMode
+    ? L("Результаты и статистика матчей берутся только из подтверждённых игр ЛЧ; сила состава — из текущих сохранённых составов.", "Match results and statistics use confirmed Champions League games only; squad strength uses the current saved lineups.")
+    : tt.subtitle;
   $("liveLabel").textContent = liveAvailable ? tt.liveConnected : tt.live;
   $("seasonLabel").textContent = tt.season;
   $("favoriteEyebrow").textContent = tt.favoriteEyebrow;
@@ -1753,8 +1764,12 @@ function setLanguage(nextLang) {
   $("strengthsDescription").textContent = tt.strengthsDescription;
   $("tickerLabel").textContent = tt.liveTicker;
   $("cardiogramEyebrow").textContent = tt.live;
-  $("cardiogramTitle").textContent = tt.cardiogramTitle;
-  $("cardiogramDescription").textContent = tt.cardiogramDescription;
+  $("cardiogramTitle").textContent = competitionMode
+    ? L("Динамика очков в матчах ЛЧ", "Champions League match-points trend")
+    : tt.cardiogramTitle;
+  $("cardiogramDescription").textContent = competitionMode
+    ? L("За победу — 3 очка, за ничью — 1. Учитываются только подтверждённые матчи ЛЧ.", "Each confirmed match awards 3 points for a win and 1 for a draw. Champions League matches only.")
+    : tt.cardiogramDescription;
   $("matchTrendEyebrow").textContent = tt.liveModel;
   $("matchTrendTitle").textContent = tt.matchTrendTitle;
   $("currentProbabilityTitle").textContent = tt.currentProbabilities;
@@ -1813,9 +1828,10 @@ function mapData(settings, rows) {
 
 async function loadData(version = ++requestVersion) {
   if (!client) return;
+  const matchesTable = competitionMode ? "league_champions_matches" : "league_matches";
   const [settingsResponse, matchesResponse] = await Promise.all([
     client.from("league_settings").select("teams,season,lineups").eq("id", true).maybeSingle(),
-    client.from("league_matches").select("home_team,away_team,home_goals,away_goals,played_at,season,stats").order("played_at", { ascending: true })
+    client.from(matchesTable).select("home_team,away_team,home_goals,away_goals,played_at,season,stats").order("played_at", { ascending: true })
   ]);
   if (version !== requestVersion) return;
   if (settingsResponse.error) throw settingsResponse.error;
@@ -1842,7 +1858,7 @@ async function start() {
       .on("postgres_changes", { event: "*", schema: "public", table: "league_settings" }, () => {
         void loadData().catch((error) => showStatus(`${t().loadError}${error.message}`));
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "league_matches" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: competitionMode ? "league_champions_matches" : "league_matches" }, () => {
         void loadData().catch((error) => showStatus(`${t().loadError}${error.message}`));
       })
       .subscribe((status) => {

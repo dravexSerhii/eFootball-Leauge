@@ -36,6 +36,7 @@
                     <nav class="site-menu-panel" id="siteMenuLinks" aria-label="Explore" data-i18n-aria-label="siteMenu">
                         <a href="cards.html" data-i18n="dbLink">Card database</a>
                         <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
+                        <a href="global/global.html?competition=champions" data-i18n="championsLeagueStatsLink">Champions League analytics</a>
                         <a href="global/global.html#achievements" data-i18n="achievementsLink">Achievements</a>
                         <button type="button" id="myProfileButton" data-i18n="myProfile">My profile</button>
                         <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
@@ -329,6 +330,65 @@
                 <button class="match-history-toggle" id="matchHistoryToggle" type="button" aria-controls="matchList" aria-expanded="false" hidden></button>
             </section>
             <div class="tip"><span class="tip-icon" aria-hidden="true">✦</span><span data-i18n="tipText">A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.</span></div>
+
+            <section class="panel champions-league-panel" id="championsLeague" aria-labelledby="championsLeagueTitle">
+                <div class="ucl-masthead">
+                    <div class="ucl-emblem" aria-hidden="true">
+                        <span class="ucl-star-orbit ucl-star-orbit-one">✦</span>
+                        <span class="ucl-star-orbit ucl-star-orbit-two">✦</span>
+                        <img src="trophy/leauge-champions.png" alt="">
+                    </div>
+                    <div class="ucl-heading-copy">
+                        <p class="ucl-kicker" data-i18n="championsLeagueEyebrow">THE ROAD TO EUROPEAN GLORY</p>
+                        <h2 id="championsLeagueTitle" data-i18n="championsLeagueTitle">Champions League</h2>
+                        <p class="champions-league-subtitle" data-i18n="championsLeagueSubtitle">Two legs each season · aggregate score decides the champion</p>
+                    </div>
+                    <a class="ucl-analytics-link" href="global/global.html?competition=champions">
+                        <span aria-hidden="true">↗</span>
+                        <span data-i18n="championsLeagueStatsLink">Champions League analytics</span>
+                    </a>
+                </div>
+                <div class="champions-league-status" id="championsLeagueStatus" role="status"></div>
+                <section class="ucl-fixtures" aria-labelledby="championsRoadTitle">
+                    <div class="ucl-section-heading">
+                        <div>
+                            <p class="ucl-section-kicker" data-i18n="championsSeason">EUROPEAN CAMPAIGN</p>
+                            <h3 id="championsRoadTitle" data-i18n="championsRoadTitle">The road to the final</h3>
+                        </div>
+                        <span class="ucl-season-badge" id="championsSeasonBadge">SEASON 1</span>
+                    </div>
+                    <div class="ucl-fixture-grid" id="championsLeagueProgress" aria-live="polite"></div>
+                </section>
+                <div class="ucl-history-heading">
+                    <h3 data-i18n="championsHistory">Match history</h3>
+                    <span data-i18n="championsConfirmedOnly">Confirmed results</span>
+                </div>
+                <div class="table-wrap champions-league-table-wrap">
+                    <table class="champions-league-table">
+                        <thead>
+                            <tr>
+                                <th scope="col" data-i18n="championsLeg">Leg</th>
+                                <th scope="col" data-i18n="colTeam">Team</th>
+                                <th scope="col" data-i18n="championsScore">Score</th>
+                                <th scope="col" data-i18n="colTeam">Team</th>
+                                <th scope="col" data-i18n="championsDate">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="championsLeagueRows"></tbody>
+                    </table>
+                </div>
+                <div class="champions-league-entry" id="championsLeagueEntry"></div>
+                <div class="champions-proposals" id="championsLeagueProposals"></div>
+                <section class="club-profiles" aria-labelledby="clubProfilesTitle">
+                    <div class="ucl-section-heading ucl-clubs-heading">
+                        <div>
+                            <p class="ucl-section-kicker" data-i18n="championsClubhouse">CLUB HONOURS</p>
+                            <h3 id="clubProfilesTitle" data-i18n="clubProfiles">Club profiles</h3>
+                        </div>
+                    </div>
+                    <div class="club-profile-list" id="clubProfileList"></div>
+                </section>
+            </section>
 
             <details class="team-stats-panel panel">
                 <summary class="team-stats-summary">
@@ -652,6 +712,15 @@
                 <button class="close-button" type="button" data-close="achievementDialog" aria-label="Close">×</button>
             </div>
             <div id="achievementDialogContent"></div>
+        </div>
+    </dialog>
+    <dialog id="clubProfileDialog" class="club-profile-dialog" aria-labelledby="clubProfileDialogTitle">
+        <div class="dialog-inner">
+            <div class="dialog-header">
+                <div><p class="eyebrow" data-i18n="clubProfileLink">Club profile</p><h2 id="clubProfileDialogTitle"></h2></div>
+                <button class="close-button" id="clubProfileDialogClose" type="button" aria-label="Close">×</button>
+            </div>
+            <div id="clubProfileDialogContent"></div>
         </div>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
