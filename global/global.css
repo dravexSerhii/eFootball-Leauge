@@ -835,6 +835,25 @@ body:not(.ucl-analytics) .improve-tab .team-logo {
   background: #fff;
   box-shadow: 0 2px 8px rgba(24,31,67,.1);
 }
+body:not(.ucl-analytics) .improve-tab.active {
+  border-color: #1839f5;
+  background: #1839f5;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(24,57,245,.18);
+}
+body:not(.ucl-analytics) .improve-tab.active .team-logo {
+  border-color: #fff;
+  background: #fff;
+}
+body:not(.ucl-analytics) .improve-tab:focus-visible {
+  outline: 2px solid #1839f5;
+  outline-offset: 2px;
+}
+body.ucl-analytics .improve-tab.active {
+  border-color: #d8bd76;
+  background: #e7c56e;
+  color: #14213d;
+}
 @media (max-width: 760px) {
   body:not(.ucl-analytics) .ga-top { gap: 8px; padding: 9px 14px; }
   body:not(.ucl-analytics) .ga-back { font-size: 12px; }

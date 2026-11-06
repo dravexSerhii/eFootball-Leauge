@@ -6080,3 +6080,185 @@ body:not(.ucl-matchnight) .analyst-toast-actions button { color: #1839f5; }
     height: 88px;
   }
 }
+
+body:not(.ucl-matchnight) .match-tabs {
+  gap: 5px;
+  padding: 4px;
+  border-color: #e2e5ed;
+  background: #f3f5fa;
+}
+body:not(.ucl-matchnight) .match-tab {
+  min-height: 42px;
+  color: #62647a;
+}
+body:not(.ucl-matchnight) .match-tab:hover { color: #20213a; }
+body:not(.ucl-matchnight) .match-tab.active {
+  background: #1839f5;
+  color: #fff;
+  box-shadow: 0 3px 9px rgba(24,57,245,.22);
+}
+body:not(.ucl-matchnight) .match-tab-status {
+  background: #d94353;
+  color: #fff;
+}
+body:not(.ucl-matchnight) .match-tab-status.confirmed {
+  background: #188548;
+  color: #fff;
+}
+body:not(.ucl-matchnight) .stats-entry {
+  border-color: #e2e5ed;
+  background: #fbfcfe;
+}
+body:not(.ucl-matchnight) .stats-entry h3 { color: #20213a; }
+body:not(.ucl-matchnight) .stats-entry h3 span,
+body:not(.ucl-matchnight) .stats-entry > p { color: #62647a; }
+body:not(.ucl-matchnight) .stats-entry-head { color: #62647a; }
+body:not(.ucl-matchnight) .stats-entry-row { color: #505267; }
+body:not(.ucl-matchnight) .stats-entry-row input {
+  border-color: #dfe2eb;
+  background: #fff;
+  color: #20213a;
+  box-shadow: inset 0 1px 2px rgba(24,31,67,.035);
+}
+body:not(.ucl-matchnight) .stats-entry-row input:hover { border-color: #c8cee0; }
+body:not(.ucl-matchnight) .stats-entry-row input:focus {
+  border-color: #1839f5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(24,57,245,.1);
+}
+body:not(.ucl-matchnight) .match-team-picker-badge {
+  border-color: #e1e5ee;
+  background: #f7f8fb;
+}
+body:not(.ucl-matchnight) .match-swap-button {
+  border-color: #cbd4ff;
+  background: #eef1ff;
+  color: #1839f5;
+}
+body:not(.ucl-matchnight) .match-swap-button:hover {
+  border-color: #aebcff;
+  background: #e0e6ff;
+}
+body:not(.ucl-matchnight) .match-swap-button:focus-visible {
+  outline-color: #1839f5;
+}
+body:not(.ucl-matchnight) .team-stats-mode {
+  border-color: #e2e5ed;
+  background: #f3f5fa;
+}
+body:not(.ucl-matchnight) .team-stats-mode-button { color: #62647a; }
+body:not(.ucl-matchnight) .team-stats-mode-button:hover { color: #20213a; }
+body:not(.ucl-matchnight) .team-stats-mode-button.active {
+  border-color: #1839f5;
+  background: #1839f5;
+  color: #fff;
+  box-shadow: 0 2px 7px rgba(24,57,245,.2);
+}
+body:not(.ucl-matchnight) .team-stats-mode-button:focus-visible {
+  outline: 2px solid #1839f5;
+}
+body:not(.ucl-matchnight) .team-stats-filter { color: #62647a; }
+body:not(.ucl-matchnight) .team-stats-filter select {
+  border-color: #dfe2eb;
+  background: #fff;
+  color: #20213a;
+}
+body:not(.ucl-matchnight) .team-stats-filter select:focus {
+  outline-color: #1839f5;
+}
+body:not(.ucl-matchnight) .team-stats-club {
+  border-color: #e2e5ed;
+  background: #fbfcfe;
+}
+body:not(.ucl-matchnight) .team-stats-club.one { border-color: #cbd4ff; }
+body:not(.ucl-matchnight) .team-stats-club.two { border-color: #dfd1f6; }
+body:not(.ucl-matchnight) .team-stats-club-badge { background: #fff; }
+body:not(.ucl-matchnight) .team-stats-club > strong { color: #20213a; }
+body:not(.ucl-matchnight) .team-stats-club > span:last-child { color: #62647a; }
+body:not(.ucl-matchnight) .team-stat-card {
+  border-color: #e2e5ed;
+  background: #fff;
+}
+body:not(.ucl-matchnight) .team-stat-label { color: #62647a; }
+body:not(.ucl-matchnight) .team-stat-side.one .team-stat-value,
+body:not(.ucl-matchnight) .team-stat-verdict.one { color: #1839f5; }
+body:not(.ucl-matchnight) .team-stat-side.two .team-stat-value,
+body:not(.ucl-matchnight) .team-stat-verdict.two { color: #7041bd; }
+body:not(.ucl-matchnight) .team-stat-side .team-stat-note,
+body:not(.ucl-matchnight) .team-stat-verdict small { color: #62647a; }
+body:not(.ucl-matchnight) .team-stat-track { background: #eceef4; }
+body:not(.ucl-matchnight) .team-stat-side.one .team-stat-fill { background: #1839f5; }
+body:not(.ucl-matchnight) .team-stat-side.two .team-stat-fill { background: #8052d6; }
+body:not(.ucl-matchnight) .team-stats-footnote,
+body:not(.ucl-matchnight) .team-stats-empty { color: #62647a; }
+body:not(.ucl-matchnight) .lineup-tab.active,
+body:not(.ucl-matchnight) .lineup-tab[aria-selected="true"] {
+  background: #1839f5;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(24,57,245,.18);
+}
+body:not(.ucl-matchnight) .lineup-tab:focus-visible {
+  outline: 2px solid #1839f5;
+  outline-offset: 2px;
+}
+body.ucl-matchnight .match-tab.active,
+body.ucl-matchnight .lineup-tab.active,
+body.ucl-matchnight .lineup-tab[aria-selected="true"] {
+  background: #e7c56e;
+  color: #14213d;
+}
+body.ucl-matchnight .match-tab-status { color: #15213a; }
+body.ucl-matchnight .match-tab-status.confirmed { color: #10233c; }
+
+body.community-mode .community-main .button.button-primary,
+body.community-mode .friend-profile .profile-actions .button.button-primary,
+body.community-mode .community-page-heading .button.button-primary,
+body.community-mode .proposal-actions .button.button-primary {
+  border-color: #1839f5;
+  background: #1839f5;
+  color: #fff;
+}
+body.community-mode .community-main .button.button-quiet,
+body.community-mode .friend-profile .profile-actions .button.button-quiet,
+body.community-mode .community-page-heading .button.button-quiet,
+body.community-mode .proposal-actions .button.button-quiet {
+  border-color: #dfe2eb;
+  background: #fff;
+  color: #303149;
+}
+body.community-mode .community-main .button.button-quiet:hover,
+body.community-mode .friend-profile .profile-actions .button.button-quiet:hover,
+body.community-mode .community-page-heading .button.button-quiet:hover,
+body.community-mode .proposal-actions .button.button-quiet:hover {
+  border-color: #cbd4ff;
+  background: #f2f5ff;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button.is-active {
+  background: #e8edff;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button.is-active > span:first-child {
+  background: #d7dfff;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button:focus-visible,
+body.community-mode .friends-tab:focus-visible,
+body.community-mode .friend-name:focus-visible,
+body.community-mode .badge-choice:focus-visible {
+  outline: 2px solid #1839f5;
+  outline-offset: 2px;
+}
+body.community-mode .friend-team,
+body.community-mode .friend-name { color: #303149; }
+body.community-mode .friend-pinned .friend-badge,
+body.community-mode .profile-achievements-grid .friend-badge {
+  border-color: #e2e5ed;
+  background: #fff;
+  color: #303149;
+}
+body.community-mode .friend-pinned .friend-badge.is-unlocked,
+body.community-mode .profile-achievements-grid .friend-badge.is-unlocked {
+  border-color: color-mix(in srgb, var(--tier) 48%, #e2e5ed);
+  background: color-mix(in srgb, var(--tier) 8%, #fff);
+}
