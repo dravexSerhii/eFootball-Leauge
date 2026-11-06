@@ -854,6 +854,44 @@ body.ucl-analytics .improve-tab.active {
   background: #e7c56e;
   color: #14213d;
 }
+body:not(.ucl-analytics) .improve-card h4 { color: #20213a; }
+body:not(.ucl-analytics) .improve-card p {
+  color: #40445c;
+  font-size: 13px;
+}
+body:not(.ucl-analytics) .improve-num {
+  background: #1839f5;
+  color: #fff;
+}
+body:not(.ucl-analytics) .theme-toggle {
+  display: inline-grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid #e2e4ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #4559d9;
+  cursor: pointer;
+  font-size: 19px;
+}
+body:not(.ucl-analytics) .theme-toggle:hover { border-color: #cbd4ff; background: #f3f5ff; }
+body:not(.ucl-analytics) .theme-toggle:focus-visible { outline: 2px solid #1839f5; outline-offset: 2px; }
+body.ucl-analytics .theme-toggle {
+  display: inline-grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(225,197,119,.32);
+  border-radius: 10px;
+  background: rgba(205,171,91,.08);
+  color: #ead590;
+  cursor: pointer;
+  font-size: 19px;
+}
+body.ucl-analytics .theme-toggle:hover { border-color: rgba(225,197,119,.6); background: rgba(205,171,91,.15); }
 @media (max-width: 760px) {
   body:not(.ucl-analytics) .ga-top { gap: 8px; padding: 9px 14px; }
   body:not(.ucl-analytics) .ga-back { font-size: 12px; }
@@ -875,8 +913,212 @@ body.ucl-analytics .improve-tab.active {
   }
   body:not(.ucl-analytics) .ga-season-label { grid-column: 2; justify-self: center; }
   body:not(.ucl-analytics) .ga-season-label select { max-width: 140px; }
-  body:not(.ucl-analytics) .ga-lang { grid-column: 3; grid-row: 1 / span 2; }
+  body:not(.ucl-analytics) .ga-lang { grid-column: 3; grid-row: 1 / span 2;   }
+  body:not(.ucl-analytics) .theme-toggle { grid-column: 1; grid-row: 2; justify-self: start; }
+  body.ucl-analytics .ga-top { flex-wrap: wrap; }
+  body.ucl-analytics .ga-top h1 { flex: 1 1 130px; }
+  body.ucl-analytics .ga-season-label { margin-left: auto; }
+  body.ucl-analytics .theme-toggle { flex-basis: 34px; width: 34px; height: 34px; }
 }
+
+html[data-color-mode="dark"] body:not(.ucl-analytics) {
+  color-scheme: dark;
+  --bg: #0d1320;
+  --panel: #151d2b;
+  --panel-solid: #192334;
+  --line: #2b374b;
+  --text: #edf2fb;
+  --muted: #9daac0;
+  --green: #55b979;
+  --green-bright: #9eafff;
+  --lime: #9eafff;
+  --mint: #73c99a;
+  --gold: #efc66c;
+  --red: #ff8291;
+  --chart-0: #9eafff;
+  --chart-1: #b291f2;
+  --chart-2: #59c59c;
+  --chart-3: #efb754;
+  color: var(--text);
+  background:
+    radial-gradient(900px 520px at 10% -15%, rgba(59,83,147,.18), transparent 68%),
+    radial-gradient(700px 500px at 100% 10%, rgba(58,79,128,.1), transparent 65%),
+    var(--bg);
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-top {
+  border-bottom-color: #2b374b;
+  background: rgba(15,23,36,.94);
+  box-shadow: 0 6px 22px rgba(0,0,0,.24);
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-top h1,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-intro h2,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .section-head h2 { color: #edf2fb; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-back,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-season-label select,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-toolbar select {
+  border-color: #344159;
+  background: #192334;
+  color: #dce4f1;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-back:hover { background: #26344d; color: #b7c5ff; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-season-label,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-season-label select { color: #bac5d7; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-lang { border-color: #344159; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-lang button { color: #aab6ca; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-lang button.active {
+  background: #34466c;
+  color: #d4dcff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-eyebrow,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-method b { color: #aab9ff; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-subtitle,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .chart-description,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .forecast-note,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-method,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .mobile-scale p { color: #aab6ca; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-live,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ga-status,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .sample-badge,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .median-badge {
+  border-color: #3a4b70;
+  background: #202c42;
+  color: #b7c5ff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .live-ticker,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .panel,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .team-card,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .summary-card,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-odds {
+  border-color: #2b374b;
+  background: #151d2b;
+  color: #e6ecf7;
+  box-shadow: 0 10px 28px rgba(0,0,0,.22);
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ticker-live-tag,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .summary-value,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .mobile-scale h2,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-report-copy strong,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-difference,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .odds-value,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .rating-number,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .rating-tier { color: #aab9ff; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .ticker-track span,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .summary-label,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .favorite-reasons,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .odds-label,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .odds-prob { color: #aab6ca; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-report-card,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .probability-cell,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .fixture-forecast-row,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .championship-row,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .method-card,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .insight-facts li,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .odds-cell,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .achievement-card {
+  border-color: #2d394d;
+  background: #192334;
+  color: #dce4f1;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-report-copy span,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .team-record,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .favorite-reasons,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .metric-label,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .forecast-explanation-card p { color: #b1bdd0; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .team-logo {
+  border-color: #3a4860;
+  background: #202c40;
+  color: #b7c5ff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-difference-track,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .metric-track { background: #2b374b; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-chip,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .rating-bubble {
+  border-color: #3a4b70;
+  background: #202c42;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .strength-chip { color: #b7c5ff; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-tab {
+  border-color: #344159;
+  background: #192334;
+  color: #b7c1d3;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-tab.active {
+  border-color: #526ee8;
+  background: #455fdb;
+  color: #fff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-tab.active .team-logo {
+  border-color: #fff;
+  background: #fff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-card {
+  border-color: #344159;
+  background: #192334;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-card h4 { color: #edf2fb; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .improve-card p { color: #b1bdd0; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .favorite-name,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .team-name,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .metric-value,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .insight-lead,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-name,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-value { color: #edf2fb; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-pill,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .forecast-explanation-card {
+  border-color: #344159;
+  background: #192334;
+  color: #dce4f1;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-odds h3 { border-bottom-color: #2b374b; color: #edf2fb; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .radar-grid,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .radar-axis { stroke: rgba(220,230,250,.18); }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .radar-poly { fill: rgba(142,163,255,.16); stroke: #9eafff; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .radar-dot { fill: #aab9ff; stroke: #151d2b; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .team-form {
+  border-color: #344159;
+  background: #192334;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-a .form-grade {
+  border-color: rgba(91,204,139,.45);
+  background: rgba(34,197,94,.12);
+  color: #81d6a5;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-b .form-grade {
+  border-color: rgba(239,198,108,.45);
+  background: rgba(250,204,21,.1);
+  color: #f0cc75;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-c .form-grade,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-result.result-loss {
+  border-color: rgba(255,130,145,.4);
+  background: rgba(251,113,133,.13);
+  color: #ff9aa7;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-result.result-win {
+  border-color: rgba(91,204,139,.4);
+  background: rgba(34,197,94,.13);
+  color: #81d6a5;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-result.result-draw,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .fixture-forecast-probabilities .forecast-draw {
+  border-color: #3a4659;
+  background: #273244;
+  color: #c1ccdc;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .theme-toggle {
+  border-color: #344159;
+  background: #202c40;
+  color: #f2d48a;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .theme-toggle:hover { border-color: #7285bc; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .probability-value,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .forecast-explanation-card h4,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .is-home-favorite .fixture-forecast-teams strong:first-child,
+html[data-color-mode="dark"] body:not(.ucl-analytics) .is-away-favorite .fixture-forecast-teams strong:last-child {
+  color: #aab9ff;
+}
+html[data-color-mode="dark"] body:not(.ucl-analytics) .form-label { color: #b1bdd0; }
+html[data-color-mode="dark"] body:not(.ucl-analytics) .winner-arrow.is-down { color: #ff8994; }
 
 body:not(.ucl-analytics) .team-title .team-logo {
   flex-basis: 56px;
