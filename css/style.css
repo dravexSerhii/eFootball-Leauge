@@ -5479,3 +5479,272 @@ dialog:not(#clubProfileDialog) .field select option { color: #24253c; background
   .table-legend { gap: 9px 16px; }
   .table-legend-item { font-size: 10px; white-space: normal; }
 }
+
+body:not(.ucl-matchnight) .team-stat-card {
+  border-color: #e7e9f0;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(24,31,67,.045);
+}
+body:not(.ucl-matchnight) .team-stat-side { opacity: 1; }
+body:not(.ucl-matchnight) .team-stat-side.one .team-stat-value,
+body:not(.ucl-matchnight) .team-stat-verdict.one { color: #1839f5; }
+body:not(.ucl-matchnight) .team-stat-side.two .team-stat-value,
+body:not(.ucl-matchnight) .team-stat-verdict.two { color: #7041bd; }
+body:not(.ucl-matchnight) .team-stat-side .team-stat-note,
+body:not(.ucl-matchnight) .team-stat-verdict,
+body:not(.ucl-matchnight) .team-stat-verdict small { color: #66687d; }
+body:not(.ucl-matchnight) .team-stat-track { background: #eceef4; }
+body:not(.ucl-matchnight) .team-stat-side.one .team-stat-fill { background: #1839f5; }
+body:not(.ucl-matchnight) .team-stat-side.two .team-stat-fill { background: #8052d6; }
+body:not(.ucl-matchnight) .team-stat-card[data-tone="results"] {
+  --stat-accent: #258f4c;
+  --stat-border: #dcefe3;
+  --stat-wash: #f0f8f3;
+}
+body:not(.ucl-matchnight) .team-stat-card[data-tone="goals"] {
+  --stat-accent: #d29a18;
+  --stat-border: #f1e7cc;
+  --stat-wash: #fcf8ed;
+}
+body:not(.ucl-matchnight) .team-stat-card[data-tone="streak"] {
+  --stat-accent: #8052d6;
+  --stat-border: #e7ddf7;
+  --stat-wash: #f6f2fb;
+}
+body:not(.ucl-matchnight) .team-stat-card[data-tone="possession"] {
+  --stat-accent: #238a86;
+  --stat-border: #d7edeb;
+  --stat-wash: #f0f8f7;
+}
+body:not(.ucl-matchnight) .team-stat-card[data-tone="shots"] {
+  --stat-accent: #8052d6;
+  --stat-border: #e7ddf7;
+  --stat-wash: #f6f2fb;
+}
+
+body.community-mode {
+  color-scheme: light;
+  background: #f5f7fb;
+}
+body.community-mode #communitySection {
+  border-color: #e7e9f0;
+  background: #fff;
+  box-shadow: 0 18px 56px rgba(24,31,67,.08);
+}
+body.community-mode .community-sidebar {
+  border-right-color: #e7e9f0;
+  background: #fff;
+}
+body.community-mode .community-brand { color: #20213a; }
+body.community-mode .community-side-user,
+body.community-mode .community-icon-button,
+body.community-mode .community-signin-card,
+body.community-mode .profile-editor,
+body.community-mode .profile-avatar-row {
+  border-color: #e7e9f0;
+  background: #fbfcfe;
+}
+body.community-mode .community-side-user .friends-me-info b { color: #20213a; }
+body.community-mode .community-side-nav button { color: #56586e; }
+body.community-mode .community-side-nav button > span:first-child {
+  background: #f0f1f6;
+  color: #62647a;
+}
+body.community-mode .community-side-nav button:hover,
+body.community-mode .community-side-nav button:focus-visible {
+  background: #f5f6fa;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button.is-active {
+  background: #eef1ff;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button.is-active > span:first-child {
+  background: #dfe5ff;
+  color: #1839f5;
+}
+body.community-mode .community-side-nav button b,
+body.community-mode .community-icon-button b {
+  background: #1839f5;
+  color: #fff;
+}
+body.community-mode .community-back {
+  border-top-color: #e7e9f0;
+  color: #62647a;
+}
+body.community-mode .community-back:hover { color: #1839f5; }
+body.community-mode .community-main { background: #f5f7fb; }
+body.community-mode .community-topbar { border-bottom-color: #e7e9f0; }
+body.community-mode .community-topbar .eyebrow,
+body.community-mode .community-page-heading .eyebrow { color: #1839f5; }
+body.community-mode .community-topbar h1,
+body.community-mode .community-page-heading h2,
+body.community-mode .profile-editor h4 { color: #20213a; }
+body.community-mode .community-page-heading p,
+body.community-mode .community-page-heading > p,
+body.community-mode .profile-editor label,
+body.community-mode .profile-editor .profile-label,
+body.community-mode .community-signin-card { color: #62647a; }
+body.community-mode .community-icon-button {
+  color: #42435a;
+  cursor: pointer;
+}
+body.community-mode .community-icon-button:hover,
+body.community-mode .community-icon-button:focus-visible {
+  outline: 2px solid #cbd4ff;
+  color: #1839f5;
+}
+body.community-mode .profile-head {
+  border-color: #dce5ff;
+  background:
+    radial-gradient(ellipse at 80% 10%, rgba(24,57,245,.12), transparent 34%),
+    linear-gradient(125deg, #fff, #f1f4ff 75%);
+}
+body.community-mode .profile-head::before {
+  border-color: rgba(24,57,245,.13);
+  box-shadow: 0 0 0 34px rgba(24,57,245,.025), 0 0 0 70px rgba(24,57,245,.018);
+}
+body.community-mode .profile-head .avatar-lg {
+  border-color: #fff;
+  box-shadow: 0 8px 22px rgba(24,31,67,.16);
+}
+body.community-mode .profile-head h3 { color: #20213a; }
+body.community-mode .friend-team { color: #62647a; }
+body.community-mode .friend-record li,
+body.community-mode .community-friends-view .friend-row {
+  border-color: #e7e9f0;
+  background: #fff;
+  color: #505267;
+}
+body.community-mode .community-friends-view .friend-row:hover {
+  border-color: #cbd4ff;
+  background: #f7f8ff;
+}
+body.community-mode .community-friends-view .friends-tabs {
+  border-bottom-color: #e7e9f0;
+}
+body.community-mode .friends-tabs .friends-tab { color: #62647a; }
+body.community-mode .friends-tabs .friends-tab[aria-selected="true"] {
+  background: #eef1ff;
+  color: #1839f5;
+}
+body.community-mode .community-friends-view .friends-search input,
+body.community-mode .profile-editor input:not([type="file"]),
+body.community-mode .profile-editor select,
+body.community-mode .message-compose textarea {
+  border-color: #dfe2eb;
+  background: #fff;
+  color: #20213a;
+}
+body.community-mode .community-friends-view .friends-search input::placeholder,
+body.community-mode .message-compose textarea::placeholder { color: #85869a; }
+body.community-mode .community-friends-view .friends-search input:focus,
+body.community-mode .profile-editor input:focus,
+body.community-mode .profile-editor select:focus,
+body.community-mode .message-compose textarea:focus {
+  border-color: #1839f5;
+  box-shadow: 0 0 0 3px rgba(24,57,245,.1);
+}
+body.community-mode .profile-editor > .button { color: #fff; }
+body.community-mode .profile-avatar-row input[type="file"] { color: #62647a; }
+body.community-mode .achievement-dialog {
+  border-color: #e7e9f0;
+  background: #fff;
+  color: #20213a;
+  box-shadow: 0 24px 70px rgba(24,31,67,.2);
+}
+body.community-mode .achievement-dialog .eyebrow { color: #1839f5; }
+body.community-mode .achievement-dialog h2,
+body.community-mode .achievement-dialog p { color: #20213a; }
+body.community-mode .site-menu-panel {
+  border-color: #e7e9f0;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(24,31,67,.16);
+}
+body.community-mode .site-menu-panel a,
+body.community-mode .site-menu-panel button { color: #303149; }
+body.community-mode .site-menu-panel a:hover,
+body.community-mode .site-menu-panel a:focus-visible,
+body.community-mode .site-menu-panel button:hover,
+body.community-mode .site-menu-panel button:focus-visible {
+  border-color: #dce5ff;
+  background: #f2f5ff;
+  color: #1839f5;
+}
+
+@media (max-width: 760px) {
+  body.community-mode .community-side-nav {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+  body.community-mode .community-side-nav button {
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    flex-direction: column;
+    gap: 3px;
+    padding: 5px 2px;
+    white-space: normal;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.15;
+  }
+  body.community-mode .community-side-nav button > span:first-child {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+  }
+  body.community-mode .community-side-nav button > span:last-of-type {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 9px;
+  }
+  body.community-mode .community-side-nav button b {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    font-size: 9px;
+  }
+  body.community-mode .community-back {
+    align-self: flex-start;
+    min-height: 30px;
+    padding: 0 4px;
+  }
+  body.community-mode #communitySection { overflow: visible; }
+  body.community-mode .community-sidebar { min-width: 0; }
+}
+@media (max-width: 480px) {
+  .site-menu-panel {
+    top: 74px;
+    right: 14px;
+    width: min(320px, calc(100vw - 28px));
+    max-height: calc(100dvh - 92px);
+    padding: 8px;
+    border-color: #e7e9f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 16px 38px rgba(24,31,67,.18);
+  }
+  .site-menu-panel a,
+  .site-menu-panel button {
+    min-height: 44px;
+    color: #303149;
+  }
+  .site-menu-panel a:hover,
+  .site-menu-panel a:focus-visible,
+  .site-menu-panel button:hover,
+  .site-menu-panel button:focus-visible {
+    border-color: #dce5ff;
+    background: #f2f5ff;
+    color: #1839f5;
+  }
+  body.community-mode .community-main { padding: 16px 12px 28px; }
+  body.community-mode .profile-head { gap: 12px; }
+  body.community-mode .community-topbar { align-items: flex-start; }
+}
