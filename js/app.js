@@ -163,6 +163,10 @@ const TRANSLATIONS = {
     championsFixtureTbd: "To be decided",
     championsFixtureOpens: "Unlocks after {0} league matches",
     championsFixtureAggregateNeeded: "Only if the aggregate is level",
+    championsMatchdayActive: "Champions League matchday is active",
+    championsLeaguePauses: "League match entry pauses until the European fixture is confirmed.",
+    championsPlayNow: "Play this match",
+    championsLeagueBlocked: "A Champions League fixture is due. Play and confirm it before adding another league match.",
     championsLeg: "Match",
     championsScore: "Score",
     championsDate: "Date",
@@ -250,7 +254,6 @@ const TRANSLATIONS = {
     totalMatches: "Total: {0} matches",
     tableTitle: "Table",
     updatedAfterMatch: "UPDATED AFTER EACH MATCH",
-    halloween: "HAPPY HALLOWEEN",
     colPos: "#",
     colTeam: "Team",
     colForm: "Form",
@@ -258,8 +261,22 @@ const TRANSLATIONS = {
     colW: "W",
     colD: "D",
     colL: "L",
+    colGF: "GF",
+    colGA: "GA",
     colGD: "GD",
     colPts: "Pts",
+    colNext: "Next",
+    tableQualification: "UEFA Champions League qualification",
+    formLegendWin: "Win",
+    formLegendDraw: "Draw",
+    formLegendLoss: "Loss",
+    formWinSymbol: "W",
+    formDrawSymbol: "D",
+    formLossSymbol: "L",
+    formWinLabel: "Win",
+    formDrawLabel: "Draw",
+    formLossLabel: "Loss",
+    nextOpponent: "Next opponent",
     currentStreak: "Current streak: {0}",
     streakWin: "{0} wins in a row",
     streakDraw: "{0} draws in a row",
@@ -272,7 +289,7 @@ const TRANSLATIONS = {
     strengthDefense: "Defense · {0} conceded / match",
     momentumNoStreak: "No active streak",
     momentumNoMatches: "Play a match to see team stats.",
-    tableFooter: "Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points",
+    tableFooter: "Pld — played · W — wins · D — draws · L — losses · GF — goals for · GA — goals against · GD — goal difference · Pts — points",
     latestMatches: "Latest matches",
     tipText: "A win earns <strong>3 points</strong>; a draw earns <strong>1</strong>. Sign in to save results to your shared league and keep them in sync.",
     leagueNews: "League news",
@@ -604,6 +621,10 @@ const TRANSLATIONS = {
     championsFixtureTbd: "Определится позже",
     championsFixtureOpens: "Откроется после {0} матчей лиги",
     championsFixtureAggregateNeeded: "Только при равенстве по сумме",
+    championsMatchdayActive: "Наступил матч Лиги чемпионов",
+    championsLeaguePauses: "Добавление матчей лиги приостановлено до подтверждения еврокубковой встречи.",
+    championsPlayNow: "Перейти к матчу",
+    championsLeagueBlocked: "Наступил матч Лиги чемпионов. Сыграйте и подтвердите его, прежде чем добавлять матч лиги.",
     championsLeg: "Встреча",
     championsScore: "Счёт",
     championsDate: "Дата",
@@ -691,7 +712,6 @@ const TRANSLATIONS = {
     totalMatches: "Всего матчей: {0}",
     tableTitle: "Таблица",
     updatedAfterMatch: "ОБНОВЛЯЕТСЯ ПОСЛЕ КАЖДОГО МАТЧА",
-    halloween: "СЧАСТЛИВОГО ХЭЛЛОУИНА",
     colPos: "#",
     colTeam: "Команда",
     colForm: "Форма",
@@ -699,8 +719,22 @@ const TRANSLATIONS = {
     colW: "В",
     colD: "Н",
     colL: "П",
+    colGF: "ЗМ",
+    colGA: "ПМ",
     colGD: "РМ",
     colPts: "О",
+    colNext: "Далее",
+    tableQualification: "Выход в Лигу чемпионов УЕФА",
+    formLegendWin: "Победа",
+    formLegendDraw: "Ничья",
+    formLegendLoss: "Поражение",
+    formWinSymbol: "В",
+    formDrawSymbol: "Н",
+    formLossSymbol: "П",
+    formWinLabel: "Победа",
+    formDrawLabel: "Ничья",
+    formLossLabel: "Поражение",
+    nextOpponent: "Следующий соперник",
     currentStreak: "Текущая серия: {0}",
     streakWin: "Побед подряд: {0}",
     streakDraw: "Ничьих подряд: {0}",
@@ -713,7 +747,7 @@ const TRANSLATIONS = {
     strengthDefense: "Оборона · {0} пропущено за матч",
     momentumNoStreak: "Сейчас нет серии",
     momentumNoMatches: "Сыграйте матч, чтобы увидеть статистику команды.",
-    tableFooter: "Форма: последние 5 матчей (зелёный — победа · серый — ничья · красный — поражение) · И — сыграно · В — победы · Н — ничьи · П — поражения · РМ — разница мячей · О — очки",
+    tableFooter: "И — сыграно · В — победы · Н — ничьи · П — поражения · ЗМ — забито мячей · ПМ — пропущено мячей · РМ — разница мячей · О — очки",
     latestMatches: "Последние матчи",
     tipText: "Победа приносит <strong>3 очка</strong>; ничья приносит <strong>1</strong>. Войдите, чтобы сохранять результаты в общей лиге и синхронизировать их.",
     leagueNews: "Новости лиги",
@@ -989,6 +1023,7 @@ function render() {
   renderStandings();
   renderTeamMomentum();
   renderChampionsLeague();
+  updateChampionsMatchdayUI();
   renderMatches();
   renderLastMatch();
   renderNews();
@@ -1066,24 +1101,20 @@ const RELEASE_NEWS = [
     created_at: "2026-11-03T12:00:00+02:00",
     image: "assets/img/second-background.jpg",
     en: {
-      title: "Display update: Halloween theme, new banner and coins",
-      summary: "A **Halloween theme** with a spooky look, a **new league banner**, a bloody running line and **coins in your profile**.",
+      title: "League banner and profile coins",
+      summary: "A refreshed league banner and **coins in your profile**.",
       body: [
         "**What's new on the site**",
-        "• **Halloween theme** — press the pumpkin button next to the language switch. The whole site turns into a dark, spooky night: glowing orange accents, drifting fog, flying bats, rising embers, lightning flashes and a pulsing vignette. Headings switch to a horror font. Press it again to go back. **Your choice is remembered.**",
-        "• **New league banner** — a night scene with a huge glowing moon, bats, fog, a cobweb, blinking red eyes in the dark and embers. The title is bright and readable.",
-        "• **Bloody running line** — at the bottom of the banner **HAPPY HALLOWEEN** runs non-stop with dripping blood. It switches to Russian together with the site language.",
+        "• **League banner** — a refreshed title area for the season.",
         "• **Coins in your profile** — after you sign in, a gold badge with **your coin balance** appears next to your email in the top bar."
       ].join("\n")
     },
     ru: {
-      title: "Обновление дизайна: Хэллоуин-тема, новый баннер и монеты",
-      summary: "**Хэллоуин-тема** в жутком стиле, **новый баннер лиги**, бегущая строка с кровью и **монеты в профиле**.",
+      title: "Баннер лиги и монеты профиля",
+      summary: "Обновлённый баннер лиги и **монеты в профиле**.",
       body: [
         "**Что нового на сайте**",
-        "• **Хэллоуин-тема** — нажмите кнопку-тыкву рядом с переключателем языка. Весь сайт превращается в тёмную жуткую ночь: светящиеся оранжевые акценты, плывущий туман, летающие летучие мыши, поднимающиеся угольки, вспышки молний и пульсирующая виньетка. Заголовки меняют шрифт на хоррор. Повторное нажатие возвращает обычный вид. **Ваш выбор запоминается.**",
-        "• **Новый баннер лиги** — ночная сцена с огромной светящейся луной, летучими мышами, туманом, паутиной, моргающими красными глазами в темноте и углями. Заголовок яркий и читаемый.",
-        "• **Бегущая строка с кровью** — внизу баннера без остановки бежит **СЧАСТЛИВОГО ХЭЛЛОУИНА** с капающей кровью. Язык меняется вместе с языком сайта.",
+        "• **Баннер лиги** — обновлённая шапка страницы для нового сезона.",
         "• **Монеты в профиле** — после входа в аккаунт в верхней панели рядом с почтой появляется золотой значок с **вашим количеством монет**."
       ].join("\n")
     }
@@ -2061,18 +2092,22 @@ function renderStandings() {
   standingsBody.replaceChildren();
   getStandings().forEach((team, position) => {
     const row = document.createElement("tr");
+    row.className = "standings-row";
+    if (state.teams.length === 2) row.classList.add("ucl-qualified");
     const difference = team.goalsFor - team.goalsAgainst;
     const values = [
       { text: String(position + 1), className: "position" },
       { team: true },
-      { form: team.index },
       { text: String(team.played) }, { text: String(team.wins) },
       { text: String(team.draws) }, { text: String(team.losses) },
+      { text: String(team.goalsFor) }, { text: String(team.goalsAgainst) },
       {
         text: difference > 0 ? `+${difference}` : String(difference),
         className: difference > 0 ? "positive" : difference < 0 ? "negative" : ""
       },
-      { text: String(team.points), className: "points" }
+      { text: String(team.points), className: "points" },
+      { form: team.index },
+      { next: team.index }
     ];
     values.forEach((value, cellIndex) => {
       const cell = document.createElement("td");
@@ -2125,6 +2160,29 @@ function renderStandings() {
           formList.append(marker);
         });
         cell.append(formList);
+      } else if (value.next !== undefined) {
+        cell.className = "next-opponent-cell";
+        if (state.teams.length === 2) {
+          const opponentIndex = state.teams.findIndex((_, index) => index !== value.next);
+          const opponentBadge = document.createElement("span");
+          opponentBadge.className = `team-badge next-opponent-badge ${teamTone(opponentIndex)}`;
+          opponentBadge.setAttribute("aria-label", `${t("nextOpponent")}: ${state.teams[opponentIndex].name}`);
+          const photo = getTeamPhoto(opponentIndex);
+          if (photo) {
+            const image = document.createElement("img");
+            image.className = "team-badge-image";
+            image.src = photo;
+            image.alt = "";
+            image.width = 32;
+            image.height = 32;
+            opponentBadge.append(image);
+          } else {
+            opponentBadge.textContent = getTeamInitials(state.teams[opponentIndex].name);
+          }
+          cell.append(opponentBadge);
+        } else {
+          cell.textContent = "—";
+        }
       } else {
         cell.textContent = value.text;
         if (value.className) cell.className = value.className;
@@ -2232,10 +2290,12 @@ function getTeamForm(teamIndex) {
     .map(match => {
       const teamGoals = match.home === teamIndex ? match.homeGoals : match.awayGoals;
       const opponentGoals = match.home === teamIndex ? match.awayGoals : match.homeGoals;
-      if (teamGoals === opponentGoals) return { outcome: "draw", symbol: "–", label: "Draw" };
+      if (teamGoals === opponentGoals) return {
+        outcome: "draw", symbol: t("formDrawSymbol"), label: t("formDrawLabel")
+      };
       return teamGoals > opponentGoals
-        ? { outcome: "win", symbol: "✓", label: "Win" }
-        : { outcome: "loss", symbol: "×", label: "Loss" };
+        ? { outcome: "win", symbol: t("formWinSymbol"), label: t("formWinLabel") }
+        : { outcome: "loss", symbol: t("formLossSymbol"), label: t("formLossLabel") };
     });
 }
 
@@ -2532,7 +2592,7 @@ function showToast(message) {
 
 function updateAuthUi() {
   const enabled = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
-  matchButton.disabled = !enabled;
+  matchButton.disabled = !enabled || Boolean(getDueChampionsMatchday());
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
   document.body.classList.toggle("read-only", !session);
@@ -2557,6 +2617,7 @@ function updateAuthUi() {
   }
   renderWelcomeBanner();
   renderAnalystNotifications();
+  updateChampionsMatchdayUI();
 }
 
 function renderWelcomeBanner() {
@@ -3996,6 +4057,11 @@ document.getElementById("authForm").addEventListener("submit", async event => {
 
 matchButton.addEventListener("click", () => {
   if (!dataReady) return;
+  if (getDueChampionsMatchday()) {
+    showToast(t("championsLeagueBlocked"));
+    updateChampionsMatchdayUI();
+    return;
+  }
   populateTeamSelects();
   document.getElementById("matchError").textContent = "";
   document.getElementById("homeGoals").value = "";
@@ -4168,6 +4234,11 @@ editTeamsButton.addEventListener("click", () => {
 
 document.getElementById("matchForm").addEventListener("submit", async event => {
   event.preventDefault();
+  if (getDueChampionsMatchday()) {
+    document.getElementById("matchError").textContent = t("championsLeagueBlocked");
+    updateChampionsMatchdayUI();
+    return;
+  }
   const home = Number(document.getElementById("homeTeam").value);
   const away = Number(document.getElementById("awayTeam").value);
   const homeGoals = Number(document.getElementById("homeGoals").value);
@@ -4361,6 +4432,42 @@ function championsAggregate(matches) {
   return totals;
 }
 
+function getDueChampionsMatchday() {
+  if (!dataReady || championsLeagueError) return null;
+  const seasonMatches = championsLeagueMatches.filter(match => Number(match.season) === currentSeason);
+  const leagueMatchesPlayed = state.matches.filter(match => Number(match.season) === currentSeason).length;
+  const firstLeg = seasonMatches.some(match => Number(match.leg) === 1);
+  const secondLeg = seasonMatches.find(match => Number(match.leg) === 2);
+  const decidingMatch = seasonMatches.some(match => Number(match.leg) === 3);
+
+  if (!firstLeg && leagueMatchesPlayed >= 18) return 1;
+  if (firstLeg && !secondLeg && leagueMatchesPlayed >= 36) return 2;
+  if (secondLeg && !decidingMatch) {
+    const aggregate = championsAggregate(seasonMatches.filter(match => Number(match.leg) <= 2));
+    if (aggregate[0] === aggregate[1]) return 3;
+  }
+  return null;
+}
+
+function updateChampionsMatchdayUI() {
+  const dueLeg = getDueChampionsMatchday();
+  const active = dueLeg !== null;
+  document.body.classList.toggle("ucl-matchnight", active);
+  const notice = document.getElementById("uclMatchdayNotice");
+  if (notice) notice.hidden = !active;
+  if (matchButton) {
+    const canAddLeagueMatch = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
+    matchButton.disabled = !canAddLeagueMatch || active;
+    if (active) {
+      matchButton.title = t("championsLeagueBlocked");
+      matchButton.setAttribute("aria-describedby", "uclMatchdayNotice");
+    } else {
+      matchButton.removeAttribute("title");
+      matchButton.removeAttribute("aria-describedby");
+    }
+  }
+}
+
 function renderChampionsLeague() {
   const status = document.getElementById("championsLeagueStatus");
   const rows = document.getElementById("championsLeagueRows");
@@ -4387,7 +4494,7 @@ function renderChampionsLeague() {
   const seasonMatches = championsLeagueMatches.filter(match => Number(match.season) === currentSeason)
     .sort((a, b) => Number(a.leg) - Number(b.leg));
   const seasonTrophies = clubTrophies.filter(trophy => Number(trophy.season) === currentSeason);
-  const leagueMatchesPlayed = state.matches.filter(match => match.season === currentSeason).length;
+  const leagueMatchesPlayed = state.matches.filter(match => Number(match.season) === currentSeason).length;
   document.getElementById("championsSeasonBadge").textContent =
     `${t("season").toUpperCase()} ${currentSeason}`;
   const totals = championsAggregate(seasonMatches);
@@ -4534,7 +4641,6 @@ function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
   ];
   container.replaceChildren(...fixtures.map(fixture => {
     const played = Boolean(fixture.match);
-    const locked = !played && !fixture.available;
     const card = document.createElement("article");
     card.className = `ucl-fixture-card${played ? " is-complete" : fixture.available ? " is-ready" : " is-locked"}`;
 
@@ -4595,9 +4701,10 @@ function createUclTeam(teamIndex, score) {
   }
   const badge = document.createElement("span");
   badge.className = `ucl-fixture-badge team-${teamIndex}`;
-  if (typeof team.logo === "string" && /^https:\/\//i.test(team.logo)) {
+  const photo = getTeamPhoto(teamIndex);
+  if (photo) {
     const logo = document.createElement("img");
-    logo.src = team.logo;
+    logo.src = photo;
     logo.alt = "";
     badge.append(logo);
   } else {
@@ -4629,9 +4736,10 @@ function renderClubProfiles() {
 
     const emblem = document.createElement("span");
     emblem.className = "club-profile-emblem";
-    if (typeof team.logo === "string" && /^https:\/\//i.test(team.logo)) {
+    const photo = getTeamPhoto(teamIndex);
+    if (photo) {
       const image = document.createElement("img");
-      image.src = team.logo;
+      image.src = photo;
       image.alt = "";
       emblem.append(image);
     } else {

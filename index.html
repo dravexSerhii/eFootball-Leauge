@@ -4,29 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#111019">
+    <meta name="theme-color" content="#f5f7fb">
     <title>eFootball League</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;600;700;800&family=Oswald:wght@500;600;700&display=swap">
-    <script>try { if (localStorage.getItem("leagueTheme") === "halloween") document.documentElement.dataset.theme = "halloween"; } catch (e) { }</script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <div class="hw-fx" aria-hidden="true">
-        <div class="hw-fog hw-fog-a"></div>
-        <div class="hw-fog hw-fog-b"></div>
-        <div class="hw-lightning"></div>
-        <i class="hw-bat" style="top:12%;--dur:16s;--dl:0s;--sz:46px"></i>
-        <i class="hw-bat" style="top:30%;--dur:22s;--dl:5s;--sz:30px"></i>
-        <i class="hw-bat" style="top:55%;--dur:19s;--dl:9s;--sz:38px"></i>
-        <i class="hw-bat" style="top:75%;--dur:26s;--dl:2s;--sz:26px"></i>
-        <i class="hw-ember" style="left:8%;--dur:9s;--dl:0s"></i><i class="hw-ember" style="left:22%;--dur:12s;--dl:3s"></i><i class="hw-ember" style="left:41%;--dur:10s;--dl:6s"></i><i class="hw-ember" style="left:57%;--dur:13s;--dl:1s"></i><i class="hw-ember" style="left:73%;--dur:11s;--dl:4s"></i><i class="hw-ember" style="left:90%;--dur:14s;--dl:7s"></i>
-        <div class="hw-vignette"></div>
-    </div>
     <div class="page-shell">
         <header class="topbar">
-            <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></div>
+            <a class="brand" href="index.html" aria-label="eFootball League home"><span class="brand-mark" aria-hidden="true">E</span><span>eFootball League</span></a>
             <div class="topbar-right">
                 <details class="site-menu" id="siteMenu">
                     <summary aria-controls="siteMenuLinks" data-i18n-aria-label="siteMenu" aria-label="Explore">
@@ -42,10 +30,9 @@
                         <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
                     </nav>
                 </details>
-                <span id="authStatus" role="status"                 data-i18n="authStatus">Connecting to database…</span>
+                <span id="authStatus" role="status" data-i18n="authStatus">Connecting to database…</span>
                 <button class="button button-quiet" id="authButton" type="button" disabled data-i18n="authButton">Sign in</button>
                 <span class="season-tag">2026 / 27</span>
-                <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" title="Halloween theme" aria-label="Halloween theme"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><radialGradient id="pkBody" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#ffb347"/><stop offset=".6" stop-color="#f26a0f"/><stop offset="1" stop-color="#a73a00"/></radialGradient></defs><path d="M16 7c-2-3-1-5 1-6 0 2 1 3 2 3z" fill="#5a8f2a"/><path d="M16 8c-9-2-14 3-14 10s5 11 14 11 14-4 14-11S25 6 16 8z" fill="url(#pkBody)" stroke="#7a2400" stroke-width="1"/><path d="M16 8c-4 3-4 18 0 21M16 8c4 3 4 18 0 21" fill="none" stroke="#a73a00" stroke-width=".9" opacity=".7"/><path class="pk-eye" d="M7.5 15l4 1.2-3.2 3z M24.5 15l-4 1.2 3.2 3z M10 22l2 1.6 1.6-1.6 2.4 1.8 2.4-1.8 1.6 1.6 2-1.6-1 3.2-2.4.8-2.6-1.6-2.6 1.6-2.4-.8z" fill="#2a0d00"/></svg></button>
                 <div class="language-toggle" aria-label="Language">
                     <button class="lang-btn lang-active" data-lang="en" type="button">EN</button>
                     <button class="lang-btn" data-lang="ru" type="button">RU</button>
@@ -76,6 +63,14 @@
                             aria-hidden="true">＋</span> Add match</button>
                 </div>
             </section>
+            <aside class="ucl-matchnight-banner" id="uclMatchdayNotice" hidden role="status">
+                <span class="ucl-matchnight-banner-star" aria-hidden="true">✦</span>
+                <div>
+                    <strong data-i18n="championsMatchdayActive">Champions League matchday is active</strong>
+                    <p data-i18n="championsLeaguePauses">League match entry pauses until the European fixture is confirmed.</p>
+                </div>
+                <a href="#championsLeague" data-i18n="championsPlayNow">Play this match</a>
+            </aside>
 
             <section class="panel analyst-briefing" id="analystBriefing" aria-labelledby="analystBriefingTitle" hidden>
                 <header class="analyst-briefing-head">
@@ -125,31 +120,8 @@
             </section>
 
             <section class="hero-card" aria-label="League information">
-                <div class="hero-fx" aria-hidden="true">
-                    <div class="fx-moon"></div>
-                    <div class="fx-fog fx-fog-a"></div>
-                    <div class="fx-fog fx-fog-b"></div>
-                    <div class="fx-web"></div>
-                    <div class="fx-eyes" style="left:46%;top:22%"><i></i><i></i></div>
-                    <div class="fx-eyes" style="left:63%;top:58%;--s:.7;--dl:2.5s"><i></i><i></i></div>
-                    <div class="fx-eyes" style="left:30%;top:68%;--s:.55;--dl:5s"><i></i><i></i></div>
-                    <i class="fx-bat" style="top:18%;--dur:9s;--dl:0s;--sz:34px"></i>
-                    <i class="fx-bat" style="top:42%;--dur:12s;--dl:3s;--sz:24px"></i>
-                    <i class="fx-bat" style="top:12%;--dur:14s;--dl:6s;--sz:40px"></i>
-                    <i class="fx-bat" style="top:55%;--dur:10s;--dl:8s;--sz:20px"></i>
-                    <i class="fx-spark" style="left:58%;--dur:6s;--dl:0s"></i><i class="fx-spark" style="left:70%;--dur:8s;--dl:2s"></i><i class="fx-spark" style="left:80%;--dur:7s;--dl:4s"></i><i class="fx-spark" style="left:90%;--dur:9s;--dl:1s"></i>
-                </div>
                 <div class="hero-content">
                     <h2 class="hero-title">eFootball League</h2>
-                </div>
-                <div class="blood-ticker" aria-hidden="true">
-                    <div class="blood-drips">
-                        <i style="left:4%;--h:22px;--d:3.2s"></i><i style="left:11%;--h:14px;--d:4.1s"></i><i style="left:19%;--h:28px;--d:3.6s"></i><i style="left:27%;--h:16px;--d:4.8s"></i><i style="left:35%;--h:24px;--d:3.9s"></i><i style="left:43%;--h:12px;--d:5s"></i><i style="left:52%;--h:26px;--d:3.4s"></i><i style="left:60%;--h:15px;--d:4.4s"></i><i style="left:68%;--h:23px;--d:3.8s"></i><i style="left:76%;--h:13px;--d:4.6s"></i><i style="left:84%;--h:27px;--d:3.3s"></i><i style="left:92%;--h:17px;--d:4.2s"></i>
-                    </div>
-                    <div class="blood-track">
-                        <span><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🦇</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🎃</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>💀</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🕸</em></span>
-                        <span><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🦇</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🎃</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>💀</em><b data-i18n="halloween">HAPPY HALLOWEEN</b><em>🕸</em></span>
-                    </div>
                 </div>
             </section>
 
@@ -159,24 +131,35 @@
                     <span class="live-label" data-i18n="updatedAfterMatch"><span class="live-dot"></span> UPDATED AFTER EACH MATCH</span>
                 </div>
                 <div class="table-wrap">
-                    <table>
+                    <table class="standings-table">
                         <thead>
                             <tr>
                                 <th scope="col" data-i18n="colPos">#</th>
                                 <th scope="col" data-i18n="colTeam">Team</th>
-                                <th scope="col" title="Results from the last five matches" data-i18n="colForm">Form</th>
                                 <th scope="col" title="Played" data-i18n="colPlayed">Pld</th>
                                 <th scope="col" title="Wins" data-i18n="colW">W</th>
                                 <th scope="col" title="Draws" data-i18n="colD">D</th>
                                 <th scope="col" title="Losses" data-i18n="colL">L</th>
+                                <th scope="col" title="Goals for" data-i18n="colGF">GF</th>
+                                <th scope="col" title="Goals against" data-i18n="colGA">GA</th>
                                 <th scope="col" title="Goal difference" data-i18n="colGD">GD</th>
                                 <th scope="col" title="Points" data-i18n="colPts">Pts</th>
+                                <th scope="col" title="Results from the last five matches" data-i18n="colForm">Form</th>
+                                <th scope="col" title="Next opponent" data-i18n="colNext">Next</th>
                             </tr>
                         </thead>
                         <tbody id="standingsBody"></tbody>
                     </table>
                 </div>
-                <div class="table-footer" data-i18n="tableFooter">Form: last five results (green — win · grey — draw · red — loss) · Pld — played · W — wins · D — draws · L — losses · GD — goal difference · Pts — points</div>
+                <div class="table-footer">
+                    <div class="table-legend" aria-label="League table legend">
+                        <span class="table-legend-item"><i class="table-zone-swatch"></i><span data-i18n="tableQualification">UEFA Champions League qualification</span></span>
+                        <span class="table-legend-item"><i class="form-marker form-win">W</i><span data-i18n="formLegendWin">Win</span></span>
+                        <span class="table-legend-item"><i class="form-marker form-draw">D</i><span data-i18n="formLegendDraw">Draw</span></span>
+                        <span class="table-legend-item"><i class="form-marker form-loss">L</i><span data-i18n="formLegendLoss">Loss</span></span>
+                    </div>
+                    <div class="table-footer-note" data-i18n="tableFooter">Pld — played · W — wins · D — draws · L — losses · GF — goals for · GA — goals against · GD — goal difference · Pts — points</div>
+                </div>
             </section>
 
             <section class="panel team-momentum-panel" aria-labelledby="teamMomentumTitle">
@@ -739,24 +722,6 @@
         </div>
     </aside>
 
-    <script>
-        (function () {
-            var btn = document.getElementById("themeToggle");
-            function sync() {
-                var on = document.documentElement.dataset.theme === "halloween";
-                btn.setAttribute("aria-pressed", on);
-                var m = document.querySelector('meta[name="theme-color"]');
-                if (m) m.content = on ? "#07030b" : "#111019";
-            }
-            btn.addEventListener("click", function () {
-                var on = document.documentElement.dataset.theme !== "halloween";
-                if (on) document.documentElement.dataset.theme = "halloween"; else delete document.documentElement.dataset.theme;
-                try { localStorage.setItem("leagueTheme", on ? "halloween" : "default"); } catch (e) { }
-                sync();
-            });
-            sync();
-        })();
-    </script>
     <script src="js/cards-data.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>

@@ -172,7 +172,7 @@ begin
     raise exception 'Shots on target cannot exceed total shots';
   end if;
 
-  select season into v_current_season from public.league_settings where id = true;
+  select season into v_current_season from public.league_settings where id = true for update;
   if p_season is distinct from v_current_season then raise exception 'This is not the current league season'; end if;
   select count(*) into v_league_match_count
     from public.league_matches where season = p_season;
@@ -255,7 +255,7 @@ begin
     raise exception 'Only the other club can confirm this result';
   end if;
 
-  select season into v_current_season from public.league_settings where id = true;
+  select season into v_current_season from public.league_settings where id = true for update;
   if v_proposal.season is distinct from v_current_season then
     raise exception 'This is not the current league season';
   end if;
@@ -374,3 +374,75 @@ revoke all on function public.decline_league_champions_match(uuid) from public, 
 grant execute on function public.propose_league_champions_match(smallint, smallint, integer, integer, integer, smallint, jsonb, integer, integer) to authenticated;
 grant execute on function public.confirm_league_champions_match(uuid) to authenticated;
 grant execute on function public.decline_league_champions_match(uuid) to authenticated;
+
+-- Pause domestic league entries while a Champions League fixture is due.
+create or replace function public.league_champions_due_leg(p_season integer)
+returns smallint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_league_match_count integer;
+  v_leg_one uuid;
+  v_leg_two uuid;
+  v_leg_three uuid;
+  v_team_zero_total integer;
+  v_team_one_total integer;
+begin
+  perform 1 from public.league_settings where id = true for update;
+  if not found then raise exception 'League settings were not found'; end if;
+
+  select count(*) into v_league_match_count
+    from public.league_matches where season = p_season;
+  select id into v_leg_one from public.league_champions_matches
+    where season = p_season and leg = 1;
+  select id into v_leg_two from public.league_champions_matches
+    where season = p_season and leg = 2;
+  select id into v_leg_three from public.league_champions_matches
+    where season = p_season and leg = 3;
+
+  if v_leg_one is null and v_league_match_count >= 18 then return 1; end if;
+  if v_leg_one is not null and v_leg_two is null and v_league_match_count >= 36 then return 2; end if;
+  if v_leg_two is not null and v_leg_three is null then
+    select
+      coalesce(sum(case when home_team = 0 then home_goals else away_goals end), 0),
+      coalesce(sum(case when home_team = 1 then home_goals else away_goals end), 0)
+    into v_team_zero_total, v_team_one_total
+    from public.league_champions_matches
+    where season = p_season and leg in (1, 2);
+    if v_team_zero_total = v_team_one_total then return 3; end if;
+  end if;
+  return null;
+end;
+$$;
+
+create or replace function public.block_league_match_during_champions_fixture()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_due_leg smallint;
+begin
+  v_due_leg := public.league_champions_due_leg(new.season);
+  if v_due_leg is not null then
+    raise exception 'A Champions League fixture is due (matchday %). Play and confirm it before adding another league match', v_due_leg;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists league_match_proposal_champions_pause on public.league_match_proposals;
+create trigger league_match_proposal_champions_pause
+  before insert on public.league_match_proposals
+  for each row execute function public.block_league_match_during_champions_fixture();
+
+drop trigger if exists league_match_champions_pause on public.league_matches;
+create trigger league_match_champions_pause
+  before insert on public.league_matches
+  for each row execute function public.block_league_match_during_champions_fixture();
+
+revoke all on function public.league_champions_due_leg(integer) from public, anon, authenticated;
+revoke all on function public.block_league_match_during_champions_fixture() from public, anon, authenticated;

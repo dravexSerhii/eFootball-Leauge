@@ -245,6 +245,7 @@ const UI = {
 };
 
 const competitionMode = new URLSearchParams(window.location.search).get("competition") === "champions";
+document.body.classList.toggle("ucl-analytics", competitionMode);
 const state = { teams: [], matches: [], lineups: {}, season: 1, selectedSeason: "current" };
 let lang = localStorage.getItem("leagueLang") === "ru" ? "ru" : "en";
 let client = null;
