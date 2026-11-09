@@ -1230,3 +1230,9 @@ body.ucl-analytics .metric-row.metric-axis-4 .metric-fill { background: #e6ad58;
   }
   body:not(.ucl-analytics) .form-label { flex-basis: 42px; }
 }
+body.world-cup-analytics { background: radial-gradient(ellipse at 75% 0%, #57431e, #17140e 48%, #0e0d0b); color: #f5ebd4; }
+body.world-cup-analytics .ga-intro { border-color: #bca05e70; background: radial-gradient(circle at 80% 50%, #a7843650, transparent 38%), #211b11; }
+body.world-cup-analytics .ga-intro h2 { color: #f7e6bf; font-family: Georgia,serif; }
+body.world-cup-analytics .ga-eyebrow { color: #e1bd6e; }
+body.world-cup-analytics .panel, body.world-cup-analytics .team-card, body.world-cup-analytics .summary-card { border-color: #bca05e8a; background: #faf6ea; color: #28231b; }
+body.world-cup-analytics .summary-value { color: #805d19; }

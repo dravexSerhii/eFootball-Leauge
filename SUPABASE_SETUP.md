@@ -58,6 +58,14 @@ goals scored, then team index. Deleting a league match recalculates its season's
 participation medal. Existing saved results are used to reconstruct award dates and historical trophies; results that
 were previously deleted cannot be reconstructed. Champions League trophies remain separate.
 
+Run `sql/supabase-migration-world-cup.sql` after the trophy-shelf migration and publish the updated site and `trophy/`
+assets. Starting with the season after migration, each season begins with a six-match FIFA World Cup. League match
+insertion is blocked until it has a winner. Table ranking is points, goal difference, then goals scored; a full tie
+requires extra matches until one is won. The winner receives a separate World Cup trophy. Matches and analytics are
+stored independently from eLeague and Champions League; match statistics are optional. Before the league starts, team
+owners can delete the latest tournament match to correct a result. The first active season is fixed when the migration
+first runs; re-running the migration does not move it.
+
 Finally run `sql/supabase-migration-profile-extras.sql`. It adds avatars (public `avatars` bucket, every user can write
 only into their own folder), up to 3 pinned achievement badges and a favourite player from the card database.
 

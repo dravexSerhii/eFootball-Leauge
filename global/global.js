@@ -246,8 +246,12 @@ const UI = {
   }
 };
 
-const competitionMode = new URLSearchParams(window.location.search).get("competition") === "champions";
+const competition = new URLSearchParams(window.location.search).get("competition");
+const worldCupMode = competition === "worldcup";
+const competitionMode = competition === "champions";
 document.body.classList.toggle("ucl-analytics", competitionMode);
+document.body.classList.toggle("world-cup-analytics", worldCupMode);
+const matchesTable = worldCupMode ? "world_cup_matches" : competitionMode ? "league_champions_matches" : "league_matches";
 const state = { teams: [], matches: [], lineups: {}, season: 1, selectedSeason: "current" };
 let lang = localStorage.getItem("leagueLang") === "ru" ? "ru" : "en";
 let client = null;
@@ -1751,20 +1755,20 @@ function setLanguage(nextLang) {
   localStorage.setItem("leagueLang", lang);
   document.documentElement.lang = lang;
   const tt = t();
-  const pageTitle = competitionMode
+  const pageTitle = worldCupMode ? L("Аналитика FIFA World Cup", "FIFA World Cup Analytics") : competitionMode
     ? L("Аналитика Лиги чемпионов", "Champions League Analytics")
     : tt.title;
   document.title = `eFootball League — ${pageTitle}`;
-  $("backLink").textContent = competitionMode ? L("← Турнир ЛЧ", "← Champions League") : tt.back;
-  $("backLink").href = competitionMode ? "../index.html#championsLeague" : "../index.html";
+  $("backLink").textContent = worldCupMode ? L("← World Cup", "← World Cup") : competitionMode ? L("← Турнир ЛЧ", "← Champions League") : tt.back;
+  $("backLink").href = worldCupMode ? "../index.html#worldCup" : competitionMode ? "../index.html#championsLeague" : "../index.html";
   $("pageTitle").textContent = pageTitle;
-  $("eyebrow").textContent = competitionMode
+  $("eyebrow").textContent = worldCupMode ? "FIFA WORLD CUP · LIVE ANALYTICS" : competitionMode
     ? L("АНАЛИТИКА ЛИГИ ЧЕМПИОНОВ · ОНЛАЙН", "CHAMPIONS LEAGUE ANALYTICS · LIVE")
     : tt.eyebrow;
-  $("heroTitle").textContent = competitionMode
+  $("heroTitle").textContent = worldCupMode ? L("Статистика матчей World Cup", "World Cup match analytics") : competitionMode
     ? L("Статистика матчей Лиги чемпионов", "Champions League match analytics")
     : tt.hero;
-  $("heroSubtitle").textContent = competitionMode
+  $("heroSubtitle").textContent = worldCupMode ? L("Только матчи World Cup; сила состава — из текущих составов.", "World Cup matches only; squad strength uses current lineups.") : competitionMode
     ? L("Результаты и статистика матчей берутся только из подтверждённых игр ЛЧ; сила состава — из текущих сохранённых составов.", "Match results and statistics use confirmed Champions League games only; squad strength uses the current saved lineups.")
     : tt.subtitle;
   $("liveLabel").textContent = liveAvailable ? tt.liveConnected : tt.live;
@@ -1776,10 +1780,10 @@ function setLanguage(nextLang) {
   $("strengthsDescription").textContent = tt.strengthsDescription;
   $("tickerLabel").textContent = tt.liveTicker;
   $("cardiogramEyebrow").textContent = tt.live;
-  $("cardiogramTitle").textContent = competitionMode
+  $("cardiogramTitle").textContent = worldCupMode ? L("Динамика очков World Cup", "World Cup match-points trend") : competitionMode
     ? L("Динамика очков в матчах ЛЧ", "Champions League match-points trend")
     : tt.cardiogramTitle;
-  $("cardiogramDescription").textContent = competitionMode
+  $("cardiogramDescription").textContent = worldCupMode ? L("Очки за все сохранённые матчи World Cup, включая решающие встречи.", "Points from all saved World Cup matches, including deciders.") : competitionMode
     ? L("За победу — 3 очка, за ничью — 1. Учитываются только подтверждённые матчи ЛЧ.", "Each confirmed match awards 3 points for a win and 1 for a draw. Champions League matches only.")
     : tt.cardiogramDescription;
   $("matchTrendEyebrow").textContent = tt.liveModel;
@@ -1840,7 +1844,6 @@ function mapData(settings, rows) {
 
 async function loadData(version = ++requestVersion) {
   if (!client) return;
-  const matchesTable = competitionMode ? "league_champions_matches" : "league_matches";
   const [settingsResponse, matchesResponse] = await Promise.all([
     client.from("league_settings").select("teams,season,lineups").eq("id", true).maybeSingle(),
     client.from(matchesTable).select("home_team,away_team,home_goals,away_goals,played_at,season,stats").order("played_at", { ascending: true })
@@ -1870,7 +1873,7 @@ async function start() {
       .on("postgres_changes", { event: "*", schema: "public", table: "league_settings" }, () => {
         void loadData().catch((error) => showStatus(`${t().loadError}${error.message}`));
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: competitionMode ? "league_champions_matches" : "league_matches" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: matchesTable }, () => {
         void loadData().catch((error) => showStatus(`${t().loadError}${error.message}`));
       })
       .subscribe((status) => {

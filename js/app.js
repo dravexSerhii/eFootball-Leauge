@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
 import { evaluateAnalystAdvice, getAnalystAdviceById, getAnalystAdviceCopy } from "./analyst-advice.js";
 import { ANALYST_DIALOGUES } from "./analyst-dialogues.js";
+import { createWorldCup } from "./world-cup.js";
 
 const initialState = {
   teams: [{ name: "FC Promashkov" }, { name: "FC Lionslav" }],
@@ -228,6 +229,8 @@ const TRANSLATIONS = {
     championsTrophyName: "Champions League trophy",
     participationMedalName: "First eLeague match medal",
     leagueTrophyName: "eLeague champion",
+    worldCupTrophyName: "FIFA World Cup",
+    worldCupStatsLink: "FIFA World Cup Analytics",
     clubBack: "← Back to league",
     clubShelfIntro: "Choose a club to explore its trophy shelf and history.",
     trophyDate: "Awarded {0}",
@@ -710,6 +713,8 @@ const TRANSLATIONS = {
     championsTrophyName: "Кубок Лиги чемпионов",
     participationMedalName: "Медаль за первый матч eЛиги",
     leagueTrophyName: "Чемпион eЛиги",
+    worldCupTrophyName: "Кубок FIFA World Cup",
+    worldCupStatsLink: "Статистика FIFA World Cup",
     clubBack: "← Назад в лигу",
     clubShelfIntro: "Выберите клуб, чтобы посмотреть его трофейную полку и историю побед.",
     trophyDate: "Получен: {0}",
@@ -1020,6 +1025,15 @@ let currentSeason = 1;
 let currentLang = localStorage.getItem("leagueLang") || "en";
 let showAllMatches = false;
 let teamStatsMode = "single";
+const worldCup = createWorldCup({
+  client: supabase,
+  getContext: () => ({
+    season: currentSeason, lang: currentLang, teams: state.teams, logos: state.teams.map((_, index) => getTeamPhoto(index)), team: myTeamIndex, session,
+    leagueStarted: state.matches.some(match => match.season === currentSeason)
+  }),
+  refreshAll: async () => { await refreshFromServer(); },
+  notify: message => showToast(message)
+});
 
 const standingsBody = document.getElementById("standingsBody");
 const matchList = document.getElementById("matchList");
@@ -1071,6 +1085,7 @@ let lastUpcomingFrame = 0;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function render() {
+  worldCup.render();
   renderStandings();
   renderTeamMomentum();
   renderChampionsLeague();
@@ -1719,7 +1734,7 @@ function renderSeasonInfo() {
       newSeasonBtn.style.display = "inline-flex";
     }
   } else {
-    matchButton.disabled = !configReady || !session || !dataReady || myTeamIndex === null;
+    matchButton.disabled = !configReady || !session || !dataReady || myTeamIndex === null || worldCup.blocksLeague() || Boolean(getDueChampionsMatchday());
     matchButton.textContent = t("addMatchBtn");
     if (newSeasonBtn) {
       newSeasonBtn.style.display = "none";
@@ -2643,7 +2658,7 @@ function showToast(message) {
 
 function updateAuthUi() {
   const enabled = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
-  matchButton.disabled = !enabled || (!championsLeagueLoaded && !championsLeagueError) || Boolean(getDueChampionsMatchday());
+  matchButton.disabled = !enabled || worldCup.blocksLeague() || (!championsLeagueLoaded && !championsLeagueError) || Boolean(getDueChampionsMatchday());
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
   document.body.classList.toggle("read-only", !session);
@@ -3501,6 +3516,7 @@ async function fetchServerState() {
     if (!proposals.error) pendingProposals = proposals.data || [];
   }
   dataReady = true;
+  await worldCup.refresh();
   await refreshChampionsLeague();
   if (previousState !== JSON.stringify([dataReady, currentSeason, state, pendingProposals])) {
     render();
@@ -3539,6 +3555,9 @@ function subscribeToChanges(generation) {
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "league_champions_proposals" }, () => {
       if (generation === sessionGeneration) void refreshChampionsLeague();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "world_cup_matches" }, () => {
+      if (generation === sessionGeneration) void refreshFromServer();
     })
     .subscribe(status => {
       if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
@@ -4111,6 +4130,7 @@ document.getElementById("authForm").addEventListener("submit", async event => {
 
 matchButton.addEventListener("click", () => {
   if (!dataReady) return;
+  if (worldCup.blocksLeague()) { showToast(worldCup.message()); return; }
   if (getDueChampionsMatchday()) {
     showToast(t("championsLeagueBlocked"));
     updateChampionsMatchdayUI();
@@ -4288,6 +4308,10 @@ editTeamsButton.addEventListener("click", () => {
 
 document.getElementById("matchForm").addEventListener("submit", async event => {
   event.preventDefault();
+  if (worldCup.blocksLeague()) {
+    document.getElementById("matchError").textContent = worldCup.message();
+    return;
+  }
   if (getDueChampionsMatchday()) {
     document.getElementById("matchError").textContent = t("championsLeagueBlocked");
     updateChampionsMatchdayUI();
@@ -4533,7 +4557,7 @@ function updateChampionsMatchdayUI() {
   if (championsPromoOpen) renderChampionsPromo();
   if (matchButton) {
     const canAddLeagueMatch = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
-    matchButton.disabled = !canAddLeagueMatch || (!championsLeagueLoaded && !championsLeagueError) || active;
+    matchButton.disabled = !canAddLeagueMatch || worldCup.blocksLeague() || (!championsLeagueLoaded && !championsLeagueError) || active;
     if (active) {
       matchButton.title = t("championsLeagueBlocked");
       matchButton.setAttribute("aria-describedby", "uclMatchdayNotice");
@@ -4903,8 +4927,9 @@ function createUclTeam(teamIndex, score) {
 
 const clubAwardTypes = {
   participation: { image: "trophy/league-medal.svg", label: "participationMedalName" },
-  league: { image: "trophy/league-cup.svg", label: "leagueTrophyName" },
-  champions_league: { image: "trophy/leauge-champions.png", label: "championsTrophyName" }
+  league: { image: "trophy/e-leauge-title.png", label: "leagueTrophyName" },
+  champions_league: { image: "trophy/leauge-champions.png", label: "championsTrophyName" },
+  world_cup: { image: "trophy/fifa-world-cup.png", label: "worldCupTrophyName" }
 };
 let activeClubProfile = null;
 

@@ -26,6 +26,7 @@
                         <a href="cards.html" data-i18n="dbLink">Card database</a>
                         <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
                         <a href="global/global.html?competition=champions" data-i18n="championsLeagueStatsLink">Champions League analytics</a>
+                        <a href="global/global.html?competition=worldcup" data-i18n="worldCupStatsLink">FIFA World Cup Analytics</a>
                         <a href="#club-profiles" data-i18n="clubProfiles">Club profiles</a>
                         <a href="global/global.html#achievements" data-i18n="achievementsLink">Achievements</a>
                         <button type="button" id="myProfileButton" data-i18n="myProfile">My profile</button>
@@ -52,6 +53,23 @@
         </section>
 
         <main>
+            <section id="worldCup" class="world-cup" aria-labelledby="worldCupTitle" hidden>
+                <div class="world-cup-hero">
+                    <div class="world-cup-copy">
+                        <p class="world-cup-kicker">✦ &nbsp; THE ROAD TO GLORY &nbsp; ✦</p>
+                        <h2 id="worldCupTitle">FIFA <span>World Cup</span></h2>
+                        <p id="worldCupSubtitle"></p>
+                        <span class="world-cup-badge" id="worldCupSeason"></span>
+                        <a class="world-cup-link" href="global/global.html?competition=worldcup" id="worldCupAnalytics">World Cup Analytics ↗</a>
+                    </div>
+                    <div class="world-cup-stage" aria-hidden="true">
+                        <span class="world-cup-orbit"></span>
+                        <img src="trophy/fifa-world-cup.png" alt="">
+                        <span class="world-cup-spark spark-one">✦</span><span class="world-cup-spark spark-two">✧</span><span class="world-cup-spark spark-three">✦</span>
+                    </div>
+                </div>
+                <div id="worldCupContent" aria-live="polite"></div>
+            </section>
             <section class="intro">
                 <div>
                     <p class="eyebrow" data-i18n="eyebrow">eFootball League</p>
