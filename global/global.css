@@ -1230,9 +1230,211 @@ body.ucl-analytics .metric-row.metric-axis-4 .metric-fill { background: #e6ad58;
   }
   body:not(.ucl-analytics) .form-label { flex-basis: 42px; }
 }
-body.world-cup-analytics { background: radial-gradient(ellipse at 75% 0%, #57431e, #17140e 48%, #0e0d0b); color: #f5ebd4; }
-body.world-cup-analytics .ga-intro { border-color: #bca05e70; background: radial-gradient(circle at 80% 50%, #a7843650, transparent 38%), #211b11; }
-body.world-cup-analytics .ga-intro h2 { color: #f7e6bf; font-family: Georgia,serif; }
-body.world-cup-analytics .ga-eyebrow { color: #e1bd6e; }
-body.world-cup-analytics .panel, body.world-cup-analytics .team-card, body.world-cup-analytics .summary-card { border-color: #bca05e8a; background: #faf6ea; color: #28231b; }
-body.world-cup-analytics .summary-value { color: #805d19; }
+/* World Cup analytics: a separate palette, without affecting league or UCL pages. */
+html body:not(.ucl-analytics).world-cup-analytics {
+  color-scheme: dark;
+  --bg: #14110d;
+  --panel: #282217;
+  --panel-solid: #30291d;
+  --line: #786443;
+  --text: #fff3da;
+  --muted: #d3c4a4;
+  --green: #a7ceaa;
+  --green-bright: #f2d492;
+  --lime: #f0d195;
+  --mint: #a7ceaa;
+  --gold: #f2d492;
+  --red: #f5a1a1;
+  --chart-0: #f0ca73;
+  --chart-1: #b8d5d3;
+  --chart-2: #d5b9ef;
+  --chart-3: #edac83;
+  color: var(--text);
+  background: radial-gradient(ellipse at 78% -8%, #584321 0, transparent 48%),
+    linear-gradient(160deg, #221b11, #14110d 65%);
+}
+html[data-color-mode="dark"] body.world-cup-analytics {
+  --bg: #0e0d0b;
+  --panel: #211d16;
+  --panel-solid: #29241b;
+  --line: #6a583b;
+  --text: #fff2d6;
+  --muted: #ccbd9d;
+  background: radial-gradient(ellipse at 78% -8%, #45351c, transparent 48%), #0e0d0b;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-top {
+  border-color: #6c5838;
+  background: rgba(25, 21, 15, .96);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .28);
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-top h1 {
+  color: #f9e9c5;
+  font-family: Georgia, serif;
+  font-weight: 500;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.ga-back, .ga-season-label select, .ga-toolbar select, .theme-toggle) {
+  border-color: #79613c;
+  background: #30281b;
+  color: #f6e8c8;
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.ga-back:hover, .theme-toggle:hover) {
+  border-color: #e6c77e;
+  background: #493a22;
+  color: #fff3d4;
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.ga-season-label, .ga-lang button) { color: #d7c7a6; }
+html body:not(.ucl-analytics).world-cup-analytics .ga-lang { border-color: #79613c; }
+html body:not(.ucl-analytics).world-cup-analytics .ga-lang button.active { background: #dfc27e; color: #30230e; }
+html body:not(.ucl-analytics).world-cup-analytics :is(a, button, select):focus-visible {
+  outline: 2px solid #f4d68c;
+  outline-offset: 3px;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-intro {
+  position: relative;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 25px;
+  min-height: 190px;
+  padding: 28px 34px;
+  overflow: hidden;
+  border: 1px solid #9c8050;
+  border-radius: 20px;
+  background: radial-gradient(circle at 8% 50%, #a8893f45, transparent 27%),
+    linear-gradient(115deg, #332819, #1d1912 72%, #3b2e19);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .22), inset 0 1px rgba(255, 238, 190, .12);
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-crest {
+  position: relative;
+  display: grid;
+  width: 120px;
+  height: 120px;
+  place-items: center;
+  border: 1px solid #c9a96788;
+  border-radius: 50%;
+  background: radial-gradient(circle, #9b79393d, transparent 72%);
+  box-shadow: 0 0 0 12px #d5b56d0b, 0 0 30px #ba934427;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-crest img {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 10px #0008);
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-stars {
+  position: absolute;
+  top: -12px;
+  color: #f3d996;
+  font-size: 11px;
+  text-shadow: 0 0 12px #e4ba65;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-crest-label { display: none; }
+html body:not(.ucl-analytics).world-cup-analytics .ga-intro h2 {
+  color: #fff0cf;
+  font: 500 clamp(30px, 4vw, 46px)/1.12 Georgia, serif;
+  letter-spacing: -.02em;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-subtitle { max-width: 700px; color: #d5c6a9; line-height: 1.6; }
+html body:not(.ucl-analytics).world-cup-analytics .ga-eyebrow { color: #e4c47d; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.ga-live, .sample-badge, .median-badge, .ga-status, .strength-chip, .rating-bubble) {
+  border-color: #8d7449;
+  background: #42351f;
+  color: #ffe4a5;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ga-live i { background: #d5e0a6; box-shadow: 0 0 10px #d5e0a6; }
+html body:not(.ucl-analytics).world-cup-analytics .live-ticker {
+  border-color: var(--line);
+  background: #251f16;
+}
+html body:not(.ucl-analytics).world-cup-analytics .ticker-live-tag { color: #f0ce84; }
+html body:not(.ucl-analytics).world-cup-analytics .ticker-live-tag i { background: #e5c27a; box-shadow: 0 0 10px #e5c27a; }
+html body:not(.ucl-analytics).world-cup-analytics .ticker-track span { color: #d4c6a9; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.panel, .team-card, .summary-card, .winner-odds) {
+  border-color: var(--line);
+  background: linear-gradient(145deg, #30291e, var(--panel));
+  color: var(--text);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, .2), inset 0 1px rgba(255, 239, 197, .06);
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.section-head h2, .winner-odds h3, .winner-name, .winner-value,
+  .favorite-name, .team-name, .team-record, .metric-label, .insight-lead, .improve-card h4,
+  .favorite-reasons, .forecast-explanation-card p) { color: var(--text); }
+html body:not(.ucl-analytics).world-cup-analytics :is(.section-head h2, .favorite-probability-panel .section-head h3, .mobile-scale h2) {
+  font-family: Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.chart-description, .forecast-note, .ga-method, .mobile-scale p,
+  .summary-label, .summary-note, .ticker-track span, .strength-report-copy span, .odds-label,
+  .odds-prob, .improve-card p, .form-label, .chart-empty) { color: var(--muted); }
+html body:not(.ucl-analytics).world-cup-analytics :is(.summary-value, .mobile-scale h2, .ga-method b, .strength-report-copy strong,
+  .strength-difference, .rating-number, .rating-tier, .odds-value, .probability-value,
+  .forecast-explanation-card h4, .is-home-favorite .fixture-forecast-teams strong:first-child,
+  .is-away-favorite .fixture-forecast-teams strong:last-child) { color: #f1d395; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.strength-report-card, .probability-cell, .fixture-forecast-row,
+  .championship-row, .method-card, .insight-facts li, .odds-cell, .achievement-card,
+  .winner-pill, .forecast-explanation-card, .improve-card, .team-form, .recent-probability-team) {
+  border-color: #6d593b;
+  background: #292319;
+  color: var(--text);
+}
+html body:not(.ucl-analytics).world-cup-analytics .winner-odds h3 { border-bottom-color: var(--line); }
+html body:not(.ucl-analytics).world-cup-analytics :is(.team-logo, .team-title .team-logo, .winner-draw-icon, .improve-tab .team-logo) {
+  border-color: #806b49;
+  background: #403522;
+  color: #f6ddaa;
+}
+html body:not(.ucl-analytics).world-cup-analytics :is(.probability-cell.is-match-favorite, .odds-cell.is-best,
+  .fixture-forecast-probabilities .is-match-favorite, .improve-tab.active) {
+  border-color: #d7b977;
+  background: #614b27;
+  color: #fff1d2;
+  box-shadow: none;
+}
+html body:not(.ucl-analytics).world-cup-analytics .improve-tab { border-color: #806b49; background: #30291e; color: #f4e3bf; }
+html body:not(.ucl-analytics).world-cup-analytics .improve-num { background: #d1ad65; color: #251b0c; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.strength-difference-track, .metric-track, .championship-track) { background: #544630; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.strength-difference-fill, .championship-track span) {
+  background: linear-gradient(90deg, #a77728, #f3d591);
+  box-shadow: none;
+}
+html body:not(.ucl-analytics).world-cup-analytics .radar-grid,
+html body:not(.ucl-analytics).world-cup-analytics .radar-axis { stroke: rgba(234, 213, 171, .26); }
+html body:not(.ucl-analytics).world-cup-analytics .radar-poly { fill: rgba(223, 190, 113, .18); stroke: #e9c77e; }
+html body:not(.ucl-analytics).world-cup-analytics .radar-dot { stroke: #292319; }
+html body:not(.ucl-analytics).world-cup-analytics .metric-axis-0 { --axis-color: #9abfff; }
+html body:not(.ucl-analytics).world-cup-analytics .metric-axis-1 { --axis-color: #ff9eb0; }
+html body:not(.ucl-analytics).world-cup-analytics .metric-axis-2 { --axis-color: #d7b6ff; }
+html body:not(.ucl-analytics).world-cup-analytics .metric-axis-3 { --axis-color: #8be1d6; }
+html body:not(.ucl-analytics).world-cup-analytics .metric-axis-4 { --axis-color: #ffd18e; }
+html body:not(.ucl-analytics).world-cup-analytics :is(.metric-row .metric-label, .metric-row .metric-value, .strength-chip) {
+  color: var(--axis-color, #f1d395);
+}
+html body:not(.ucl-analytics).world-cup-analytics .metric-fill { background: var(--axis-color, #f1d395); }
+html body:not(.ucl-analytics).world-cup-analytics .radar-label { fill: var(--axis-color, #f1d395); }
+html body:not(.ucl-analytics).world-cup-analytics .radar-dot { fill: var(--axis-color, #f1d395); }
+html body:not(.ucl-analytics).world-cup-analytics .chart-grid-line,
+html body:not(.ucl-analytics).world-cup-analytics .probability-grid-line { stroke: rgba(234, 213, 171, .18); }
+html body:not(.ucl-analytics).world-cup-analytics .probability-line-0 { stroke: #f0ca73; }
+html body:not(.ucl-analytics).world-cup-analytics .probability-line-1 { stroke: #d5b9ef; }
+html body:not(.ucl-analytics).world-cup-analytics .probability-line-2 { stroke: #a4d6ce; }
+html body:not(.ucl-analytics).world-cup-analytics .probability-swatch-0 { background: #f0ca73; }
+html body:not(.ucl-analytics).world-cup-analytics .probability-swatch-1 { background: #d5b9ef; }
+html body:not(.ucl-analytics).world-cup-analytics .probability-swatch-2 { background: #a4d6ce; }
+@media (max-width: 700px) {
+  html body:not(.ucl-analytics).world-cup-analytics .ga-intro {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 15px;
+    min-height: 0;
+    padding: 20px;
+  }
+  html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-crest { width: 70px; height: 70px; }
+  html body:not(.ucl-analytics).world-cup-analytics .ga-live { grid-column: 2; justify-self: start; }
+  html body:not(.ucl-analytics).world-cup-analytics .ga-team-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+  html body:not(.ucl-analytics).world-cup-analytics .ga-intro { grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 17px; }
+  html body:not(.ucl-analytics).world-cup-analytics .ga-ucl-crest { width: 54px; height: 54px; }
+  html body:not(.ucl-analytics).world-cup-analytics .ga-intro h2 { font-size: 27px; }
+}

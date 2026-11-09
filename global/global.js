@@ -251,6 +251,7 @@ const worldCupMode = competition === "worldcup";
 const competitionMode = competition === "champions";
 document.body.classList.toggle("ucl-analytics", competitionMode);
 document.body.classList.toggle("world-cup-analytics", worldCupMode);
+if (worldCupMode) document.querySelector(".ga-ucl-crest img").src = "../trophy/fifa-world-cup.png";
 const matchesTable = worldCupMode ? "world_cup_matches" : competitionMode ? "league_champions_matches" : "league_matches";
 const state = { teams: [], matches: [], lineups: {}, season: 1, selectedSeason: "current" };
 let lang = localStorage.getItem("leagueLang") === "ru" ? "ru" : "en";
