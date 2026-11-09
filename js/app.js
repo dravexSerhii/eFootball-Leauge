@@ -156,7 +156,7 @@ const TRANSLATIONS = {
     championsSeason: "EUROPEAN CAMPAIGN",
     championsRoadTitle: "The road to the final",
     championsHistory: "Match history",
-    championsConfirmedOnly: "Confirmed results",
+    championsConfirmedOnly: "Saved results",
     championsClubhouse: "CLUB HONOURS",
     championsFixtureReady: "READY TO PLAY",
     championsFixtureComplete: "COMPLETED",
@@ -165,7 +165,7 @@ const TRANSLATIONS = {
     championsFixtureOpens: "Unlocks after {0} league matches",
     championsFixtureAggregateNeeded: "Only if the aggregate is level",
     championsMatchdayActive: "Champions League matchday is active",
-    championsLeaguePauses: "League match entry pauses until the European fixture is confirmed.",
+    championsLeaguePauses: "League match entry pauses until the European fixture is saved.",
     championsPlayNow: "Play this match",
     championsPromoKicker: "THE STAGE IS SET",
     championsPromoTitle: "A night for champions",
@@ -181,7 +181,10 @@ const TRANSLATIONS = {
     championsPromoComplete: "This season's campaign is complete.",
     championsPromoUnavailable: "Match information is unavailable. Check the Champions League section.",
     championsPromoLoading: "Loading match information…",
-    championsLeagueBlocked: "A Champions League fixture is due. Play and confirm it before adding another league match.",
+    championsDeleteMatch: "Delete match",
+    championsDeleteConfirm: "Delete this Champions League match? Its trophy will be recalculated.",
+    championsDeleteError: "Could not delete Champions League match: {0}",
+    championsLeagueBlocked: "A Champions League fixture is due. Save it before adding another league match.",
     championsLeg: "Match",
     championsScore: "Score",
     championsDate: "Date",
@@ -190,7 +193,7 @@ const TRANSLATIONS = {
     championsDecider: "Deciding match",
     championsWaiting18: "First leg unlocks after 18 league matches ({0}/18 played).",
     championsWaiting36: "Second leg unlocks after 36 league matches ({0}/36 played).",
-    championsWaitingSignIn: "Sign in as a team owner to submit or confirm a Champions League result.",
+    championsWaitingSignIn: "Sign in as a team owner to save a Champions League result.",
     championsWaitingOpponent: "Waiting for the other club to confirm this result.",
     championsLevelAggregate: "The two legs are level on aggregate. A deciding third match is required.",
     championsAggregateScore: "Two-leg aggregate: {0} {1}–{2} {3}",
@@ -210,7 +213,7 @@ const TRANSLATIONS = {
     championsShotsOnTarget: "Shots on target",
     championsPossession: "Possession (%)",
     championsPasses: "Passes",
-    championsSubmit: "Submit result for confirmation",
+    championsSubmit: "Save result",
     championsConfirm: "Confirm result",
     championsReject: "Reject",
     championsProposalWaiting: "{0} reports {1} {2}–{3} {4} · {5}",
@@ -629,7 +632,7 @@ const TRANSLATIONS = {
     championsSeason: "ЕВРОПЕЙСКИЙ СЕЗОН",
     championsRoadTitle: "Путь к финалу",
     championsHistory: "История матчей",
-    championsConfirmedOnly: "Подтверждённые результаты",
+    championsConfirmedOnly: "Сохранённые результаты",
     championsClubhouse: "КЛУБНЫЕ НАГРАДЫ",
     championsFixtureReady: "МОЖНО ИГРАТЬ",
     championsFixtureComplete: "СЫГРАНО",
@@ -638,7 +641,7 @@ const TRANSLATIONS = {
     championsFixtureOpens: "Откроется после {0} матчей лиги",
     championsFixtureAggregateNeeded: "Только при равенстве по сумме",
     championsMatchdayActive: "Наступил матч Лиги чемпионов",
-    championsLeaguePauses: "Добавление матчей лиги приостановлено до подтверждения еврокубковой встречи.",
+    championsLeaguePauses: "Добавление матчей лиги приостановлено до сохранения еврокубковой встречи.",
     championsPlayNow: "Перейти к матчу",
     championsPromoKicker: "ВСЁ ГОТОВО К БОЛЬШОЙ ИГРЕ",
     championsPromoTitle: "Ночь чемпионов",
@@ -656,7 +659,10 @@ const TRANSLATIONS = {
     championsPromoComplete: "Еврокубковый сезон завершён.",
     championsPromoUnavailable: "Данные о матче недоступны. Проверьте раздел Лиги чемпионов.",
     championsPromoLoading: "Загружаем данные о матче…",
-    championsLeagueBlocked: "Наступил матч Лиги чемпионов. Сыграйте и подтвердите его, прежде чем добавлять матч лиги.",
+    championsDeleteMatch: "Удалить матч",
+    championsDeleteConfirm: "Удалить этот матч Лиги чемпионов? Трофей будет пересчитан.",
+    championsDeleteError: "Не удалось удалить матч Лиги чемпионов: {0}",
+    championsLeagueBlocked: "Наступил матч Лиги чемпионов. Сохраните его, прежде чем добавлять матч лиги.",
     championsLeg: "Встреча",
     championsScore: "Счёт",
     championsDate: "Дата",
@@ -665,7 +671,7 @@ const TRANSLATIONS = {
     championsDecider: "Решающая встреча",
     championsWaiting18: "Первый матч откроется после 18 матчей лиги (сыграно {0}/18).",
     championsWaiting36: "Ответный матч откроется после 36 матчей лиги (сыграно {0}/36).",
-    championsWaitingSignIn: "Войдите как владелец клуба, чтобы отправить или подтвердить результат ЛЧ.",
+    championsWaitingSignIn: "Войдите как владелец клуба, чтобы сохранить результат ЛЧ.",
     championsWaitingOpponent: "Ожидаем подтверждения результата вторым клубом.",
     championsLevelAggregate: "После двух матчей равенство по сумме голов. Нужна третья решающая встреча.",
     championsAggregateScore: "Сумма двух матчей: {0} {1}–{2} {3}",
@@ -685,7 +691,7 @@ const TRANSLATIONS = {
     championsShotsOnTarget: "Удары в створ",
     championsPossession: "Владение (%)",
     championsPasses: "Пасы",
-    championsSubmit: "Отправить результат на подтверждение",
+    championsSubmit: "Сохранить результат",
     championsConfirm: "Подтвердить результат",
     championsReject: "Отклонить",
     championsProposalWaiting: "{0} сообщает: {1} {2}–{3} {4} · {5}",
@@ -4348,7 +4354,9 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
     errorElement.textContent = t("mustBeInMatch");
     return;
   }
-  const { error } = await supabase.rpc("propose_league_match", {
+  const submitButton = document.querySelector('#matchForm button[type="submit"]');
+  submitButton.disabled = true;
+  const { error } = await supabase.rpc("save_league_match", {
     p_home: home,
     p_away: away,
     p_home_goals: homeGoals,
@@ -4357,13 +4365,15 @@ document.getElementById("matchForm").addEventListener("submit", async event => {
     p_season: currentSeason
   });
   if (error) {
-    console.error("Failed to send the result for confirmation:", error);
+    console.error("Failed to save the match:", error);
     errorElement.textContent = t("matchSaveError", error.message);
+    submitButton.disabled = false;
     return;
   }
   await refreshFromServer();
   matchDialog.close();
-  showToast(t("proposalSent", state.teams[home === myTeamIndex ? away : home]?.name ?? ""));
+  submitButton.disabled = false;
+  showToast(t("matchSaved"));
 });
 
 function matchSummaryText(proposal) {
@@ -4616,7 +4626,6 @@ function renderChampionsLeague() {
   const leagueMatchesPlayed = state.matches.filter(match => Number(match.season) === currentSeason).length;
   document.getElementById("championsSeasonBadge").textContent =
     `${t("championsPromoSeason").toUpperCase()} ${currentSeason}`;
-  const totals = championsAggregate(seasonMatches);
   const aggregate = championsAggregate(seasonMatches.filter(match => Number(match.leg) <= 2));
   renderChampionsProgress(seasonMatches, leagueMatchesPlayed, aggregate);
   document.querySelector(".champions-league-table-wrap")
@@ -4624,10 +4633,13 @@ function renderChampionsLeague() {
   document.querySelector(".ucl-history-heading")
     ?.classList.toggle("is-empty", seasonMatches.length === 0);
   const trophy = seasonTrophies.find(item => item.competition === "champions_league");
-  let winner = trophy?.team_index;
-  if (winner == null && seasonMatches.length >= 2 && totals[0] !== totals[1]) {
-    winner = totals[0] > totals[1] ? 0 : 1;
-  } else if (winner == null && seasonMatches.some(match => Number(match.leg) === 3)) {
+  const hasFirst = seasonMatches.some(match => Number(match.leg) === 1);
+  const hasSecond = seasonMatches.some(match => Number(match.leg) === 2);
+  let winner = hasFirst && hasSecond ? trophy?.team_index : null;
+  if (winner == null && hasFirst && hasSecond && aggregate[0] !== aggregate[1]) {
+    winner = aggregate[0] > aggregate[1] ? 0 : 1;
+  } else if (winner == null && hasFirst && hasSecond && aggregate[0] === aggregate[1] &&
+    seasonMatches.some(match => Number(match.leg) === 3)) {
     const decider = seasonMatches.find(match => Number(match.leg) === 3);
     winner = decider.home_goals > decider.away_goals ||
       decider.home_goals === decider.away_goals && decider.home_penalties > decider.away_penalties
@@ -4659,6 +4671,26 @@ function renderChampionsLeague() {
     date.textContent = new Date(match.played_at).toLocaleDateString(
       currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short", year: "numeric" }
     );
+    if (session && (match.home_team === myTeamIndex || match.away_team === myTeamIndex)) {
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "ucl-match-delete";
+      deleteButton.textContent = t("championsDeleteMatch");
+      deleteButton.addEventListener("click", async () => {
+        if (!confirm(t("championsDeleteConfirm"))) return;
+        deleteButton.disabled = true;
+        const { error } = await supabase.rpc("delete_champions_match", { p_id: match.id });
+        if (error) {
+          console.error("Failed to delete Champions League match:", error);
+          showToast(t("championsDeleteError", error.message));
+          deleteButton.disabled = false;
+          return;
+        }
+        await refreshChampionsLeague();
+        showToast(t("matchDeleted"));
+      });
+      date.append(document.createElement("br"), deleteButton);
+    }
     row.append(legCell, home, score, away, date);
     rows.append(row);
   });
@@ -4674,14 +4706,14 @@ function renderChampionsLeague() {
     winnerStatus.append(icon, text);
     status.append(winnerStatus);
   }
-  if (seasonMatches.length >= 2) {
+  if (hasFirst && hasSecond) {
     const aggregateStatus = document.createElement("p");
     aggregateStatus.className = "champions-aggregate";
     aggregateStatus.textContent = t("championsAggregateScore",
       state.teams[0]?.name ?? "?", aggregate[0], aggregate[1], state.teams[1]?.name ?? "?");
     status.append(aggregateStatus);
   }
-  if (winner == null && seasonMatches.length >= 2 && totals[0] === totals[1]) {
+  if (winner == null && hasFirst && hasSecond && aggregate[0] === aggregate[1]) {
     const aggregateStatus = document.createElement("p");
     aggregateStatus.className = "champions-level";
     aggregateStatus.textContent = t("championsLevelAggregate");
@@ -4704,9 +4736,10 @@ function renderChampionsLeague() {
   const canSubmit = session && (myTeamIndex === 0 || myTeamIndex === 1) &&
     pending.length === 0 && winner == null;
   let availableLeg = null;
-  if (seasonMatches.length === 0 && leagueMatchesPlayed >= 18) availableLeg = 1;
-  else if (seasonMatches.length === 1 && leagueMatchesPlayed >= 36) availableLeg = 2;
-  else if (seasonMatches.length === 2 && totals[0] === totals[1]) availableLeg = 3;
+  if (!hasFirst && leagueMatchesPlayed >= 18) availableLeg = 1;
+  else if (hasFirst && !hasSecond && leagueMatchesPlayed >= 36) availableLeg = 2;
+  else if (hasFirst && hasSecond && !seasonMatches.some(match => Number(match.leg) === 3) &&
+    aggregate[0] === aggregate[1]) availableLeg = 3;
 
   if (!championsLeagueError) {
     if (!session) {
@@ -4757,7 +4790,7 @@ function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
   const firstLeg = matches.find(match => Number(match.leg) === 1);
   const secondLeg = matches.find(match => Number(match.leg) === 2);
   const decidingMatch = matches.find(match => Number(match.leg) === 3);
-  const tied = Boolean(secondLeg) && aggregate[0] === aggregate[1];
+  const tied = Boolean(firstLeg && secondLeg) && aggregate[0] === aggregate[1];
   const fixtures = [
     {
       leg: 1,
@@ -4779,7 +4812,7 @@ function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
       leg: 3,
       match: decidingMatch,
       available: !decidingMatch && tied,
-      lockedText: secondLeg && !tied
+      lockedText: firstLeg && secondLeg && !tied
         ? t("championsFixtureAggregateNeeded")
         : t("championsFixtureLocked"),
       home: 0,
@@ -4823,9 +4856,7 @@ function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
         currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short", year: "numeric" })
       : fixture.available
         ? t("championsFixtureReady")
-        : fixture.leg === 3 && !tied
-          ? t("championsFixtureAggregateNeeded")
-          : fixture.lockedText;
+        : fixture.lockedText;
     footer.append(hint);
 
     card.append(head, teams, footer);
@@ -5084,7 +5115,7 @@ function renderChampionsEntry(container, leg) {
       return;
     }
     submit.disabled = true;
-    const { error } = await supabase.rpc("propose_league_champions_match", {
+    const { error } = await supabase.rpc("save_champions_match", {
       p_home: homeIndex,
       p_away: awayIndex,
       p_home_goals: homeGoals,
@@ -5096,12 +5127,12 @@ function renderChampionsEntry(container, leg) {
       p_away_penalties: leg === 3 && homeGoals === awayGoals && awayPens.input.value ? Number(awayPens.input.value) : null
     });
     if (error) {
-      console.error("Failed to submit Champions League result:", error);
+      console.error("Failed to save Champions League result:", error);
       message.textContent = error.message;
       submit.disabled = false;
       return;
     }
-    showToast(t("championsProposalSent"));
+    showToast(t("matchSaved"));
     await refreshChampionsLeague();
   });
   container.append(form);

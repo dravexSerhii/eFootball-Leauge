@@ -43,6 +43,13 @@ submits a result, the other team confirms it before it is published), and adds n
 player search. A player's team and achievements are shown only to the owner and to accepted friends. Re-publish
 the site files together with this migration; the old site cannot add matches after it is applied.
 
+After `sql/supabase-migration-champions-league.sql`, run `sql/supabase-migration-direct-results.sql` and publish
+the updated site together with it. Either club can save its league and Champions League results immediately.
+Pending proposals are cancelled (their records are retained, but their results are not published). Either participating
+club can delete an individual Champions League match; the season's Champions League trophy is recalculated, while
+participation medals and other matches remain. If an earlier match is deleted, it must be replayed to restore the
+missing leg; subsequent saved matches are not deleted. The old site cannot submit results after this migration.
+
 Finally run `sql/supabase-migration-profile-extras.sql`. It adds avatars (public `avatars` bucket, every user can write
 only into their own folder), up to 3 pinned achievement badges and a favourite player from the card database.
 
