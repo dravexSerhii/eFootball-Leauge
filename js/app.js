@@ -984,6 +984,7 @@ let championsLeagueProposals = [];
 let clubTrophies = [];
 let championsLeagueError = null;
 let championsLeagueLoaded = false;
+let championsRenderSignature = null;
 const shownChampionsPromos = new Set();
 let championsPromoOpen = false;
 let championsPromoSignature = "";
@@ -3457,7 +3458,7 @@ function validateServerState(settings, matchRows) {
 }
 
 async function fetchServerState() {
-  championsLeagueLoaded = false;
+  const previousState = JSON.stringify([dataReady, currentSeason, state, pendingProposals]);
   const [settingsResponse, matchesResponse] = await Promise.all([
     supabase.from("league_settings").select("*").eq("id", true).maybeSingle(),
     supabase.from("league_matches")
@@ -3486,10 +3487,12 @@ async function fetchServerState() {
     if (!proposals.error) pendingProposals = proposals.data || [];
   }
   dataReady = true;
-  render();
-  updateAuthUi();
-  renderProposals();
   await refreshChampionsLeague();
+  if (previousState !== JSON.stringify([dataReady, currentSeason, state, pendingProposals])) {
+    render();
+    updateAuthUi();
+    renderProposals();
+  }
 }
 
 async function refreshFromServer() {
@@ -3547,6 +3550,7 @@ async function handleSession(nextSession) {
   if (messageRefreshTimer) clearInterval(messageRefreshTimer);
   messageRefreshTimer = null;
   dataReady = false;
+  championsLeagueLoaded = false;
   if (pollTimer) clearInterval(pollTimer);
   if (realtimeChannel) {
     await supabase.removeChannel(realtimeChannel);
@@ -4584,11 +4588,16 @@ function renderChampionsLeague() {
   const entry = document.getElementById("championsLeagueEntry");
   const proposals = document.getElementById("championsLeagueProposals");
   if (!status || !rows || !entry || !proposals) return;
+  const signature = JSON.stringify([
+    currentSeason, currentLang, state.teams, state.matches.filter(match => Number(match.season) === currentSeason).length,
+    championsLeagueMatches, clubTrophies, championsLeagueProposals, championsLeagueError,
+    session?.user?.id ?? null, myTeamIndex
+  ]);
+  if (signature === championsRenderSignature) return;
   renderClubProfiles();
   status.replaceChildren();
   status.classList.remove("is-error");
   rows.replaceChildren();
-  entry.replaceChildren();
   proposals.replaceChildren();
 
   if (championsLeagueError) {
@@ -4705,13 +4714,41 @@ function renderChampionsLeague() {
     } else if (!canSubmit && pending.length === 0 && winner == null && !availableLeg) {
       entry.textContent = t("championsWaitingOpponent");
     } else if (canSubmit && availableLeg) {
-      renderChampionsEntry(entry, availableLeg);
+      const formKey = JSON.stringify([currentSeason, availableLeg, session.user.id, myTeamIndex]);
+      const oldForm = entry.querySelector(".champions-result-form");
+      if (!oldForm || oldForm.dataset.formKey !== formKey ||
+          oldForm.dataset.language !== currentLang ||
+          oldForm.dataset.teams !== JSON.stringify(state.teams)) {
+        const sameFixture = oldForm?.dataset.formKey === formKey;
+        const oldInputs = sameFixture ? [...oldForm.querySelectorAll("input")] : [];
+        const values = oldInputs.map(input => input.value);
+        const focusedIndex = oldInputs.indexOf(document.activeElement);
+        entry.replaceChildren();
+        renderChampionsEntry(entry, availableLeg);
+        const newForm = entry.querySelector(".champions-result-form");
+        newForm.dataset.formKey = formKey;
+        newForm.dataset.language = currentLang;
+        newForm.dataset.teams = JSON.stringify(state.teams);
+        const newInputs = [...newForm.querySelectorAll("input")];
+        values.forEach((value, index) => {
+          if (newInputs[index]) {
+            newInputs[index].value = value;
+            newInputs[index].dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        });
+        if (focusedIndex >= 0) newInputs[focusedIndex]?.focus({ preventScroll: true });
+      }
     } else if (pending.length > 0) {
       entry.textContent = t("championsWaitingOpponent");
+    } else {
+      entry.replaceChildren();
     }
+  } else {
+    entry.replaceChildren();
   }
 
   pending.forEach(proposal => renderChampionsProposal(proposals, proposal));
+  championsRenderSignature = signature;
 }
 
 function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
