@@ -4941,27 +4941,11 @@ body.community-mode #communitySection {
 }
 
 body.ucl-matchnight {
-  --surface: rgba(10, 23, 54, .92);
-  --surface-raised: rgba(21, 43, 86, .94);
-  --line: rgba(179, 205, 255, .18);
-  --muted: #a9bbdf;
   background:
-    linear-gradient(180deg, rgba(5, 15, 42, .42), rgba(4, 12, 34, .72)),
-    url("../assets/img/second-background.jpg") center top / cover fixed,
-    #07132f;
+    linear-gradient(180deg, rgba(5, 15, 42, .86), rgba(8, 20, 52, .94)),
+    url("../trophy/back-champion.webp") center top / 100% auto no-repeat,
+    #081434;
 }
-body.ucl-matchnight .topbar {
-  border-bottom-color: rgba(197, 216, 255, .22);
-  background: linear-gradient(90deg, rgba(7,18,47,.88), rgba(13,31,72,.72), rgba(7,18,47,.88));
-  box-shadow: 0 8px 34px rgba(2, 8, 24, .24);
-  backdrop-filter: blur(14px);
-}
-body.ucl-matchnight .panel:not(.champions-league-panel) {
-  border-color: rgba(169, 197, 255, .2);
-  background: linear-gradient(145deg, rgba(13,29,65,.94), rgba(8,19,45,.95));
-}
-body.ucl-matchnight .eyebrow,
-body.ucl-matchnight .intro .eyebrow { color: #e6cc88; }
 body.ucl-matchnight .ucl-matchnight-banner:not([hidden]) {
   display: flex;
 }
@@ -5021,7 +5005,7 @@ body.ucl-matchnight #championsLeague {
   .ucl-matchnight-banner a { align-self: center; padding: 8px; font-size: 9px; }
 }
 
-body:not(.ucl-matchnight) { color-scheme: light; }
+body { color-scheme: light; }
 .page-shell { width: min(1200px, calc(100% - 40px)); }
 .page-shell > .topbar {
   top: 12px;
@@ -5276,7 +5260,6 @@ main { padding: 36px 0 72px; }
   --line: rgba(171,197,247,.18);
   --lime: #e7c56e;
 }
-body.ucl-matchnight { color-scheme: dark; }
 dialog:not(#clubProfileDialog) {
   border-color: #e4e6ee;
   border-radius: 17px;
@@ -5529,43 +5512,43 @@ dialog:not(#clubProfileDialog) .field select option { color: #24253c; background
   .table-legend-item { font-size: 10px; white-space: normal; }
 }
 
-body:not(.ucl-matchnight) .team-stat-card {
+body .team-stat-card {
   border-color: #e7e9f0;
   background: #fff;
   box-shadow: 0 5px 16px rgba(24,31,67,.045);
 }
-body:not(.ucl-matchnight) .team-stat-side { opacity: 1; }
-body:not(.ucl-matchnight) .team-stat-side.one .team-stat-value,
-body:not(.ucl-matchnight) .team-stat-verdict.one { color: #1839f5; }
-body:not(.ucl-matchnight) .team-stat-side.two .team-stat-value,
-body:not(.ucl-matchnight) .team-stat-verdict.two { color: #7041bd; }
-body:not(.ucl-matchnight) .team-stat-side .team-stat-note,
-body:not(.ucl-matchnight) .team-stat-verdict,
-body:not(.ucl-matchnight) .team-stat-verdict small { color: #66687d; }
-body:not(.ucl-matchnight) .team-stat-track { background: #eceef4; }
-body:not(.ucl-matchnight) .team-stat-side.one .team-stat-fill { background: #1839f5; }
-body:not(.ucl-matchnight) .team-stat-side.two .team-stat-fill { background: #8052d6; }
-body:not(.ucl-matchnight) .team-stat-card[data-tone="results"] {
+body .team-stat-side { opacity: 1; }
+body .team-stat-side.one .team-stat-value,
+body .team-stat-verdict.one { color: #1839f5; }
+body .team-stat-side.two .team-stat-value,
+body .team-stat-verdict.two { color: #7041bd; }
+body .team-stat-side .team-stat-note,
+body .team-stat-verdict,
+body .team-stat-verdict small { color: #66687d; }
+body .team-stat-track { background: #eceef4; }
+body .team-stat-side.one .team-stat-fill { background: #1839f5; }
+body .team-stat-side.two .team-stat-fill { background: #8052d6; }
+body .team-stat-card[data-tone="results"] {
   --stat-accent: #258f4c;
   --stat-border: #dcefe3;
   --stat-wash: #f0f8f3;
 }
-body:not(.ucl-matchnight) .team-stat-card[data-tone="goals"] {
+body .team-stat-card[data-tone="goals"] {
   --stat-accent: #d29a18;
   --stat-border: #f1e7cc;
   --stat-wash: #fcf8ed;
 }
-body:not(.ucl-matchnight) .team-stat-card[data-tone="streak"] {
+body .team-stat-card[data-tone="streak"] {
   --stat-accent: #8052d6;
   --stat-border: #e7ddf7;
   --stat-wash: #f6f2fb;
 }
-body:not(.ucl-matchnight) .team-stat-card[data-tone="possession"] {
+body .team-stat-card[data-tone="possession"] {
   --stat-accent: #238a86;
   --stat-border: #d7edeb;
   --stat-wash: #f0f8f7;
 }
-body:not(.ucl-matchnight) .team-stat-card[data-tone="shots"] {
+body .team-stat-card[data-tone="shots"] {
   --stat-accent: #8052d6;
   --stat-border: #e7ddf7;
   --stat-wash: #f6f2fb;
@@ -5996,7 +5979,7 @@ body.community-mode .message-bubble time { color: #686a80; }
 body.community-mode .message-compose { border-top-color: #e7e9f0; }
 body.community-mode .message-compose .button { color: #fff; }
 
-body:not(.ucl-matchnight) .analyst-briefing {
+body .analyst-briefing {
   --ink: #20213a;
   --muted: #62647a;
   --lime: #1839f5;
@@ -6005,26 +5988,26 @@ body:not(.ucl-matchnight) .analyst-briefing {
   color: #303149;
   box-shadow: 0 18px 48px rgba(24,31,67,.2);
 }
-body:not(.ucl-matchnight) .analyst-briefing-head { border-bottom-color: #e6e8f0; }
-body:not(.ucl-matchnight) .analyst-briefing-head h2,
-body:not(.ucl-matchnight) .analyst-staff-meta { color: #20213a; }
-body:not(.ucl-matchnight) .analyst-briefing-head > div > p:last-child,
-body:not(.ucl-matchnight) .analyst-presence,
-body:not(.ucl-matchnight) .analyst-tension-label,
-body:not(.ucl-matchnight) .analyst-conversation > h3,
-body:not(.ucl-matchnight) .analyst-chat-ended,
-body:not(.ucl-matchnight) .analyst-typing,
-body:not(.ucl-matchnight) .analyst-empty { color: #62647a; }
-body:not(.ucl-matchnight) .analyst-kicker,
-body:not(.ucl-matchnight) .analyst-toast-heading > small,
-body:not(.ucl-matchnight) .analyst-notice-meta > span { color: #1839f5; }
-body:not(.ucl-matchnight) .analyst-presence[data-online="true"] { color: #18733b; }
-body:not(.ucl-matchnight) .analyst-presence[data-online="true"]::before {
+body .analyst-briefing-head { border-bottom-color: #e6e8f0; }
+body .analyst-briefing-head h2,
+body .analyst-staff-meta { color: #20213a; }
+body .analyst-briefing-head > div > p:last-child,
+body .analyst-presence,
+body .analyst-tension-label,
+body .analyst-conversation > h3,
+body .analyst-chat-ended,
+body .analyst-typing,
+body .analyst-empty { color: #62647a; }
+body .analyst-kicker,
+body .analyst-toast-heading > small,
+body .analyst-notice-meta > span { color: #1839f5; }
+body .analyst-presence[data-online="true"] { color: #18733b; }
+body .analyst-presence[data-online="true"]::before {
   background: #218c4b;
   box-shadow: 0 0 8px rgba(33,140,75,.35);
 }
-body:not(.ucl-matchnight) .analyst-staff-avatar,
-body:not(.ucl-matchnight) .analyst-chat-avatar {
+body .analyst-staff-avatar,
+body .analyst-chat-avatar {
   border: 2px solid #fff;
   outline: 1px solid #cbd4ff;
   background: #fff;
@@ -6032,96 +6015,96 @@ body:not(.ucl-matchnight) .analyst-chat-avatar {
   object-position: center;
   box-shadow: 0 2px 8px rgba(24,31,67,.12);
 }
-body:not(.ucl-matchnight) .analyst-panel-close,
-body:not(.ucl-matchnight) .analyst-dismiss {
+body .analyst-panel-close,
+body .analyst-dismiss {
   border-color: #dfe2ec;
   background: #fff;
   color: #62647a;
 }
-body:not(.ucl-matchnight) .analyst-panel-close:hover,
-body:not(.ucl-matchnight) .analyst-dismiss:hover {
+body .analyst-panel-close:hover,
+body .analyst-dismiss:hover {
   border-color: #bfcaff;
   background: #eef1ff;
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .analyst-notice {
+body .analyst-notice {
   border-color: #e2e5ed;
   background: #fff;
   color: #303149;
   box-shadow: 0 3px 12px rgba(24,31,67,.045);
 }
-body:not(.ucl-matchnight) .analyst-notice.is-unread { border-color: #cbd4ff; }
-body:not(.ucl-matchnight) .analyst-notice-meta strong,
-body:not(.ucl-matchnight) .analyst-tension-label strong { color: #20213a; }
-body:not(.ucl-matchnight) .analyst-archive { border-top-color: #e7e9f0; }
-body:not(.ucl-matchnight) .analyst-archive > summary { color: #62647a; }
-body:not(.ucl-matchnight) .analyst-archive > summary:hover { color: #1839f5; }
-body:not(.ucl-matchnight) .analyst-tension-track {
+body .analyst-notice.is-unread { border-color: #cbd4ff; }
+body .analyst-notice-meta strong,
+body .analyst-tension-label strong { color: #20213a; }
+body .analyst-archive { border-top-color: #e7e9f0; }
+body .analyst-archive > summary { color: #62647a; }
+body .analyst-archive > summary:hover { color: #1839f5; }
+body .analyst-tension-track {
   border-color: #e2e5ed;
   background: #eceef4;
 }
-body:not(.ucl-matchnight) .analyst-tension-track > span {
+body .analyst-tension-track > span {
   background: linear-gradient(90deg, #218c4b, #9abb32);
 }
-body:not(.ucl-matchnight) .analyst-tension-track[data-level="high"] > span {
+body .analyst-tension-track[data-level="high"] > span {
   background: linear-gradient(90deg, #d29a18, #e78231);
 }
-body:not(.ucl-matchnight) .analyst-tension-track[data-level="critical"] > span {
+body .analyst-tension-track[data-level="critical"] > span {
   background: linear-gradient(90deg, #e78231, #d93d52);
 }
-body:not(.ucl-matchnight) .analyst-conversation { border-bottom-color: #e7e9f0; }
-body:not(.ucl-matchnight) .analyst-conversation-history {
+body .analyst-conversation { border-bottom-color: #e7e9f0; }
+body .analyst-conversation-history {
   scrollbar-color: #c9cde0 transparent;
 }
-body:not(.ucl-matchnight) .analyst-chat-bubble {
+body .analyst-chat-bubble {
   border-color: #e2e5ed;
   background: #fff;
   color: #303149;
   box-shadow: 0 2px 8px rgba(24,31,67,.045);
 }
-body:not(.ucl-matchnight) .analyst-chat-row.is-player .analyst-chat-bubble {
+body .analyst-chat-row.is-player .analyst-chat-bubble {
   border-color: #cbd4ff;
   background: #eef1ff;
 }
-body:not(.ucl-matchnight) .analyst-chat-bubble strong,
-body:not(.ucl-matchnight) .analyst-chat-row.is-player .analyst-chat-bubble strong {
+body .analyst-chat-bubble strong,
+body .analyst-chat-row.is-player .analyst-chat-bubble strong {
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .analyst-chat-bubble p { color: #303149; }
-body:not(.ucl-matchnight) .analyst-question {
+body .analyst-chat-bubble p { color: #303149; }
+body .analyst-question {
   border-color: #dce2f2;
   background: #fff;
   color: #303149;
 }
-body:not(.ucl-matchnight) .analyst-question:hover:not(:disabled),
-body:not(.ucl-matchnight) .analyst-question:focus-visible {
+body .analyst-question:hover:not(:disabled),
+body .analyst-question:focus-visible {
   border-color: #bfcaff;
   background: #eef1ff;
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .analyst-question:focus-visible { outline-color: #1839f5; }
-body:not(.ucl-matchnight) .analyst-chat-choices .analyst-choice.button-quiet {
+body .analyst-question:focus-visible { outline-color: #1839f5; }
+body .analyst-chat-choices .analyst-choice.button-quiet {
   border-color: #dfe2ec;
   background: #fff;
   color: #303149;
 }
-body:not(.ucl-matchnight) .analyst-chat-choices .analyst-choice.button-primary {
+body .analyst-chat-choices .analyst-choice.button-primary {
   border-color: #bfcaff;
   background: #eef1ff;
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .analyst-toast {
+body .analyst-toast {
   border-color: #dce2f2;
   background: linear-gradient(145deg, #fff, #f7f8fd);
   box-shadow: 0 18px 48px rgba(24,31,67,.2);
 }
-body:not(.ucl-matchnight) .analyst-toast-mark {
+body .analyst-toast-mark {
   border-color: #cbd4ff;
   background: #eef1ff;
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .analyst-toast-copy > p { color: #303149; }
-body:not(.ucl-matchnight) .analyst-toast-actions button { color: #1839f5; }
+body .analyst-toast-copy > p { color: #303149; }
+body .analyst-toast-actions button { color: #1839f5; }
 @media (max-width: 430px) {
   body.community-mode .profile-head .avatar-lg {
     flex-basis: 88px;
@@ -6130,134 +6113,126 @@ body:not(.ucl-matchnight) .analyst-toast-actions button { color: #1839f5; }
   }
 }
 
-body:not(.ucl-matchnight) .match-tabs {
+body .match-tabs {
   gap: 5px;
   padding: 4px;
   border-color: #e2e5ed;
   background: #f3f5fa;
 }
-body:not(.ucl-matchnight) .match-tab {
+body .match-tab {
   min-height: 42px;
   color: #62647a;
 }
-body:not(.ucl-matchnight) .match-tab:hover { color: #20213a; }
-body:not(.ucl-matchnight) .match-tab.active {
+body .match-tab:hover { color: #20213a; }
+body .match-tab.active {
   background: #1839f5;
   color: #fff;
   box-shadow: 0 3px 9px rgba(24,57,245,.22);
 }
-body:not(.ucl-matchnight) .match-tab-status {
+body .match-tab-status {
   background: #d94353;
   color: #fff;
 }
-body:not(.ucl-matchnight) .match-tab-status.confirmed {
+body .match-tab-status.confirmed {
   background: #188548;
   color: #fff;
 }
-body:not(.ucl-matchnight) .stats-entry {
+body .stats-entry {
   border-color: #e2e5ed;
   background: #fbfcfe;
 }
-body:not(.ucl-matchnight) .stats-entry h3 { color: #20213a; }
-body:not(.ucl-matchnight) .stats-entry h3 span,
-body:not(.ucl-matchnight) .stats-entry > p { color: #62647a; }
-body:not(.ucl-matchnight) .stats-entry-head { color: #62647a; }
-body:not(.ucl-matchnight) .stats-entry-row { color: #505267; }
-body:not(.ucl-matchnight) .stats-entry-row input {
+body .stats-entry h3 { color: #20213a; }
+body .stats-entry h3 span,
+body .stats-entry > p { color: #62647a; }
+body .stats-entry-head { color: #62647a; }
+body .stats-entry-row { color: #505267; }
+body .stats-entry-row input {
   border-color: #dfe2eb;
   background: #fff;
   color: #20213a;
   box-shadow: inset 0 1px 2px rgba(24,31,67,.035);
 }
-body:not(.ucl-matchnight) .stats-entry-row input:hover { border-color: #c8cee0; }
-body:not(.ucl-matchnight) .stats-entry-row input:focus {
+body .stats-entry-row input:hover { border-color: #c8cee0; }
+body .stats-entry-row input:focus {
   border-color: #1839f5;
   outline: none;
   box-shadow: 0 0 0 3px rgba(24,57,245,.1);
 }
-body:not(.ucl-matchnight) .match-team-picker-badge {
+body .match-team-picker-badge {
   border-color: #e1e5ee;
   background: #f7f8fb;
 }
-body:not(.ucl-matchnight) .match-swap-button {
+body .match-swap-button {
   border-color: #cbd4ff;
   background: #eef1ff;
   color: #1839f5;
 }
-body:not(.ucl-matchnight) .match-swap-button:hover {
+body .match-swap-button:hover {
   border-color: #aebcff;
   background: #e0e6ff;
 }
-body:not(.ucl-matchnight) .match-swap-button:focus-visible {
+body .match-swap-button:focus-visible {
   outline-color: #1839f5;
 }
-body:not(.ucl-matchnight) .team-stats-mode {
+body .team-stats-mode {
   border-color: #e2e5ed;
   background: #f3f5fa;
 }
-body:not(.ucl-matchnight) .team-stats-mode-button { color: #62647a; }
-body:not(.ucl-matchnight) .team-stats-mode-button:hover { color: #20213a; }
-body:not(.ucl-matchnight) .team-stats-mode-button.active {
+body .team-stats-mode-button { color: #62647a; }
+body .team-stats-mode-button:hover { color: #20213a; }
+body .team-stats-mode-button.active {
   border-color: #1839f5;
   background: #1839f5;
   color: #fff;
   box-shadow: 0 2px 7px rgba(24,57,245,.2);
 }
-body:not(.ucl-matchnight) .team-stats-mode-button:focus-visible {
+body .team-stats-mode-button:focus-visible {
   outline: 2px solid #1839f5;
 }
-body:not(.ucl-matchnight) .team-stats-filter { color: #62647a; }
-body:not(.ucl-matchnight) .team-stats-filter select {
+body .team-stats-filter { color: #62647a; }
+body .team-stats-filter select {
   border-color: #dfe2eb;
   background: #fff;
   color: #20213a;
 }
-body:not(.ucl-matchnight) .team-stats-filter select:focus {
+body .team-stats-filter select:focus {
   outline-color: #1839f5;
 }
-body:not(.ucl-matchnight) .team-stats-club {
+body .team-stats-club {
   border-color: #e2e5ed;
   background: #fbfcfe;
 }
-body:not(.ucl-matchnight) .team-stats-club.one { border-color: #cbd4ff; }
-body:not(.ucl-matchnight) .team-stats-club.two { border-color: #dfd1f6; }
-body:not(.ucl-matchnight) .team-stats-club-badge { background: #fff; }
-body:not(.ucl-matchnight) .team-stats-club > strong { color: #20213a; }
-body:not(.ucl-matchnight) .team-stats-club > span:last-child { color: #62647a; }
-body:not(.ucl-matchnight) .team-stat-card {
+body .team-stats-club.one { border-color: #cbd4ff; }
+body .team-stats-club.two { border-color: #dfd1f6; }
+body .team-stats-club-badge { background: #fff; }
+body .team-stats-club > strong { color: #20213a; }
+body .team-stats-club > span:last-child { color: #62647a; }
+body .team-stat-card {
   border-color: #e2e5ed;
   background: #fff;
 }
-body:not(.ucl-matchnight) .team-stat-label { color: #62647a; }
-body:not(.ucl-matchnight) .team-stat-side.one .team-stat-value,
-body:not(.ucl-matchnight) .team-stat-verdict.one { color: #1839f5; }
-body:not(.ucl-matchnight) .team-stat-side.two .team-stat-value,
-body:not(.ucl-matchnight) .team-stat-verdict.two { color: #7041bd; }
-body:not(.ucl-matchnight) .team-stat-side .team-stat-note,
-body:not(.ucl-matchnight) .team-stat-verdict small { color: #62647a; }
-body:not(.ucl-matchnight) .team-stat-track { background: #eceef4; }
-body:not(.ucl-matchnight) .team-stat-side.one .team-stat-fill { background: #1839f5; }
-body:not(.ucl-matchnight) .team-stat-side.two .team-stat-fill { background: #8052d6; }
-body:not(.ucl-matchnight) .team-stats-footnote,
-body:not(.ucl-matchnight) .team-stats-empty { color: #62647a; }
-body:not(.ucl-matchnight) .lineup-tab.active,
-body:not(.ucl-matchnight) .lineup-tab[aria-selected="true"] {
+body .team-stat-label { color: #62647a; }
+body .team-stat-side.one .team-stat-value,
+body .team-stat-verdict.one { color: #1839f5; }
+body .team-stat-side.two .team-stat-value,
+body .team-stat-verdict.two { color: #7041bd; }
+body .team-stat-side .team-stat-note,
+body .team-stat-verdict small { color: #62647a; }
+body .team-stat-track { background: #eceef4; }
+body .team-stat-side.one .team-stat-fill { background: #1839f5; }
+body .team-stat-side.two .team-stat-fill { background: #8052d6; }
+body .team-stats-footnote,
+body .team-stats-empty { color: #62647a; }
+body .lineup-tab.active,
+body .lineup-tab[aria-selected="true"] {
   background: #1839f5;
   color: #fff;
   box-shadow: 0 4px 12px rgba(24,57,245,.18);
 }
-body:not(.ucl-matchnight) .lineup-tab:focus-visible {
+body .lineup-tab:focus-visible {
   outline: 2px solid #1839f5;
   outline-offset: 2px;
 }
-body.ucl-matchnight .match-tab.active,
-body.ucl-matchnight .lineup-tab.active,
-body.ucl-matchnight .lineup-tab[aria-selected="true"] {
-  background: #e7c56e;
-  color: #14213d;
-}
-body.ucl-matchnight .match-tab-status { color: #15213a; }
-body.ucl-matchnight .match-tab-status.confirmed { color: #10233c; }
 
 body.community-mode .community-main .button.button-primary,
 body.community-mode .friend-profile .profile-actions .button.button-primary,
@@ -6322,7 +6297,7 @@ html[data-color-mode="dark"] {
   --lime: #8ea3ff;
   --shadow: 0 16px 42px rgba(0,0,0,.32);
 }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) {
+html[data-color-mode="dark"] body {
   color-scheme: dark;
   background:
     radial-gradient(ellipse at 50% -18%, rgba(50,74,130,.19), transparent 46%),
@@ -6436,22 +6411,22 @@ html[data-color-mode="dark"] .match-score {
   background: #25334b;
   color: #d7e0ff;
 }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-momentum-chip {
+html[data-color-mode="dark"] body .team-momentum-chip {
   border-color: #3a4b70;
   background: #202c42;
   color: #bac8ff;
 }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-momentum-chip.streak-loss {
+html[data-color-mode="dark"] body .team-momentum-chip.streak-loss {
   border-color: #693846;
   background: #38232d;
   color: #ff9aa7;
 }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-momentum-chip.streak-draw {
+html[data-color-mode="dark"] body .team-momentum-chip.streak-draw {
   border-color: #3f4859;
   background: #252e3d;
   color: #bdc5d3;
 }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-momentum-chip.streak-unbeaten {
+html[data-color-mode="dark"] body .team-momentum-chip.streak-unbeaten {
   border-color: #2c5745;
   background: #1b342b;
   color: #81d6a5;
@@ -6555,10 +6530,10 @@ html[data-color-mode="dark"] .lineup-open-button {
 html[data-color-mode="dark"] .lineup-open-button:hover { border-color: #566a99; background: #293851; }
 html[data-color-mode="dark"] .team-stats-track,
 html[data-color-mode="dark"] .team-stat-track { background: #2a3548; }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-stat-side.one .team-stat-value,
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-stat-verdict.one { color: #aab9ff; }
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-stat-side.two .team-stat-value,
-html[data-color-mode="dark"] body:not(.ucl-matchnight) .team-stat-verdict.two { color: #c1a8ff; }
+html[data-color-mode="dark"] body .team-stat-side.one .team-stat-value,
+html[data-color-mode="dark"] body .team-stat-verdict.one { color: #aab9ff; }
+html[data-color-mode="dark"] body .team-stat-side.two .team-stat-value,
+html[data-color-mode="dark"] body .team-stat-verdict.two { color: #c1a8ff; }
 html[data-color-mode="dark"] .team-stats-footnote,
 html[data-color-mode="dark"] .team-stats-empty { color: #aab6ca; }
 html[data-color-mode="dark"] .analyst-briefing {
@@ -6659,12 +6634,6 @@ html[data-color-mode="dark"] dialog :is(input,select,textarea):focus { border-co
     url("../trophy/back-champion.webp") center top / 100% auto no-repeat,
     #071337;
   border-color: rgba(130, 186, 255, .35);
-}
-body.ucl-matchnight {
-  background:
-    linear-gradient(180deg, rgba(3, 10, 40, .5), rgba(3, 11, 34, .88)),
-    url("../trophy/back-champion.webp") center top / cover fixed,
-    #07132f;
 }
 .ucl-masthead { min-height: 180px; }
 .ucl-masthead-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
@@ -6847,4 +6816,80 @@ body.ucl-matchnight {
   .ucl-fixture-card:is(.is-ready, .is-locked)::after, .ucl-fixture-card.is-ready .ucl-fixture-badge,
   .ucl-promo.is-playing .ucl-promo-glow, .ucl-promo.is-playing::after, .ucl-promo.is-playing .ucl-promo-lightning,
   .ucl-promo.is-playing .ucl-promo-content, .ucl-promo.is-playing .ucl-fixture-team { animation: none; }
+}
+
+html[data-color-mode="dark"] body.ucl-matchnight {
+  background:
+    linear-gradient(180deg, rgba(5, 15, 42, .86), rgba(8, 20, 52, .94)),
+    url("../trophy/back-champion.webp") center top / 100% auto no-repeat,
+    #081434;
+}
+body.ucl-matchnight .intro .eyebrow { color: #d3e2ff; }
+body.ucl-matchnight .tip {
+  border-color: rgba(159, 195, 255, .3);
+  background: #14284d;
+  color: #e1eaff;
+}
+body.ucl-matchnight .tip :is(strong, .tip-icon) { color: #fff; }
+body.ucl-matchnight .page-shell > footer {
+  border-top-color: #425477;
+  color: #c3d1ea;
+}
+#championsLeague .ucl-fixture-card.is-locked { opacity: 1; }
+.analyst-notice-heading {
+  margin: 0;
+  color: #62647a;
+  font: 800 10px Inter, sans-serif;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+html[data-color-mode="dark"] body .analyst-briefing {
+  --ink: #edf2fb;
+  --muted: #aab6ca;
+  --lime: #b7c5ff;
+}
+html[data-color-mode="dark"] body .analyst-notice-heading,
+html[data-color-mode="dark"] body .analyst-briefing-head > div > p:last-child,
+html[data-color-mode="dark"] body .analyst-conversation > h3,
+html[data-color-mode="dark"] body .analyst-tension-label,
+html[data-color-mode="dark"] body .analyst-chat-ended,
+html[data-color-mode="dark"] body .analyst-archive > summary,
+html[data-color-mode="dark"] body .analyst-empty { color: #b1bdd0; }
+html[data-color-mode="dark"] body .analyst-chat-row.is-player .analyst-chat-bubble {
+  border-color: #465c95;
+  background: #273858;
+}
+html[data-color-mode="dark"] body .analyst-chat-bubble strong,
+html[data-color-mode="dark"] body .analyst-chat-row.is-player .analyst-chat-bubble strong,
+html[data-color-mode="dark"] body .analyst-kicker,
+html[data-color-mode="dark"] body .analyst-notice-meta > span { color: #b7c5ff; }
+
+#championsLeague .champions-result-form .stats-entry {
+  border-color: rgba(159, 181, 232, .25);
+  background: rgba(11, 25, 55, .88);
+}
+#championsLeague .champions-result-form .stats-entry h3 { color: #f3e4bc; }
+#championsLeague .champions-result-form :is(.stats-entry > p, .stats-entry-head, .stats-entry-row, .champions-score-field, legend) {
+  color: #c3d1ea;
+}
+#championsLeague .champions-result-form :is(.champions-score-field input, .stats-entry-row input) {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid #53688e;
+  border-radius: 8px;
+  background: #101f3e;
+  color: #fff;
+  font: 600 14px Inter, sans-serif;
+}
+#championsLeague .champions-result-form :is(.champions-score-field input, .stats-entry-row input):focus {
+  border-color: #a9d8ff;
+  outline: 2px solid #a9d8ff;
+  outline-offset: 2px;
+}
+#championsLeague .champions-result-form .button-primary {
+  border-color: #d4b96e;
+  background: linear-gradient(135deg, #e4ce93, #b9954f);
+  color: #17213a;
 }

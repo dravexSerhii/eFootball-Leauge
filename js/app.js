@@ -24,6 +24,7 @@ const TRANSLATIONS = {
     analystNeverSeen: "Not recently active",
     analystEmpty: "The staff has no urgent recommendations right now. Keep the good work going.",
     analystArchive: "Previous messages",
+    analystNotificationsHeading: "Staff notifications",
     analystArchived: "ARCHIVED",
     analystHistoryUnavailable: "This older conversation history could not be restored.",
     analystClose: "Hide this recommendation",
@@ -496,6 +497,7 @@ const TRANSLATIONS = {
     analystNeverSeen: "Давно не был(а) в сети",
     analystEmpty: "Срочных рекомендаций пока нет. Продолжайте в том же духе.",
     analystArchive: "Предыдущие сообщения",
+    analystNotificationsHeading: "Уведомления штаба",
     analystArchived: "В АРХИВЕ",
     analystHistoryUnavailable: "Историю старого разговора восстановить не удалось.",
     analystClose: "Скрыть эту рекомендацию",
@@ -2821,6 +2823,7 @@ function clearAnalystToast() {
 }
 
 function showAnalystToast(notice) {
+  if (!analystBriefing.hidden) return;
   const copy = notice[currentLang] || notice.en;
   if (!copy) return;
   analystToastNoticeId = notice.id;
@@ -3208,15 +3211,6 @@ function renderAnalystNotifications() {
     if (!copy) return null;
     const article = document.createElement("article");
     article.className = `analyst-notice${notice.read ? "" : " is-unread"}${archived ? " is-archived" : ""}`;
-    const identity = document.createElement("div");
-    identity.className = "analyst-staff-avatar-wrap";
-    const avatar = document.createElement("img");
-    avatar.className = "analyst-staff-avatar";
-    avatar.src = getAnalystAvatar(myTeamIndex);
-    avatar.alt = getAnalystAuthor(myTeamIndex);
-    const authorName = document.createElement("span");
-    authorName.textContent = getAnalystAuthor(myTeamIndex);
-    identity.append(avatar, authorName);
     const head = document.createElement("div");
     head.className = "analyst-notice-meta";
     const label = document.createElement("span");
@@ -3231,7 +3225,7 @@ function renderAnalystNotifications() {
       dismiss.addEventListener("click", () => dismissAnalystNotice(notice.id));
       head.append(dismiss);
     }
-    article.append(identity, head);
+    article.append(head);
     const chat = document.createElement("div");
     chat.className = "analyst-chat";
     chat.append(analystChatBubble("staff", getAnalystAuthor(myTeamIndex), `${copy.message} ${copy.signoff}`));
@@ -3271,6 +3265,12 @@ function renderAnalystNotifications() {
     return article;
   };
   const content = activeNotices.map(notice => renderNotice(notice, false)).filter(Boolean);
+  if (activeNotices.length) {
+    const heading = document.createElement("h3");
+    heading.className = "analyst-notice-heading";
+    heading.textContent = t("analystNotificationsHeading");
+    content.unshift(heading);
+  }
   if (!activeNotices.length) {
     const empty = document.createElement("p");
     empty.className = "analyst-empty";
@@ -3296,6 +3296,7 @@ function setAnalystBriefingOpen(open) {
   analystBriefing.hidden = !open;
   analystNotificationsButton.setAttribute("aria-expanded", String(open));
   if (!open || !analystNoticeState) return;
+  clearAnalystToast();
   let changed = false;
   analystNoticeState.notices.forEach(notice => {
     if (!notice.read) {
@@ -4783,9 +4784,11 @@ function renderChampionsProgress(matches, leagueMatchesPlayed, aggregate) {
     hint.textContent = played
       ? new Date(fixture.match.played_at).toLocaleDateString(
         currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "short", year: "numeric" })
-      : fixture.leg === 3 && !tied
-        ? t("championsFixtureAggregateNeeded")
-        : fixture.lockedText;
+      : fixture.available
+        ? t("championsFixtureReady")
+        : fixture.leg === 3 && !tied
+          ? t("championsFixtureAggregateNeeded")
+          : fixture.lockedText;
     footer.append(hint);
 
     card.append(head, teams, footer);
