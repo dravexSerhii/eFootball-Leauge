@@ -223,10 +223,14 @@ const TRANSLATIONS = {
     championsMatchSaved: "Champions League result saved.",
     clubProfileLink: "Club profile",
     clubProfiles: "Club profiles",
-    clubTrophiesCount: "{0} Champions League titles",
+    clubTrophiesCount: "{0} awards",
     clubNoTrophies: "No trophies yet",
     championsTrophyName: "Champions League trophy",
-    participationMedalName: "First participation medal",
+    participationMedalName: "First eLeague match medal",
+    leagueTrophyName: "eLeague champion",
+    clubBack: "← Back to league",
+    clubShelfIntro: "Choose a club to explore its trophy shelf and history.",
+    trophyDate: "Awarded {0}",
     liveSimulation: "LIVE SIMULATION",
     raceDisclaimer: "Live estimate from season results with simulated momentum. Not live-match odds.",
     raceChartLabel: "Live championship chance cardiogram",
@@ -701,10 +705,14 @@ const TRANSLATIONS = {
     championsMatchSaved: "Результат ЛЧ сохранён.",
     clubProfileLink: "Профиль клуба",
     clubProfiles: "Профили клубов",
-    clubTrophiesCount: "Титулов Лиги чемпионов: {0}",
+    clubTrophiesCount: "Наград: {0}",
     clubNoTrophies: "Трофеев пока нет",
     championsTrophyName: "Кубок Лиги чемпионов",
-    participationMedalName: "Медаль за первое участие",
+    participationMedalName: "Медаль за первый матч eЛиги",
+    leagueTrophyName: "Чемпион eЛиги",
+    clubBack: "← Назад в лигу",
+    clubShelfIntro: "Выберите клуб, чтобы посмотреть его трофейную полку и историю побед.",
+    trophyDate: "Получен: {0}",
     liveSimulation: "ЖИВАЯ СИМУЛЯЦИЯ",
     raceDisclaimer: "Оценка по результатам сезона с моделируемой динамикой. Это не шансы во время матча.",
     raceChartLabel: "Кардиограмма шансов на чемпионство в реальном времени",
@@ -1673,7 +1681,7 @@ async function startNewSeason() {
     showToast(t("seasonStartBlocked"));
     return;
   }
-  const standings = getStandings();
+  const standings = getStandings(matchesInSeason);
   const winnerIdx = standings[0].index;
   const championships = { ...getChampionships() };
   championships[String(winnerIdx)] = (championships[String(winnerIdx)] || 0) + 1;
@@ -2104,12 +2112,12 @@ function subscribeToNews() {
     });
 }
 
-function getStandings() {
+function getStandings(matches = state.matches) {
   const stats = state.teams.map((team, index) => ({
     index, name: team.name, played: 0, wins: 0, draws: 0, losses: 0,
     goalsFor: 0, goalsAgainst: 0, points: 0
   }));
-  state.matches.forEach(match => {
+  matches.forEach(match => {
     const home = stats[match.home];
     const away = stats[match.away];
     home.played++;
@@ -4720,16 +4728,6 @@ function renderChampionsLeague() {
     status.append(aggregateStatus);
   }
 
-  seasonTrophies.filter(item => item.competition === "participation").forEach(item => {
-    const medal = document.createElement("span");
-    medal.className = "champions-medal";
-    const icon = document.createElement("img");
-    icon.src = "trophy/first-title.png";
-    icon.alt = t("participationMedalName");
-    medal.append(icon, document.createTextNode(`${state.teams[item.team_index]?.name ?? "?"} · ${t("participationMedalName")}`));
-    status.append(medal);
-  });
-
   const pending = championsLeagueProposals.filter(proposal =>
     Number(proposal.season) === currentSeason &&
     (proposal.home_team === myTeamIndex || proposal.away_team === myTeamIndex));
@@ -4903,12 +4901,23 @@ function createUclTeam(teamIndex, score) {
   return element;
 }
 
+const clubAwardTypes = {
+  participation: { image: "trophy/league-medal.svg", label: "participationMedalName" },
+  league: { image: "trophy/league-cup.svg", label: "leagueTrophyName" },
+  champions_league: { image: "trophy/leauge-champions.png", label: "championsTrophyName" }
+};
+let activeClubProfile = null;
+
 function renderClubProfiles() {
   const list = document.getElementById("clubProfileList");
   if (!list) return;
+  const error = document.getElementById("clubShelfError");
+  error.hidden = !championsLeagueError;
+  error.textContent = championsLeagueError === "missing"
+    ? t("championsNoMigration")
+    : championsLeagueError ? t("championsLoadError", championsLeagueError) : "";
   list.replaceChildren(...state.teams.map((team, teamIndex) => {
-    const awards = clubTrophies.filter(trophy => Number(trophy.team_index) === teamIndex);
-    const titleCount = awards.filter(trophy => trophy.competition === "champions_league").length;
+    const awards = clubTrophies.filter(trophy => Number(trophy.team_index) === teamIndex && clubAwardTypes[trophy.competition]);
     const button = document.createElement("button");
     button.type = "button";
     button.className = `club-profile-card ${teamTone(teamIndex)}`;
@@ -4931,59 +4940,70 @@ function renderClubProfiles() {
     const name = document.createElement("strong");
     name.textContent = team.name;
     const summary = document.createElement("span");
-    summary.textContent = t("clubTrophiesCount", titleCount);
+    summary.textContent = championsLeagueError ? t("championsPromoUnavailable") : t("clubTrophiesCount", awards.length);
     info.append(name, summary);
 
     const awardIcons = document.createElement("span");
     awardIcons.className = "club-profile-awards";
-    awards.filter(trophy => trophy.competition === "participation" || trophy.competition === "champions_league")
+    awards
       .slice(0, 4)
       .forEach(trophy => {
         const icon = document.createElement("img");
-        icon.src = trophy.competition === "participation" ? "trophy/first-title.png" : "trophy/leauge-champions.png";
-        icon.alt = trophy.competition === "participation" ? t("participationMedalName") : t("championsTrophyName");
+        icon.src = clubAwardTypes[trophy.competition].image;
+        icon.alt = t(clubAwardTypes[trophy.competition].label);
         icon.title = `${icon.alt} · ${t("season")} ${trophy.season}`;
         awardIcons.append(icon);
       });
     button.append(emblem, info, awardIcons);
-    button.addEventListener("click", () => openClubProfile(team, awards));
+    button.disabled = Boolean(championsLeagueError);
+    button.addEventListener("click", () => openClubProfile(teamIndex));
     return button;
   }));
+  if (clubProfileDialog?.open && activeClubProfile !== null) {
+    openClubProfile(activeClubProfile);
+  }
 }
 
-function openClubProfile(team, awards) {
+function openClubProfile(teamIndex) {
   const title = document.getElementById("clubProfileDialogTitle");
   const content = document.getElementById("clubProfileDialogContent");
   if (!clubProfileDialog || !title || !content) return;
-  title.textContent = team.name;
+  activeClubProfile = teamIndex;
+  const awards = clubTrophies.filter(award => Number(award.team_index) === teamIndex && clubAwardTypes[award.competition]);
+  title.textContent = state.teams[teamIndex].name;
   content.replaceChildren();
-  if (!awards.length) {
+  if (championsLeagueError || !awards.length) {
     const empty = document.createElement("p");
     empty.className = "club-profile-empty";
-    empty.textContent = t("clubNoTrophies");
+    empty.textContent = championsLeagueError ? t("championsPromoUnavailable") : t("clubNoTrophies");
     content.append(empty);
   } else {
     const grid = document.createElement("div");
     grid.className = "club-profile-trophy-grid";
-    awards.slice().sort((a, b) => Number(a.season) - Number(b.season)).forEach(award => {
+    awards.slice().sort((a, b) => new Date(b.awarded_at) - new Date(a.awarded_at)).forEach(award => {
       const card = document.createElement("article");
       card.className = "club-profile-trophy";
       const image = document.createElement("img");
-      image.src = award.competition === "participation" ? "trophy/first-title.png" : "trophy/leauge-champions.png";
+      image.src = clubAwardTypes[award.competition].image;
       image.alt = "";
       const label = document.createElement("strong");
-      label.textContent = award.competition === "participation" ? t("participationMedalName") : t("championsTrophyName");
+      label.textContent = t(clubAwardTypes[award.competition].label);
       const season = document.createElement("span");
       season.textContent = `${t("season")} ${award.season}`;
-      card.append(image, label, season);
+      const date = document.createElement("span");
+      date.textContent = t("trophyDate", new Date(award.awarded_at).toLocaleDateString(
+        currentLang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "long", year: "numeric" }
+      ));
+      card.append(image, label, season, date);
       grid.append(card);
     });
     content.append(grid);
   }
-  clubProfileDialog.showModal();
+  if (!clubProfileDialog.open) clubProfileDialog.showModal();
 }
 
 document.getElementById("clubProfileDialogClose")?.addEventListener("click", () => clubProfileDialog?.close());
+clubProfileDialog?.addEventListener("close", () => { activeClubProfile = null; });
 
 function renderChampionsEntry(container, leg) {
   const homeIndex = leg === 2 ? 1 : 0;
@@ -6750,6 +6770,10 @@ document.querySelectorAll("[data-community-page]").forEach(button => {
   button.addEventListener("click", () => navigateCommunity(button.dataset.communityPage));
 });
 window.addEventListener("hashchange", () => {
+  const clubsOpen = location.hash === "#club-profiles";
+  document.body.classList.toggle("club-profiles-mode", clubsOpen);
+  document.getElementById("clubProfilesSection").hidden = !clubsOpen;
+  if (!clubsOpen && clubProfileDialog?.open) clubProfileDialog.close();
   const match = location.hash.match(/^#community(?:\/(profile|friends|messages|achievements|edit))?$/);
   if (match) void openCommunityPage(match[1] || "profile", false);
   else {
@@ -6757,6 +6781,10 @@ window.addEventListener("hashchange", () => {
     communitySection.hidden = true;
   }
 });
+if (location.hash === "#club-profiles") {
+  document.body.classList.add("club-profiles-mode");
+  document.getElementById("clubProfilesSection").hidden = false;
+}
 const initialCommunityMatch = location.hash.match(/^#community(?:\/(profile|friends|messages|achievements|edit))?$/);
 if (initialCommunityMatch) void openCommunityPage(initialCommunityMatch[1] || "profile", false);
 

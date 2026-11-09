@@ -26,6 +26,7 @@
                         <a href="cards.html" data-i18n="dbLink">Card database</a>
                         <a href="global/global.html" data-i18n="globalLink">Team analytics</a>
                         <a href="global/global.html?competition=champions" data-i18n="championsLeagueStatsLink">Champions League analytics</a>
+                        <a href="#club-profiles" data-i18n="clubProfiles">Club profiles</a>
                         <a href="global/global.html#achievements" data-i18n="achievementsLink">Achievements</a>
                         <button type="button" id="myProfileButton" data-i18n="myProfile">My profile</button>
                         <button type="button" id="friendsButton" data-i18n="friendsLink">Friends</button>
@@ -384,15 +385,17 @@
                 </div>
                 <div class="champions-league-entry" id="championsLeagueEntry"></div>
                 <div class="champions-proposals" id="championsLeagueProposals"></div>
-                <section class="club-profiles" aria-labelledby="clubProfilesTitle">
-                    <div class="ucl-section-heading ucl-clubs-heading">
-                        <div>
-                            <p class="ucl-section-kicker" data-i18n="championsClubhouse">CLUB HONOURS</p>
-                            <h3 id="clubProfilesTitle" data-i18n="clubProfiles">Club profiles</h3>
-                        </div>
-                    </div>
-                    <div class="club-profile-list" id="clubProfileList"></div>
-                </section>
+            </section>
+
+            <section class="club-profiles" id="clubProfilesSection" aria-labelledby="clubProfilesTitle" hidden>
+                <a class="club-shelf-back" href="#home" data-i18n="clubBack">← Back to league</a>
+                <div class="club-shelf-heading">
+                    <p data-i18n="championsClubhouse">CLUB HONOURS</p>
+                    <h1 id="clubProfilesTitle" data-i18n="clubProfiles">Club profiles</h1>
+                    <span data-i18n="clubShelfIntro">Choose a club to explore its trophy shelf and history.</span>
+                </div>
+                <p class="club-shelf-error" id="clubShelfError" role="status" hidden></p>
+                <div class="club-profile-list" id="clubProfileList"></div>
             </section>
 
             <details class="team-stats-panel panel">

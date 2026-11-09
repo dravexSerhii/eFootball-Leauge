@@ -50,6 +50,14 @@ club can delete an individual Champions League match; the season's Champions Lea
 participation medals and other matches remain. If an earlier match is deleted, it must be replayed to restore the
 missing leg; subsequent saved matches are not deleted. The old site cannot submit results after this migration.
 
+After the direct-results migration, run `sql/supabase-migration-trophy-shelf.sql` and publish the updated site,
+including the `trophy/` folder. Each team receives one lifetime participation medal for its first eLeague match;
+the migration replaces the old Champions League participation medals with medals derived from saved eLeague matches.
+Completed seasons receive an eLeague trophy after 36 matches, ordered by that season's points, goal difference,
+goals scored, then team index. Deleting a league match recalculates its season's trophy, but does not remove a
+participation medal. Existing saved results are used to reconstruct award dates and historical trophies; results that
+were previously deleted cannot be reconstructed. Champions League trophies remain separate.
+
 Finally run `sql/supabase-migration-profile-extras.sql`. It adds avatars (public `avatars` bucket, every user can write
 only into their own folder), up to 3 pinned achievement badges and a favourite player from the card database.
 
