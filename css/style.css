@@ -6652,3 +6652,199 @@ html[data-color-mode="dark"] dialog :is(input,select,textarea):focus { border-co
 @media (prefers-reduced-motion: reduce) {
   html[data-color-mode="dark"] * { scroll-behavior: auto; }
 }
+
+.champions-league-panel {
+  background:
+    linear-gradient(180deg, rgba(2, 9, 40, .43), rgba(4, 12, 42, .94) 620px),
+    url("../trophy/back-champion.webp") center top / 100% auto no-repeat,
+    #071337;
+  border-color: rgba(130, 186, 255, .35);
+}
+body.ucl-matchnight {
+  background:
+    linear-gradient(180deg, rgba(3, 10, 40, .5), rgba(3, 11, 34, .88)),
+    url("../trophy/back-champion.webp") center top / cover fixed,
+    #07132f;
+}
+.ucl-masthead { min-height: 180px; }
+.ucl-masthead-actions { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.ucl-promo-launch {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(147, 213, 255, .62);
+  border-radius: 8px;
+  background: linear-gradient(110deg, #1d5bc8, #356ade);
+  color: #fff;
+  cursor: pointer;
+  font: 750 11px Inter, sans-serif;
+}
+.ucl-promo-launch:hover { background: #347de5; }
+.ucl-promo-launch:focus-visible, .ucl-promo-close:focus-visible, .ucl-promo-action:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.ucl-fixture-card {
+  background: linear-gradient(145deg, rgba(20, 54, 118, .88), rgba(5, 15, 52, .94));
+  border-color: rgba(127, 185, 255, .3);
+}
+.ucl-fixture-badge,
+.ucl-fixture-badge.team-1 {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ucl-fixture-badge img { filter: drop-shadow(0 3px 8px rgba(0, 0, 0, .35)); }
+.ucl-fixture-card.is-ready {
+  border-color: #80d5ff;
+  box-shadow: 0 0 28px rgba(44, 155, 255, .3), inset 0 1px rgba(255,255,255,.1);
+}
+.ucl-fixture-card:is(.is-ready, .is-locked)::after {
+  position: absolute;
+  inset: -40% auto -40% -60%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(170, 228, 255, .22), transparent);
+  content: "";
+  pointer-events: none;
+  transform: skewX(-20deg);
+  animation: ucl-fixture-sweep 7s ease-in-out infinite;
+}
+.ucl-fixture-card.is-ready .ucl-fixture-badge { animation: ucl-crest-float 4s ease-in-out infinite; }
+.ucl-fixture-card.is-ready .ucl-fixture-team:last-child .ucl-fixture-badge { animation-delay: -.8s; }
+.ucl-fixture-card.is-locked::after { opacity: .5; animation-delay: -2s; }
+.ucl-fixture-card.is-ready .ucl-fixture-state { color: #a6e5ff; }
+@keyframes ucl-fixture-sweep {
+  0%, 45% { left: -60%; }
+  70%, 100% { left: 140%; }
+}
+@keyframes ucl-crest-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.ucl-promo[hidden] { display: none; }
+.ucl-promo {
+  position: relative;
+  isolation: isolate;
+  min-height: 405px;
+  margin: 0 0 24px;
+  padding: 44px 24px 36px;
+  overflow: hidden;
+  scroll-margin-top: 85px;
+  border: 1px solid rgba(162, 216, 255, .5);
+  border-radius: 20px;
+  background:
+    linear-gradient(90deg, rgba(1, 8, 38, .82), rgba(4, 18, 60, .46), rgba(1, 8, 38, .82)),
+    url("../trophy/back-champion.webp") center / cover,
+    #06133e;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 22px 65px rgba(2, 12, 47, .36), 0 0 40px rgba(49, 143, 255, .14);
+}
+.ucl-promo::before, .ucl-promo::after, .ucl-promo-glow {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+.ucl-promo::before {
+  background: radial-gradient(ellipse at 50% 110%, rgba(32, 167, 255, .5), transparent 58%);
+}
+.ucl-promo::after {
+  background-image: radial-gradient(circle, rgba(255,255,255,.9) 1px, transparent 2px);
+  background-size: 105px 87px;
+  opacity: .35;
+}
+.ucl-promo-glow {
+  background: linear-gradient(110deg, transparent 20%, rgba(126, 213, 255, .3) 50%, transparent 70%);
+  transform: translateX(-120%);
+}
+.ucl-promo-lightning {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: #b6eaff;
+  stroke-width: 1.5;
+  opacity: 0;
+  filter: drop-shadow(0 0 7px #65c5ff);
+}
+.ucl-promo.is-playing .ucl-promo-glow { animation: ucl-promo-light 3.8s ease-out both; }
+.ucl-promo.is-playing::after { animation: ucl-promo-stars 4s ease-in-out infinite alternate; }
+.ucl-promo.is-playing .ucl-promo-lightning { animation: ucl-promo-lightning 10s ease-in-out infinite; }
+.ucl-promo-close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 50%;
+  background: rgba(3,14,48,.65);
+  color: #fff;
+  cursor: pointer;
+  font-size: 23px;
+}
+.ucl-promo-content { position: relative; max-width: 700px; margin: auto; }
+.ucl-promo-kicker { margin: 0 0 9px; color: #9cddff; font: 800 10px Inter,sans-serif; letter-spacing: .25em; }
+.ucl-promo h2 { margin: 0; color: #fff; font: 700 clamp(30px, 5vw, 54px)/1.08 Oswald,Inter,sans-serif; text-transform: uppercase; text-shadow: 0 0 35px rgba(95, 188, 255, .6); }
+.ucl-promo-leg { margin: 10px 0 0; color: #c1dcff; font: 700 11px Inter,sans-serif; text-transform: uppercase; letter-spacing: .15em; }
+.ucl-promo-countdown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 34px;
+  margin: 15px auto 0;
+  padding: 6px 13px;
+  border: 1px solid rgba(152, 210, 255, .32);
+  border-radius: 6px;
+  background: rgba(4, 25, 70, .7);
+  color: #d5e9ff;
+  font: 700 10px/1.4 Inter, sans-serif;
+}
+.ucl-promo-countdown strong { color: #fff; font: 700 20px/1 Oswald, sans-serif; font-variant-numeric: tabular-nums; }
+.ucl-promo-teams { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; gap: 14px; max-width: 470px; margin: 18px auto; }
+.ucl-promo-teams[hidden], .ucl-promo-caption[hidden], .ucl-promo-leg[hidden] { display: none; }
+.ucl-promo .ucl-fixture-team { gap: 10px; }
+.ucl-promo .ucl-fixture-badge,
+.ucl-promo .ucl-fixture-badge.team-1 { width: 78px; height: 78px; border: 0; background: transparent; box-shadow: none; font-size: 20px; }
+.ucl-promo .ucl-fixture-team-name { color: #fff; font: 700 13px Inter,sans-serif; }
+.ucl-promo-versus { color: #b7dcff; font: 700 16px Oswald, sans-serif; letter-spacing: .12em; }
+.ucl-promo-caption { margin: 0 0 19px; color: #d3e2f9; font: 500 12px/1.5 Inter,sans-serif; }
+.ucl-promo-action { display: inline-block; padding: 10px 16px; border: 1px solid rgba(172,223,255,.65); border-radius: 6px; background: rgba(26,94,189,.6); color: #fff; text-decoration: none; font: 700 11px Inter,sans-serif; }
+.ucl-promo-action:hover { background: #236bc2; }
+.ucl-promo.is-playing .ucl-promo-content { animation: ucl-promo-reveal 1s ease-out both; }
+.ucl-promo.is-playing .ucl-fixture-team:first-child { animation: ucl-promo-home 1.2s .3s ease-out both; }
+.ucl-promo.is-playing .ucl-fixture-team:last-child { animation: ucl-promo-away 1.2s .3s ease-out both; }
+@keyframes ucl-promo-light { to { transform: translateX(120%); } }
+@keyframes ucl-promo-stars { from { opacity: .15; } to { opacity: .65; } }
+@keyframes ucl-promo-lightning {
+  0%, 62%, 78%, 100% { opacity: 0; }
+  70% { opacity: .32; }
+}
+@keyframes ucl-promo-reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ucl-promo-home { from { opacity: 0; transform: translateX(-45px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes ucl-promo-away { from { opacity: 0; transform: translateX(45px); } to { opacity: 1; transform: translateX(0); } }
+@media (max-width: 700px) {
+  .ucl-masthead { min-height: auto; }
+  .ucl-masthead-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
+  .ucl-masthead-actions > * { flex: 1 1 180px; justify-content: center; }
+  .ucl-fixture-grid { grid-template-columns: 1fr; }
+  .ucl-fixture-card { display: grid; grid-template-columns: minmax(0,1fr) minmax(150px,1.2fr); align-items: center; gap: 0 8px; padding: 9px 10px; }
+  .ucl-fixture-head { grid-column: 1 / -1; }
+  .ucl-fixture-teams { min-height: 60px; padding: 5px 0 0; }
+  .ucl-fixture-footer { align-self: stretch; min-height: 0; padding: 5px 0 0 8px; border-top: 0; border-left: 1px solid rgba(198,213,248,.1); }
+  .ucl-fixture-state { font-size: 7px; }
+  .ucl-promo { min-height: 365px; padding: 42px 16px 28px; }
+  .ucl-promo .ucl-fixture-badge, .ucl-promo .ucl-fixture-badge.team-1 { width: 62px; height: 62px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ucl-fixture-card:is(.is-ready, .is-locked)::after, .ucl-fixture-card.is-ready .ucl-fixture-badge,
+  .ucl-promo.is-playing .ucl-promo-glow, .ucl-promo.is-playing::after, .ucl-promo.is-playing .ucl-promo-lightning,
+  .ucl-promo.is-playing .ucl-promo-content, .ucl-promo.is-playing .ucl-fixture-team { animation: none; }
+}

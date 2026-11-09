@@ -166,6 +166,20 @@ const TRANSLATIONS = {
     championsMatchdayActive: "Champions League matchday is active",
     championsLeaguePauses: "League match entry pauses until the European fixture is confirmed.",
     championsPlayNow: "Play this match",
+    championsPromoKicker: "THE STAGE IS SET",
+    championsPromoTitle: "A night for champions",
+    championsPromoCaption: "Two clubs. One stage. Everything to play for.",
+    championsPromoExplore: "Explore the fixture",
+    championsPromoWatch: "▶ Watch match preview",
+    championsPromoClose: "Close match preview",
+    championsPromoSeason: "Season",
+    championsPromoMatchNumber: "MATCH {0}",
+    championsPromoCountdownOne: "league round until the match",
+    championsPromoCountdownOther: "league rounds until the match",
+    championsPromoMatchday: "MATCHDAY · READY TO PLAY",
+    championsPromoComplete: "This season's campaign is complete.",
+    championsPromoUnavailable: "Match information is unavailable. Check the Champions League section.",
+    championsPromoLoading: "Loading match information…",
     championsLeagueBlocked: "A Champions League fixture is due. Play and confirm it before adding another league match.",
     championsLeg: "Match",
     championsScore: "Score",
@@ -624,6 +638,22 @@ const TRANSLATIONS = {
     championsMatchdayActive: "Наступил матч Лиги чемпионов",
     championsLeaguePauses: "Добавление матчей лиги приостановлено до подтверждения еврокубковой встречи.",
     championsPlayNow: "Перейти к матчу",
+    championsPromoKicker: "ВСЁ ГОТОВО К БОЛЬШОЙ ИГРЕ",
+    championsPromoTitle: "Ночь чемпионов",
+    championsPromoCaption: "Два клуба. Одна сцена. Всё решается здесь.",
+    championsPromoExplore: "Перейти к встрече",
+    championsPromoWatch: "▶ Смотреть промо матча",
+    championsPromoClose: "Закрыть промо матча",
+    championsPromoSeason: "Сезон",
+    championsPromoMatchNumber: "ВСТРЕЧА {0}",
+    championsPromoCountdownOne: "тур лиги до матча",
+    championsPromoCountdownFew: "тура лиги до матча",
+    championsPromoCountdownMany: "туров лиги до матча",
+    championsPromoCountdownOther: "тура лиги до матча",
+    championsPromoMatchday: "МАТЧЕВЫЙ ДЕНЬ · ПОРА ИГРАТЬ",
+    championsPromoComplete: "Еврокубковый сезон завершён.",
+    championsPromoUnavailable: "Данные о матче недоступны. Проверьте раздел Лиги чемпионов.",
+    championsPromoLoading: "Загружаем данные о матче…",
     championsLeagueBlocked: "Наступил матч Лиги чемпионов. Сыграйте и подтвердите его, прежде чем добавлять матч лиги.",
     championsLeg: "Встреча",
     championsScore: "Счёт",
@@ -951,6 +981,10 @@ let championsLeagueMatches = [];
 let championsLeagueProposals = [];
 let clubTrophies = [];
 let championsLeagueError = null;
+let championsLeagueLoaded = false;
+const shownChampionsPromos = new Set();
+let championsPromoOpen = false;
+let championsPromoSignature = "";
 let analystNoticeState = null;
 let analystToastNoticeId = null;
 let analystToastTimer = null;
@@ -2592,7 +2626,7 @@ function showToast(message) {
 
 function updateAuthUi() {
   const enabled = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
-  matchButton.disabled = !enabled || Boolean(getDueChampionsMatchday());
+  matchButton.disabled = !enabled || (!championsLeagueLoaded && !championsLeagueError) || Boolean(getDueChampionsMatchday());
   editTeamsButton.disabled = !enabled;
   addNewsButton.disabled = !configReady || !session;
   document.body.classList.toggle("read-only", !session);
@@ -3422,6 +3456,7 @@ function validateServerState(settings, matchRows) {
 }
 
 async function fetchServerState() {
+  championsLeagueLoaded = false;
   const [settingsResponse, matchesResponse] = await Promise.all([
     supabase.from("league_settings").select("*").eq("id", true).maybeSingle(),
     supabase.from("league_matches")
@@ -4392,6 +4427,7 @@ async function refreshChampionsLeague() {
   ]);
   const error = matchesResponse.error || trophiesResponse.error;
   if (error) {
+    championsLeagueLoaded = false;
     championsLeagueMatches = [];
     clubTrophies = [];
     championsLeagueProposals = [];
@@ -4400,6 +4436,7 @@ async function refreshChampionsLeague() {
       console.error("Failed to load Champions League data:", error);
     }
     renderChampionsLeague();
+    updateChampionsMatchdayUI();
     return;
   }
   championsLeagueMatches = matchesResponse.data || [];
@@ -4420,7 +4457,9 @@ async function refreshChampionsLeague() {
       championsLeagueProposals = proposalsResponse.data || [];
     }
   }
+  championsLeagueLoaded = !championsLeagueError;
   renderChampionsLeague();
+  updateChampionsMatchdayUI();
 }
 
 function championsAggregate(matches) {
@@ -4432,21 +4471,27 @@ function championsAggregate(matches) {
   return totals;
 }
 
-function getDueChampionsMatchday() {
-  if (!dataReady || championsLeagueError) return null;
+function getChampionsPreview() {
+  if (championsLeagueError) return { status: "unavailable" };
+  if (!dataReady || !championsLeagueLoaded) return { status: "loading" };
   const seasonMatches = championsLeagueMatches.filter(match => Number(match.season) === currentSeason);
   const leagueMatchesPlayed = state.matches.filter(match => Number(match.season) === currentSeason).length;
   const firstLeg = seasonMatches.some(match => Number(match.leg) === 1);
   const secondLeg = seasonMatches.find(match => Number(match.leg) === 2);
   const decidingMatch = seasonMatches.some(match => Number(match.leg) === 3);
 
-  if (!firstLeg && leagueMatchesPlayed >= 18) return 1;
-  if (firstLeg && !secondLeg && leagueMatchesPlayed >= 36) return 2;
+  if (!firstLeg) return { status: "upcoming", leg: 1, rounds: Math.max(0, 18 - leagueMatchesPlayed) };
+  if (!secondLeg) return { status: "upcoming", leg: 2, rounds: Math.max(0, 36 - leagueMatchesPlayed) };
   if (secondLeg && !decidingMatch) {
     const aggregate = championsAggregate(seasonMatches.filter(match => Number(match.leg) <= 2));
-    if (aggregate[0] === aggregate[1]) return 3;
+    if (aggregate[0] === aggregate[1]) return { status: "upcoming", leg: 3, rounds: 0 };
   }
-  return null;
+  return { status: "complete" };
+}
+
+function getDueChampionsMatchday() {
+  const preview = getChampionsPreview();
+  return preview.status === "upcoming" && preview.rounds === 0 ? preview.leg : null;
 }
 
 function updateChampionsMatchdayUI() {
@@ -4455,9 +4500,17 @@ function updateChampionsMatchdayUI() {
   document.body.classList.toggle("ucl-matchnight", active);
   const notice = document.getElementById("uclMatchdayNotice");
   if (notice) notice.hidden = !active;
+  if (active) {
+    const promoKey = `${currentSeason}:${dueLeg}`;
+    if (!shownChampionsPromos.has(promoKey)) {
+      shownChampionsPromos.add(promoKey);
+      showChampionsPromo();
+    }
+  }
+  if (championsPromoOpen) renderChampionsPromo();
   if (matchButton) {
     const canAddLeagueMatch = configReady && Boolean(session) && dataReady && myTeamIndex !== null;
-    matchButton.disabled = !canAddLeagueMatch || active;
+    matchButton.disabled = !canAddLeagueMatch || (!championsLeagueLoaded && !championsLeagueError) || active;
     if (active) {
       matchButton.title = t("championsLeagueBlocked");
       matchButton.setAttribute("aria-describedby", "uclMatchdayNotice");
@@ -4467,6 +4520,62 @@ function updateChampionsMatchdayUI() {
     }
   }
 }
+
+function renderChampionsPromo() {
+  const teams = document.getElementById("uclPromoTeams");
+  const label = document.getElementById("uclPromoLeg");
+  const countdown = document.getElementById("uclPromoCountdown");
+  const caption = document.getElementById("uclPromoCaption");
+  if (!teams || !label || !countdown || !caption) return;
+  const preview = getChampionsPreview();
+  const upcoming = preview.status === "upcoming";
+  teams.hidden = !upcoming;
+  caption.hidden = !upcoming;
+  label.hidden = !upcoming;
+  countdown.replaceChildren();
+  if (!upcoming) {
+    countdown.textContent = t(preview.status === "complete" ? "championsPromoComplete" :
+      preview.status === "unavailable" ? "championsPromoUnavailable" : "championsPromoLoading");
+    return;
+  }
+  const { leg, rounds } = preview;
+  const number = document.createElement("strong");
+  number.textContent = String(rounds);
+  const description = document.createElement("span");
+  const plural = new Intl.PluralRules(currentLang).select(rounds);
+  const pluralKey = `championsPromoCountdown${plural.charAt(0).toUpperCase()}${plural.slice(1)}`;
+  description.textContent = rounds === 0 ? t("championsPromoMatchday") : t(pluralKey);
+  countdown.append(number, description);
+  label.textContent = `${t("championsPromoSeason")} ${currentSeason} · ${t("championsPromoMatchNumber", String(leg).padStart(2, "0"))} · ${t(leg === 1 ? "championsLegOne" : leg === 2 ? "championsLegTwo" : "championsDecider")}`;
+  const signature = JSON.stringify([leg, currentSeason, currentLang,
+    state.teams.map(team => team.name), getTeamPhoto(0), getTeamPhoto(1)]);
+  if (signature === championsPromoSignature) return;
+  championsPromoSignature = signature;
+  const versus = document.createElement("span");
+  versus.className = "ucl-promo-versus";
+  versus.textContent = "VS";
+  teams.replaceChildren(createUclTeam(leg === 2 ? 1 : 0), versus, createUclTeam(leg === 2 ? 0 : 1));
+}
+
+function showChampionsPromo(scroll = false) {
+  const promo = document.getElementById("uclPromo");
+  if (!promo) return;
+  championsPromoOpen = true;
+  renderChampionsPromo();
+  promo.hidden = false;
+  promo.classList.remove("is-playing");
+  void promo.offsetWidth;
+  promo.classList.add("is-playing");
+  if (scroll) promo.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+}
+
+document.getElementById("uclPromoLaunch").addEventListener("click", () => {
+  showChampionsPromo(true);
+});
+document.getElementById("uclPromoClose").addEventListener("click", () => {
+  document.getElementById("uclPromo").hidden = true;
+  championsPromoOpen = false;
+});
 
 function renderChampionsLeague() {
   const status = document.getElementById("championsLeagueStatus");
@@ -4496,7 +4605,7 @@ function renderChampionsLeague() {
   const seasonTrophies = clubTrophies.filter(trophy => Number(trophy.season) === currentSeason);
   const leagueMatchesPlayed = state.matches.filter(match => Number(match.season) === currentSeason).length;
   document.getElementById("championsSeasonBadge").textContent =
-    `${t("season").toUpperCase()} ${currentSeason}`;
+    `${t("championsPromoSeason").toUpperCase()} ${currentSeason}`;
   const totals = championsAggregate(seasonMatches);
   const aggregate = championsAggregate(seasonMatches.filter(match => Number(match.leg) <= 2));
   renderChampionsProgress(seasonMatches, leagueMatchesPlayed, aggregate);

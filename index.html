@@ -65,6 +65,23 @@
                             aria-hidden="true">＋</span> Add match</button>
                 </div>
             </section>
+            <section class="ucl-promo" id="uclPromo" aria-labelledby="uclPromoTitle" hidden>
+                <div class="ucl-promo-glow" aria-hidden="true"></div>
+                <svg class="ucl-promo-lightning" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <path d="M92 0 L155 96 L126 114 L205 218 L175 225 L245 335"></path>
+                    <path d="M906 0 L850 83 L878 104 L806 190 L835 205 L770 304"></path>
+                </svg>
+                <button class="ucl-promo-close" id="uclPromoClose" type="button" data-i18n-aria-label="championsPromoClose" aria-label="Close match preview">×</button>
+                <div class="ucl-promo-content">
+                    <p class="ucl-promo-kicker" data-i18n="championsPromoKicker">THE STAGE IS SET</p>
+                    <h2 id="uclPromoTitle" data-i18n="championsPromoTitle">A night for champions</h2>
+                    <p class="ucl-promo-leg" id="uclPromoLeg"></p>
+                    <div class="ucl-promo-countdown" id="uclPromoCountdown" role="status" aria-live="polite"></div>
+                    <div class="ucl-promo-teams" id="uclPromoTeams"></div>
+                    <p class="ucl-promo-caption" id="uclPromoCaption" data-i18n="championsPromoCaption">Two clubs. One stage. Everything to play for.</p>
+                    <a class="ucl-promo-action" href="#championsLeague" data-i18n="championsPromoExplore">Explore the fixture</a>
+                </div>
+            </section>
             <aside class="ucl-matchnight-banner" id="uclMatchdayNotice" hidden role="status">
                 <span class="ucl-matchnight-banner-star" aria-hidden="true">✦</span>
                 <div>
@@ -328,10 +345,13 @@
                         <h2 id="championsLeagueTitle" data-i18n="championsLeagueTitle">Champions League</h2>
                         <p class="champions-league-subtitle" data-i18n="championsLeagueSubtitle">Two legs each season · aggregate score decides the champion</p>
                     </div>
-                    <a class="ucl-analytics-link" href="global/global.html?competition=champions">
-                        <span aria-hidden="true">↗</span>
-                        <span data-i18n="championsLeagueStatsLink">Champions League analytics</span>
-                    </a>
+                    <div class="ucl-masthead-actions">
+                        <button class="ucl-promo-launch" id="uclPromoLaunch" type="button" data-i18n="championsPromoWatch">▶ Watch match preview</button>
+                        <a class="ucl-analytics-link" href="global/global.html?competition=champions">
+                            <span aria-hidden="true">↗</span>
+                            <span data-i18n="championsLeagueStatsLink">Champions League analytics</span>
+                        </a>
+                    </div>
                 </div>
                 <div class="champions-league-status" id="championsLeagueStatus" role="status"></div>
                 <section class="ucl-fixtures" aria-labelledby="championsRoadTitle">
